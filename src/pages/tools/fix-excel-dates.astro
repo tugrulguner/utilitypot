@@ -5,11 +5,12 @@ import UtilityApp from "../../components/UtilityApp.astro";
 
 <UtilityLayout
   title="Fix mixed spreadsheet dates"
-  description="Normalize a mixed date column, preserve partial dates, and flag ambiguous values before exporting a reviewed CSV."
+  description="Clean up a list of dates, with unclear values kept visible for review."
   slug="fix-excel-dates"
 >
   <UtilityApp tool="dates" />
-  <section class="prose">
+  <details class="prose tool-help">
+    <summary>How this tool works &amp; limits</summary>
     <h2>Formatting a cell is not the same as repairing its date</h2>
     <p>
       Spreadsheet imports can interpret some dates as numbers and leave others
@@ -40,5 +41,5 @@ import UtilityApp from "../../components/UtilityApp.astro";
       description; it cannot determine missing facts from an ambiguous date
       alone.
     </p>
-  </section>
+  </details>
 </UtilityLayout>

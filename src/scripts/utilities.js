@@ -1,3 +1,4 @@
+import { groupCsv } from "../lib/utilities/outcome.js";
 import Papa from "papaparse";
 import { parseCsv, templatePaths, transformCsv } from "../lib/utilities/csv.js";
 import { normalizeDates } from "../lib/utilities/dates.js";
@@ -53,16 +54,63 @@ if (root) {
     output = "";
     slots = [];
     $("results").hidden = true;
-    const reviewed = $("reviewed");
-    if (reviewed) reviewed.checked = false;
   };
   root.addEventListener("input", (e) => {
-    if (e.target.id === "reviewed" || e.target.id === "ai-consent") return;
     invalidate();
     if (["csv-input", "json-example", "csv-intent"].includes(e.target.id)) {
       $("mapping-panel").hidden = true;
       fields = [];
+      if (e.target.id === "csv-input") syncCsv();
     }
+  });
+  function syncCsv() {
+    try {
+      const headers = Object.keys(parseCsv($("csv-input").value)[0]);
+      const selected = $("group-by").value;
+      $("group-by").replaceChildren(...headers.map((h) => new Option(h, h)));
+      if (headers.includes(selected)) $("group-by").value = selected;
+      $("parent-fields").replaceChildren(
+        ...headers.map((h) => {
+          const l = document.createElement("label");
+          l.className = "check";
+          const c = document.createElement("input");
+          c.type = "checkbox";
+          c.dataset.parent = "";
+          c.value = h;
+          l.append(c, `Keep ${h} on parent (must agree in each group)`);
+          return l;
+        }),
+      );
+    } catch (e) {
+      $("group-by").replaceChildren(
+        new Option("Paste valid CSV to choose a field", ""),
+      );
+      status(e.message, true);
+    }
+  }
+  function syncAvailability() {
+    const ai = $("availability-mode").value === "jev";
+    root
+      .querySelectorAll("[data-availability]")
+      .forEach((e) => (e.hidden = (e.dataset.availability === "jev") !== ai));
+    $("meeting-consent").hidden = !ai;
+    $("run").textContent = ai ? "Find times with Jev" : "Find times";
+  }
+  $("availability-mode")?.addEventListener("change", syncAvailability);
+  $("source-file")?.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    invalidate();
+    const token = revision;
+    if (file.size > 2000000) {
+      status("CSV exceeds 2 MB.", true);
+      return;
+    }
+    const text = await file.text();
+    if (token !== revision) return;
+    $("csv-input").value = text;
+    invalidate();
+    syncCsv();
   });
   function download(text, name, type, action = "download_result") {
     capture("utility_output_download_requested", {
@@ -95,10 +143,9 @@ if (root) {
     const headers = Object.keys(rows[0]);
     fields = paths.map((path) => ({
       path,
-      column:
-        plan?.fields?.find((f) => f.path === path)?.column ||
-        headers.find((h) => h === path) ||
-        "",
+      column: plan
+        ? plan.fields?.find((f) => f.path === path)?.column || ""
+        : headers.find((h) => h === path) || "",
     }));
     const group = $("group-by");
     group.replaceChildren(
@@ -129,7 +176,6 @@ if (root) {
       container.append(row);
     });
     $("mapping-panel").hidden = false;
-    $("reviewed").checked = false;
   }
   function participants() {
     return [...root.querySelectorAll(".participant")].map((p) =>
@@ -203,6 +249,11 @@ if (root) {
         },
       ]);
     }
+    if (tool === "csv") {
+      $("custom-schema").checked = false;
+      syncCsv();
+      $("mapping-panel").hidden = true;
+    }
     status(
       "Example loaded. Review the settings before running; AI has not been called.",
     );
@@ -210,6 +261,7 @@ if (root) {
   $("prepare")?.addEventListener("click", () => {
     try {
       invalidate();
+      $("custom-schema").checked = true;
       buildMapping();
       status(
         "Choose a source column for every output path and review grouping.",
@@ -231,7 +283,15 @@ if (root) {
     for (const e of p.querySelectorAll("[data-field]")) {
       e.id = `p${n}-${e.dataset.field}`;
       if (
-        ["name", "text", "excludeStart", "excludeEnd"].includes(e.dataset.field)
+        [
+          "name",
+          "zone",
+          "text",
+          "start",
+          "end",
+          "excludeStart",
+          "excludeEnd",
+        ].includes(e.dataset.field)
       )
         e.value = "";
     }
@@ -247,16 +307,14 @@ if (root) {
       root.querySelector(".participant:last-child").remove();
     }
   });
-  $("ask-jev").addEventListener("click", async () => {
-    if (!$("ai-consent").checked) {
-      status("Please confirm consent before sending context to Jev.", true);
-      return;
-    }
-    const button = $("ask-jev");
+  async function askJev() {
+    const button = $("ask-jev") || $("run");
     const attempt = begin("ai_interpretation");
     let outcome = "unexpected_failure",
       responseStatus = 0;
     let input;
+    invalidate();
+    const token = revision;
     try {
       if (tool === "csv") {
         const r = parseCsv($("csv-input").value);
@@ -281,8 +339,6 @@ if (root) {
             text,
           })),
         };
-      invalidate();
-      const token = revision;
       button.disabled = true;
       status("Asking Jev for a proposed interpretation…");
       const r = await fetch("/api/utilities/interpret", {
@@ -303,12 +359,17 @@ if (root) {
         );
       if (data.source !== "jev" || !data.plan)
         throw new Error("The AI response could not be verified.");
-      if (tool === "csv") buildMapping(data.plan);
+      if (tool === "csv") {
+        $("custom-schema").checked = true;
+        buildMapping(data.plan);
+      }
       if (tool === "dates") {
         $("date-convention").value = data.plan.convention;
       }
       if (tool === "meeting") {
         setPeople(data.plan.participants);
+        $("availability-mode").value = "local";
+        syncAvailability();
         if (data.plan.participants.some((p) => p.scope !== "supported")) {
           status(
             "Jev flagged unsupported or ambiguous availability. Correct the editable windows manually before reviewing.",
@@ -318,15 +379,23 @@ if (root) {
           return;
         }
       }
+      if (!runLocal(false)) {
+        outcome = "rejected";
+        return;
+      }
       const weak = Object.values(data.confidence || {}).some(
         (v) => typeof v !== "number" || v < 0.6,
       );
       status(
-        `Jev proposed settings${weak ? " with uncertain selections" : ""}. Review every setting before running. Model: ${data.model}.`,
+        `Jev proposed settings${weak ? " with uncertain selections" : ""}. Review the editable preview. Model: ${data.model}.`,
         weak,
       );
       outcome = "success";
     } catch (e) {
+      if (token !== revision) {
+        outcome = "cancelled";
+        return;
+      }
       outcome =
         e.name === "TimeoutError" ||
         (responseStatus >= 400 && responseStatus < 500)
@@ -342,29 +411,86 @@ if (root) {
       complete(attempt, outcome);
       button.disabled = false;
     }
-  });
+  }
+  $("ask-jev")?.addEventListener("click", askJev);
   $("run").addEventListener("click", () => {
-    const attempt = begin("manual_run");
+    if (tool === "meeting" && $("availability-mode").value === "jev")
+      return askJev();
+    runLocal();
+  });
+  function runLocal(emit = true) {
+    const attempt = emit ? begin("manual_run") : null;
     let outcome = "rejected";
     try {
       if (tool === "csv") {
-        if (!$("reviewed").checked) {
-          outcome = "rejected";
-          throw new Error("Review and confirm the mapping first.");
-        }
         rows = parseCsv($("csv-input").value);
-        const result = transformCsv(rows, {
-          groupBy: $("group-by").value,
-          fields,
-        });
+        const result = $("custom-schema").checked
+          ? transformCsv(rows, { groupBy: $("group-by").value, fields })
+          : groupCsv(
+              $("csv-input").value,
+              $("group-by").value,
+              [...root.querySelectorAll("[data-parent]:checked")].map(
+                (e) => e.value,
+              ),
+              $("child-name").value,
+            );
         outcome = "unexpected_failure";
         show(
           JSON.stringify(result, null, 2),
           "modepot-data.json",
           "application/json",
         );
+        const tree = document.createElement("div");
+        for (const parent of result.slice(0, 100)) {
+          const item = document.createElement("details");
+          const title = document.createElement("summary");
+          title.textContent =
+            Object.entries(parent)
+              .filter(([, v]) => !Array.isArray(v))
+              .map(([k, v]) => `${k}: ${v}`)
+              .join(" · ") || "Parent record";
+          item.append(title);
+          for (const [key, value] of Object.entries(parent)) {
+            if (Array.isArray(value)) {
+              const caption = document.createElement("p");
+              caption.textContent = `${key}: ${value.length} child rows`;
+              item.append(caption);
+              const table = document.createElement("table");
+              const headers = [...new Set(value.flatMap(Object.keys))];
+              const head = document.createElement("tr");
+              for (const k of headers) {
+                const th = document.createElement("th");
+                th.textContent = k;
+                head.append(th);
+              }
+              table.append(head);
+              for (const row of value.slice(0, 100)) {
+                const tr = document.createElement("tr");
+                for (const k of headers) {
+                  const td = document.createElement("td");
+                  td.textContent =
+                    typeof row[k] === "object"
+                      ? JSON.stringify(row[k])
+                      : (row[k] ?? "");
+                  tr.append(td);
+                }
+                table.append(tr);
+              }
+              const wrap = document.createElement("div");
+              wrap.className = "table-scroll";
+              wrap.append(table);
+              item.append(wrap);
+            }
+          }
+          tree.append(item);
+        }
+        const code = document.createElement("details");
+        const label = document.createElement("summary");
+        label.textContent = "JSON code view";
+        code.append(label, ...$("result-view").childNodes);
+        $("result-view").replaceChildren(tree, code);
         status(
-          `Converted ${rows.length} source rows to ${result.length} parent records locally. Values were preserved as strings.`,
+          `Converted ${rows.length} source rows to ${result.length} parent records locally. Values were preserved as strings. Preview shows up to 100 parents and children per group; download includes all rows.`,
         );
       }
       if (tool === "dates") {
@@ -378,6 +504,9 @@ if (root) {
           "modepot-dates.csv",
           "text/csv",
         );
+        $("convention-panel").hidden =
+          !result.some((row) => row.status === "review") &&
+          $("date-convention").value === "auto";
         const table = document.createElement("table");
         const head = document.createElement("thead");
         const tr = document.createElement("tr");
@@ -408,10 +537,6 @@ if (root) {
         );
       }
       if (tool === "meeting") {
-        if (!$("reviewed").checked) {
-          outcome = "rejected";
-          throw new Error("Review and confirm all participant windows first.");
-        }
         const duration = Number($("duration").value);
         slots = findSlots($("meeting-date").value, duration, participants());
         const lines = slots.map(
@@ -450,14 +575,16 @@ if (root) {
         }
       }
       outcome = "success";
+      return true;
     } catch (e) {
       output = "";
       $("results").hidden = true;
       status(e.message, true);
+      return false;
     } finally {
-      complete(attempt, outcome);
+      if (attempt) complete(attempt, outcome);
     }
-  });
+  }
   $("download").addEventListener("click", () => {
     if (output) {
       download(output, filename, mime);

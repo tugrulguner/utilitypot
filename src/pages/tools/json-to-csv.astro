@@ -5,11 +5,12 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
 
 <UtilityLayout
   title="JSON to CSV"
-  description="Choose a record array, flatten objects, and review nested-array handling."
+  description="Turn JSON records into a spreadsheet-ready CSV."
   slug="json-to-csv"
 >
   <ExtraUtilityApp tool="jsonCsv" />
-  <section class="prose">
+  <details class="prose tool-help">
+    <summary>How this tool works &amp; limits</summary>
     <h2>What this tool does</h2>
     <p>
       Select the record array before exporting. Nested objects become
@@ -25,5 +26,5 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
       database. AI classifications can be wrong; typed output is not proof of
       truth. <a href="/privacy/">Read privacy and operating limits.</a>
     </p>
-  </section>
+  </details>
 </UtilityLayout>

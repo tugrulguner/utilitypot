@@ -5,46 +5,73 @@ interface Props {
 const { tool } = Astro.props;
 ---
 
-<section data-extra-utility={tool} class="ph-no-capture ph-no-autocapture">
-  <div class="actions">
-    <button id="extra-example">Load example</button>
-  </div>
-  {tool === "qa" && (
-    <div class="panel">
-      <label for="page-url">Public documentation URL (optional)</label>
-      <input
-        id="page-url"
-        type="url"
-        maxlength="2000"
-        placeholder="https://docs.python.org/3/library/json.html"
-      />
-      <div class="actions">
-        <button id="read-page">Read public page</button>
-      </div>
-      <p class="notice">
-        URL reading is limited to docs.python.org, developer.mozilla.org,
-        docs.typesafe.ai, mermaid.js.org, developers.cloudflare.com,
-        www.rfc-editor.org and en.wikipedia.org. Other pages: paste their text
-        below. This fetch sends the URL to our server, not to Jev, and executes
-        no page scripts. Login/paywall bypass is not supported.
-      </p>
+<section
+  data-extra-utility={tool}
+  class="utility-app ph-no-capture ph-no-autocapture"
+>
+  <section class="panel">
+    <div class="workspace-toolbar">
+      <h2>Input</h2>
+      <button id="extra-example">Load example</button>
     </div>
-  )}
-  <div class="utility-grid">
-    <div class="panel">
+    {tool === "qa" && (
+      <>
+        <input id="source-mode" type="hidden" value="paste" />
+        <div role="tablist" aria-label="Source type" class="actions">
+          <button
+            id="paste-tab"
+            role="tab"
+            aria-selected="true"
+            aria-controls="source-panel"
+            data-source-mode="paste"
+          >
+            Pasted text
+          </button>
+          <button
+            id="url-tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="url-panel"
+            tabindex="-1"
+            data-source-mode="url"
+          >
+            Public URL
+          </button>
+        </div>
+        <div id="url-panel" role="tabpanel" aria-labelledby="url-tab" hidden>
+          <label for="page-url">Public documentation URL</label>
+          <input
+            id="page-url"
+            type="url"
+            maxlength="2000"
+            placeholder="https://docs.python.org/3/library/asyncio.html"
+          />
+          <p class="notice">
+            Approved hosts: docs.python.org, developer.mozilla.org,
+            docs.typesafe.ai, mermaid.js.org, developers.cloudflare.com,
+            www.rfc-editor.org and en.wikipedia.org. Other sources can be
+            pasted.
+          </p>
+        </div>
+      </>
+    )}
+    <div
+      id="source-panel"
+      role={tool === "qa" ? "tabpanel" : undefined}
+      aria-labelledby={tool === "qa" ? "paste-tab" : undefined}
+    >
       <label for="source-text">
         {tool === "jsonCsv"
           ? "JSON document"
           : tool === "diagram"
-            ? "Process steps (one per line)"
+            ? "Steps (one per line)"
             : tool === "qa"
               ? "Page text"
-              : "Shared text"}
+              : "Text to explore"}
       </label>
       <textarea
         id="source-text"
-        rows="10"
-        spellcheck="false"
+        rows="7"
         maxlength={
           tool === "jsonCsv"
             ? 2000000
@@ -54,126 +81,207 @@ const { tool } = Astro.props;
                 ? 1800
                 : 5000
         }
+        placeholder={
+          tool === "jsonCsv"
+            ? '[{"id":"001","name":"Ada"}]'
+            : tool === "diagram"
+              ? "Receive request\nReview request\nSend reply"
+              : tool === "qa"
+                ? "Paste the source paragraphs here."
+                : "Ada works at Acme Labs."
+        }
       />
-      <p class="notice">
-        {tool === "entities"
-          ? "Up to 120 source tokens. Each defined category returns at most three mentions; this is not exhaustive full-document NER."
-          : tool === "diagram"
-            ? "Up to eight short steps. Jev selects node roles and supported relationships; it does not write Mermaid code."
-            : tool === "qa"
-              ? "Up to 10,000 characters and 100 paragraphs. Answers are exact excerpts, not generated explanations. A fetched page may be truncated; inspect the text before asking."
-              : "Arrays of objects, up to 10,000 rows. Identifiers stay textual. No arbitrary scripts."}
-      </p>
     </div>
-    <div class="panel">
-      <label for="instructions">
-        {tool === "entities"
-          ? "Entity definitions (Type: definition per line)"
-          : tool === "qa"
-            ? "Question"
-            : "Describe the desired result"}
-      </label>
-      <textarea
-        id="instructions"
-        rows="5"
-        maxlength={tool === "entities" ? 1000 : tool === "qa" ? 400 : 800}
-      />
-      {tool === "jsonCsv" && (
-        <>
-          <label for="row-path">Record array</label>
-          <select id="row-path">
-            <option value="">Prepare arrays first</option>
-          </select>
-          <label for="array-policy">Other nested arrays</label>
+    {tool === "jsonCsv" && (
+      <>
+        <label for="source-file">Or upload JSON (local only, up to 2 MB)</label>
+        <input id="source-file" type="file" accept=".json,application/json" />
+        <div id="array-options" hidden>
+          <label for="row-path">Which records?</label>
+          <select id="row-path" />
+          <label for="array-policy">Nested arrays within each record</label>
           <select id="array-policy">
-            <option value="reject">Reject until explicitly resolved</option>
+            <option value="reject">Stop if nested arrays exist</option>
+            <option value="join">Keep as JSON text in a cell</option>
             <option value="omit">Omit nested-array fields</option>
-            <option value="join">Store arrays as JSON-text cells</option>
           </select>
-          <div class="actions">
-            <button id="prepare-extra">Find record arrays locally</button>
-          </div>
-        </>
+          <p class="notice">
+            No row expansion. Omitting arrays removes those fields from the CSV.
+          </p>
+        </div>
+        <details>
+          <summary>Choose records with Jev</summary>
+          <label for="instructions">Which records do you need?</label>
+          <textarea id="instructions" rows="2" maxlength="800" />
+          <p class="notice">
+            Convert with Jev sends a reduced sample (five items per array) and
+            your instructions to Jev/TypeSafe.
+          </p>
+          <button id="extra-ask">Convert with Jev</button>
+        </details>
+      </>
+    )}
+    {tool === "entities" && (
+      <>
+        <fieldset>
+          <legend>Categories</legend>
+          <label class="check">
+            <input type="checkbox" id="people-category" checked />
+            People
+          </label>
+          <label class="check">
+            <input type="checkbox" id="companies-category" checked />
+            Companies
+          </label>
+          <label class="check">
+            <input type="checkbox" id="custom-category" />
+            Custom
+          </label>
+        </fieldset>
+        <div id="custom-definitions" hidden>
+          <label for="instructions">
+            Custom categories (Name: definition, one per line)
+          </label>
+          <textarea
+            id="instructions"
+            rows="2"
+            maxlength="1000"
+            placeholder="Place: a named city"
+          />
+        </div>
+        <p class="notice">
+          Extract sends your text and chosen categories to Jev/TypeSafe. Short
+          texts only: up to three matches per category; review the highlights.
+        </p>
+      </>
+    )}
+    {tool === "entities" && (
+      <details>
+        <summary>Extraction limits</summary>Up to 120 source tokens and 1–4
+        categories, three matches per category. This is not exhaustive
+        full-document extraction.
+      </details>
+    )}
+    {tool === "diagram" && (
+      <>
+        <label for="diagram-mode">Connections</label>
+        <select id="diagram-mode">
+          <option value="local">
+            Sequential — private, edit connections yourself
+          </option>
+          <option value="jev">Describe connections — use Jev</option>
+        </select>
+        <div id="connection-description" hidden>
+          <label for="instructions">Describe the connections</label>
+          <textarea
+            id="instructions"
+            rows="3"
+            maxlength="800"
+            placeholder="If approved, send confirmation; otherwise notify rejection."
+          />
+          <p class="notice">
+            Create diagram with Jev sends the listed steps and connection
+            description to Jev/TypeSafe. It selects relationships, never
+            arbitrary code.
+          </p>
+        </div>
+        <p class="notice">
+          Up to eight steps of 160 characters. Review labels and connections
+          before export.
+        </p>
+      </>
+    )}
+    {tool === "qa" && (
+      <>
+        <label for="instructions">Question</label>
+        <textarea
+          id="instructions"
+          rows="2"
+          maxlength="400"
+          placeholder="What does this source say about cancellation?"
+        />
+        <p class="notice">
+          Find answer sends the source and your question to Jev/TypeSafe. URL
+          mode first reads the public page. Results quote the source, not
+          generated answers.
+        </p>
+        <p id="source-coverage" class="notice" />
+        <details id="source-inspection" hidden>
+          <summary>Inspect fetched source and coverage</summary>
+          <pre id="fetched-source" />
+        </details>
+      </>
+    )}
+    <p class="notice">
+      No saved inputs or input-content analytics.{" "}
+      <a href="/privacy/">Privacy &amp; limits</a>
+    </p>
+    <div class="actions">
+      {tool === "jsonCsv" && (
+        <button id="extra-run" class="primary">
+          Convert
+        </button>
+      )}
+      {tool === "entities" && (
+        <button id="extra-ask" class="primary">
+          Extract with Jev
+        </button>
       )}
       {tool === "diagram" && (
-        <div class="actions">
-          <button id="prepare-extra">Prepare a sequential graph locally</button>
-        </div>
+        <button id="create-diagram" class="primary">
+          Create diagram
+        </button>
       )}
-      <p class="notice">
-        {tool === "entities"
-          ? "Define 1–4 categories. Jev selects exact start/end tokens in the source. Missing or inconsistent spans are rejected; review the proposals before export."
-          : tool === "qa"
-            ? "Jev checks whether the source contains an answer and selects a supporting paragraph. A source can be wrong or malicious; excerpts are evidence from that source, not independent fact verification."
-            : "Manual controls remain available without Jev. Review proposals before converting or rendering."}
-      </p>
-    </div>
-  </div>
-  <div class="panel">
-    <h2>Jev interpretation</h2>
-    <p class="notice">
-      {tool === "jsonCsv"
-        ? "AI receives a reduced JSON sample (at most five items per array) and your instructions."
-        : tool === "diagram"
-          ? "AI receives the listed steps and relationship instructions."
-          : tool === "entities"
-            ? "AI receives the entire bounded text and your category definitions."
-            : "AI receives the bounded page text and your question. No external knowledge is used to construct an answer."}{" "}
-      Your inputs are not stored by this application or sent to analytics.
-      TypeSafe receives submitted AI context.
-    </p>
-    <label class="check">
-      <input id="extra-consent" type="checkbox" />I agree to send this context
-      to Jev.
-    </label>
-    <div class="actions">
-      <button id="extra-ask">Ask Jev</button>
-    </div>
-  </div>
-  {(tool === "entities" || tool === "diagram") && (
-    <div class="panel">
-      <label for="review-plan">
-        Editable {tool === "diagram" ? "graph" : "entity"} JSON
-      </label>
-      <textarea
-        id="review-plan"
-        rows="7"
-        spellcheck="false"
-        maxlength="20000"
-      />
-      <label class="check">
-        <input id="extra-reviewed" type="checkbox" />I reviewed this proposal
-        against my source.
-      </label>
-      <div class="actions">
-        <button id="extra-run" class="primary">
-          {tool === "diagram"
-            ? "Render Mermaid locally"
-            : "Validate and export entities"}
+      {tool === "qa" && (
+        <button id="extra-ask" class="primary">
+          Find answer
         </button>
-      </div>
+      )}
     </div>
-  )}
-  {tool === "jsonCsv" && (
-    <>
-      <label class="check">
-        <input id="extra-reviewed" type="checkbox" />I reviewed the selected
-        record array and nested-array policy.
-      </label>
-      <div class="actions">
-        <button id="extra-run" class="primary">
-          Convert JSON to CSV locally
-        </button>
-      </div>
-    </>
-  )}
+  </section>
   <p id="extra-status" class="utility-status" role="status" aria-live="polite">
-    Load an example or enter your source.
+    Enter your source or load an example.
   </p>
+  {tool === "entities" && (
+    <details id="entity-review" class="panel">
+      <summary>Review or edit mentions manually</summary>
+      <h2>Review mentions</h2>
+      <p class="notice">
+        Correct exact source text, choose its occurrence and category, or remove
+        it. Offsets are computed locally.
+      </p>
+      <div id="entity-editor" />
+      <button id="add-mention">Add mention manually</button>
+      <button id="extra-run">Update preview</button>
+    </details>
+  )}
+  {tool === "diagram" && (
+    <details id="graph-panel" class="panel" hidden>
+      <summary>Edit steps and connections</summary>
+      <h2>Edit diagram</h2>
+      <p class="notice">
+        Choose each node’s type and destinations. Yes and No apply to decisions.
+      </p>
+      <div id="graph-editor" />
+      <button id="extra-run">Update diagram</button>
+      <button id="prepare-extra">Start a private sequential diagram</button>
+    </details>
+  )}
+  {(tool === "entities" || tool === "diagram") && (
+    <details>
+      <summary>Advanced: import a manual JSON plan</summary>
+      <label for="review-plan">Manual plan</label>
+      <textarea id="review-plan" rows="4" maxlength="20000" />
+      <button id="import-plan">Import plan</button>
+    </details>
+  )}
   <section id="extra-results" class="panel" hidden>
-    <h2>Result</h2>
+    <h2>Result — review before sharing</h2>
     <div id="extra-visual" />
-    <pre id="extra-output" />
+    <details>
+      <summary>Export code view</summary>
+      <pre id="extra-output" />
+    </details>
     <div class="actions">
       <button id="extra-download">Download result</button>
       <button id="extra-copy">Copy result</button>

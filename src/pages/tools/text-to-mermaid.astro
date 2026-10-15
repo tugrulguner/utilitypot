@@ -5,11 +5,12 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
 
 <UtilityLayout
   title="Text to Mermaid flowchart"
-  description="Review source-backed steps and branches, then render a safe flowchart locally."
+  description="Turn a short list of steps into an editable diagram."
   slug="text-to-mermaid"
 >
   <ExtraUtilityApp tool="diagram" />
-  <section class="prose">
+  <details class="prose tool-help">
+    <summary>How this tool works &amp; limits</summary>
     <h2>What this tool does</h2>
     <p>
       List up to eight steps and describe the relationships. Jev selects node
@@ -25,5 +26,5 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
       database. AI classifications can be wrong; typed output is not proof of
       truth. <a href="/privacy/">Read privacy and operating limits.</a>
     </p>
-  </section>
+  </details>
 </UtilityLayout>
