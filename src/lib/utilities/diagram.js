@@ -101,9 +101,10 @@ export function createDiagramInterpretation(input) {
             to: next,
             label: n.type === "decision" ? "yes" : "",
           });
-        if (alt !== "none") {
-          if (n.type !== "decision" || alt === next)
-            throw new Error("Inconsistent decision branches.");
+        // Questions run independently: a false-branch answer is relevant only
+        // when this node was actually classified as a decision.
+        if (n.type === "decision" && alt !== "none") {
+          if (alt === next) throw new Error("Inconsistent decision branches.");
           edges.push({ from: n.id, to: alt, label: "no" });
         }
       });

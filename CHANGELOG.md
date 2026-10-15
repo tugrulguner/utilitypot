@@ -14,6 +14,8 @@
 
 ### Fixed
 
+- Branching diagrams ignore inapplicable false-branch judgments on non-decision steps instead of rejecting an otherwise valid reviewed graph.
+
 - Public-page extraction preserves inline text, prefers semantic main content and returns a disclosed character/paragraph-bounded context that the QA input accepts.
 
 - Reject disjoint availability windows rather than inventing availability across their gaps; keep allowed and excluded time candidates separate.
