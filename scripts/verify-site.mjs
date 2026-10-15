@@ -15,8 +15,15 @@ for (const path of [
     !html.includes("https://github.com/tugrulguner/utilitypot")
   )
     throw Error("Missing family/source links");
-  if (/posthog|TYPESAFE_API_KEY=|test-server-only/.test(html))
-    throw Error("Unexpected tracking or credential marker");
+  if (/TYPESAFE_API_KEY=|test-server-only/.test(html))
+    throw Error("Unexpected credential marker");
+  if (
+    (html.match(/posthog\.init\(/g) || []).length !== 1 ||
+    !html.includes("disable_session_recording:true") ||
+    !html.includes("autocapture:false") ||
+    !html.includes("persistence:'localStorage'")
+  )
+    throw Error("Missing or unsafe analytics bootstrap: " + path);
   for (const m of html.matchAll(
     /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g,
   ))

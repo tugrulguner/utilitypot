@@ -3,6 +3,7 @@ import "@fontsource-variable/manrope";
 import "@fontsource/ibm-plex-mono/400.css";
 import "../styles/global.css";
 import "../styles/utilities.css";
+import { posthogScript } from "../lib/analytics.js";
 import "../styles/family.css";
 interface Props {
   title: string;
@@ -92,6 +93,7 @@ const schema = {
         ],
       })}
     />
+    <script is:inline set:html={posthogScript} />
   </head>
   <body class="utility-page">
     <a href="#main" class="skip-link">

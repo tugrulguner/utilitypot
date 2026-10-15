@@ -13,9 +13,17 @@ import UtilityLayout from "../layouts/UtilityLayout.astro";
     <p>
       Manual conversion, normalization, scheduling and diagram rendering run in
       your browser. This application has no account database, saved input
-      history, session replay or analytics SDK. Downloads are initiated by you.
-      Hosting providers still process ordinary request metadata under their own
-      policies.
+      history, session replay or input analytics. Anonymous, opt-out-respecting
+      PostHog analytics measure page views and coarse tool actions, using a
+      pseudonymous browser identifier in local storage rather than analytics
+      cookies. SDK opt-out is stored in the browser. Pageview URLs retain the
+      public path but remove query strings and fragments; referrers are reduced
+      to their origin, and campaign/ad-click identifiers are discarded,
+      including persisted acquisition properties. Analytics does not record form
+      values, page text, provider responses, or output. Manual processing and
+      downloads remain in your browser; download events measure user intent, not
+      completed transfer. Hosting providers still process ordinary request
+      metadata under their own policies.
     </p>
     <h2>When you choose Ask Jev</h2>
     <p>

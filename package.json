@@ -10,7 +10,7 @@
     "dev": "astro dev",
     "check": "astro check",
     "build": "astro build && node scripts/verify-site.mjs",
-    "test": "node --test src/lib/utilities/*.test.mjs",
+    "test": "node --test src/lib/*.test.mjs src/lib/utilities/*.test.mjs",
     "preview": "astro preview",
     "test:browser": "playwright test",
     "test:worker": "playwright test --config=playwright.utilities.config.mjs",

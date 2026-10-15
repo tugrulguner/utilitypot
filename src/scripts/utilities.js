@@ -13,6 +13,37 @@ if (root) {
     filename = "",
     mime = "text/plain",
     slots = [];
+  const analyticsTool = {
+    csv: "csv_to_nested_json",
+    dates: "fix_excel_dates",
+    meeting: "meeting_time_finder",
+  }[tool];
+  const capture = (event, properties = {}) => {
+    try {
+      globalThis.posthog?.capture(event, properties, { send_instantly: true });
+    } catch {
+      /* Analytics must never block the utility. */
+    }
+  };
+  const attemptId = () =>
+    globalThis.crypto?.randomUUID?.() ??
+    `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const begin = (action) => {
+    const id = attemptId();
+    capture("utility_action_started", {
+      tool: analyticsTool,
+      action,
+      attempt_id: id,
+    });
+    return { id, action };
+  };
+  const complete = (attempt, outcome) =>
+    capture("utility_action_completed", {
+      tool: analyticsTool,
+      action: attempt.action,
+      attempt_id: attempt.id,
+      outcome,
+    });
   const status = (text, error = false) => {
     $("utility-status").textContent = text;
     $("utility-status").classList.toggle("error", error);
@@ -33,7 +64,11 @@ if (root) {
       fields = [];
     }
   });
-  function download(text, name, type) {
+  function download(text, name, type, action = "download_result") {
+    capture("utility_output_download_requested", {
+      tool: analyticsTool,
+      action,
+    });
     const url = URL.createObjectURL(new Blob([text], { type }));
     const a = document.createElement("a");
     a.href = url;
@@ -218,6 +253,9 @@ if (root) {
       return;
     }
     const button = $("ask-jev");
+    const attempt = begin("ai_interpretation");
+    let outcome = "unexpected_failure",
+      responseStatus = 0;
     let input;
     try {
       if (tool === "csv") {
@@ -253,8 +291,12 @@ if (root) {
         body: JSON.stringify({ tool, input }),
         signal: AbortSignal.timeout(20000),
       });
+      responseStatus = r.status;
       const data = await r.json();
-      if (token !== revision) return;
+      if (token !== revision) {
+        outcome = "cancelled";
+        return;
+      }
       if (!r.ok)
         throw new Error(
           data.error || "AI is unavailable. Use manual controls.",
@@ -272,6 +314,7 @@ if (root) {
             "Jev flagged unsupported or ambiguous availability. Correct the editable windows manually before reviewing.",
             true,
           );
+          outcome = "rejected";
           return;
         }
       }
@@ -282,7 +325,13 @@ if (root) {
         `Jev proposed settings${weak ? " with uncertain selections" : ""}. Review every setting before running. Model: ${data.model}.`,
         weak,
       );
+      outcome = "success";
     } catch (e) {
+      outcome =
+        e.name === "TimeoutError" ||
+        (responseStatus >= 400 && responseStatus < 500)
+          ? "rejected"
+          : "unexpected_failure";
       status(
         e.name === "TimeoutError"
           ? "AI timed out. Manual controls still work."
@@ -290,19 +339,25 @@ if (root) {
         true,
       );
     } finally {
+      complete(attempt, outcome);
       button.disabled = false;
     }
   });
   $("run").addEventListener("click", () => {
+    const attempt = begin("manual_run");
+    let outcome = "rejected";
     try {
       if (tool === "csv") {
-        if (!$("reviewed").checked)
+        if (!$("reviewed").checked) {
+          outcome = "rejected";
           throw new Error("Review and confirm the mapping first.");
+        }
         rows = parseCsv($("csv-input").value);
         const result = transformCsv(rows, {
           groupBy: $("group-by").value,
           fields,
         });
+        outcome = "unexpected_failure";
         show(
           JSON.stringify(result, null, 2),
           "modepot-data.json",
@@ -317,6 +372,7 @@ if (root) {
           $("dates-input").value,
           $("date-convention").value,
         );
+        outcome = "unexpected_failure";
         show(
           Papa.unparse(result, { escapeFormulae: true }),
           "modepot-dates.csv",
@@ -352,14 +408,17 @@ if (root) {
         );
       }
       if (tool === "meeting") {
-        if (!$("reviewed").checked)
+        if (!$("reviewed").checked) {
+          outcome = "rejected";
           throw new Error("Review and confirm all participant windows first.");
+        }
         const duration = Number($("duration").value);
         slots = findSlots($("meeting-date").value, duration, participants());
         const lines = slots.map(
           (s, i) =>
             `${i + 1}. ${s.start} — ${s.end}\n${s.local.map((p) => `${p.name || "Participant"}: ${p.start} → ${p.end}`).join("\n")}`,
         );
+        outcome = "unexpected_failure";
         show(
           lines.join("\n\n") ||
             "No overlapping time satisfies these windows. Change the constraints explicitly to try alternatives.",
@@ -384,24 +443,34 @@ if (root) {
               calendarEvent(slots[Number(select.value)], duration),
               "modepot-meeting.ics",
               "text/calendar",
+              "calendar_download",
             ),
           );
           $("result-view").append(label, select, b);
         }
       }
+      outcome = "success";
     } catch (e) {
       output = "";
       $("results").hidden = true;
       status(e.message, true);
+    } finally {
+      complete(attempt, outcome);
     }
   });
   $("download").addEventListener("click", () => {
-    if (output) download(output, filename, mime);
+    if (output) {
+      download(output, filename, mime);
+    }
   });
   $("copy").addEventListener("click", async () => {
     try {
       if (output) {
         await navigator.clipboard.writeText(output);
+        capture("utility_output_copy_succeeded", {
+          tool: analyticsTool,
+          action: "copy_result",
+        });
         status("Result copied.");
       }
     } catch {
