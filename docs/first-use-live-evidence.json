@@ -1,0 +1,649 @@
+{
+  "base": "413043db85c3da438cf02c63cd4df0c890d9673e",
+  "candidateVersion": "53234efb-746b-49da-a677-45425eee52c3",
+  "totalCases": 25,
+  "statusCounts": {
+    "passed": 23,
+    "passed-with-manual-correction": 2
+  },
+  "firstUseCases": [
+    {
+      "id": "csv-example-to-fresh-orders",
+      "status": "passed",
+      "exampleLabel": "Load example: customers",
+      "explanation": "Three rows → two customer groups: 001 has two items, 002 has one.",
+      "checks": [
+        "fresh grouping",
+        "literal IDs/strings",
+        "download",
+        "cancel preserves source and result",
+        "accepted replacement clears result without AI"
+      ]
+    },
+    {
+      "id": "dates-example-to-fresh-values",
+      "status": "passed",
+      "exampleLabel": "Load example: mixed dates",
+      "explanation": "Try complete, unclear, invalid and month/year-only dates. Every original stays in the report.",
+      "checks": [
+        "fresh ambiguity retained",
+        "explicit convention",
+        "partial and invalid preserved",
+        "download"
+      ]
+    },
+    {
+      "id": "meeting-example-to-fresh-cities",
+      "status": "passed",
+      "exampleLabel": "Load example: working hours",
+      "explanation": "Sample London–Kolkata hours, not your availability. Find 30-minute overlaps.",
+      "checks": [
+        "optional names collapsed for initial and added participants",
+        "fresh cities",
+        "selected calendar export"
+      ]
+    },
+    {
+      "id": "json-example-to-fresh-records",
+      "status": "passed",
+      "exampleLabel": "Load example: orders",
+      "explanation": "Two orders become two spreadsheet rows, including customer.name as a column. Review the selected record sample before converting.",
+      "checks": [
+        "multiple-list choice stays explicit",
+        "nested list stop/keep recovery",
+        "leading-zero ID",
+        "download"
+      ]
+    },
+    {
+      "id": "diagram-example-to-fresh-steps",
+      "status": "passed",
+      "exampleLabel": "Load example: approval steps",
+      "explanation": "Four steps form an approval flowchart with Yes and No branches. Edit connections privately; export Mermaid or SVG.",
+      "checks": ["fresh steps", "private rendering and Mermaid download"]
+    },
+    {
+      "id": "entities-example-to-fresh-names-real-jev",
+      "status": "passed-with-manual-correction",
+      "exampleLabel": "Load example: repeated names",
+      "explanation": "Find Ada, Lin and Acme Labs. Correct highlights in the manual mention editor.",
+      "model": "jev-1.13.0",
+      "rawProposal": {
+        "entities": [
+          {
+            "type": "Person",
+            "text": "Alex Rivera",
+            "start": 0,
+            "end": 11
+          },
+          {
+            "type": "Person",
+            "text": "Morgan Lee",
+            "start": 32,
+            "end": 42
+          },
+          {
+            "type": "Person",
+            "text": "Alex",
+            "start": 47,
+            "end": 51
+          },
+          {
+            "type": "Organization",
+            "text": "Pine Studio",
+            "start": 19,
+            "end": 30
+          }
+        ],
+        "needsReview": true,
+        "limit": "At most three mentions per type; additional mentions may be omitted."
+      },
+      "manualCorrections": [
+        {
+          "mention": 3,
+          "from": "Alex",
+          "to": "Alex Rivera",
+          "occurrence": 2
+        }
+      ],
+      "checks": [
+        "fresh names",
+        "real Jev",
+        "review and exact-source correction when needed",
+        "distinct repeated source spans",
+        "download verified"
+      ]
+    },
+    {
+      "id": "qa-example-to-fresh-passage-real-jev",
+      "status": "passed",
+      "exampleLabel": "Load example: privacy passage",
+      "explanation": "Expected quotation: “The application does not store submitted text or require an account.”",
+      "model": "jev-1.13.0",
+      "checks": [
+        "fresh passage and question",
+        "real Jev",
+        "literal supporting source quotation"
+      ]
+    }
+  ],
+  "standardCases": [
+    {
+      "id": "csv-to-nested-json",
+      "status": "passed-with-manual-correction",
+      "manualCorrections": [
+        {
+          "path": "name",
+          "from": "",
+          "to": "CustomerName",
+          "reason": "Real user review of an unresolved Jev mapping"
+        }
+      ]
+    },
+    {
+      "id": "fix-excel-dates",
+      "status": "passed"
+    },
+    {
+      "id": "meeting-time-finder",
+      "status": "passed"
+    },
+    {
+      "id": "json-to-csv",
+      "status": "passed"
+    },
+    {
+      "id": "entity-extractor",
+      "status": "passed"
+    },
+    {
+      "id": "text-to-mermaid-linear",
+      "status": "passed"
+    },
+    {
+      "id": "text-to-mermaid",
+      "status": "passed"
+    },
+    {
+      "id": "ask-a-webpage-pasted",
+      "status": "passed"
+    },
+    {
+      "id": "ask-a-webpage-public-url",
+      "status": "passed"
+    },
+    {
+      "id": "ask-a-webpage-absent-answer",
+      "status": "passed"
+    },
+    {
+      "id": "date-ambiguity",
+      "status": "passed"
+    }
+  ],
+  "targetedCases": [
+    {
+      "id": "meeting-cities-selected-calendar",
+      "status": "passed",
+      "readable": "Selected meeting time · 30 minutes\nLondon\nNov 3, 2026, 2:15 PM – Nov 3, 2026, 2:45 PM\nNew York\nNov 3, 2026, 9:15 AM – Nov 3, 2026, 9:45 AM",
+      "calendarSelectedSlot": 1
+    },
+    {
+      "id": "single-object-nested-array-recovery",
+      "status": "passed",
+      "csv": "id,name,tags\r\n001,Ada,\"[\"\"alpha\"\"]\""
+    },
+    {
+      "id": "empty-date-recovery",
+      "status": "passed",
+      "message": "Enter at least one date; blank rows are preserved within a non-empty list."
+    },
+    {
+      "id": "entities-original-repeated",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "entities": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 0,
+          "end": 10
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 30,
+          "end": 39
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 64,
+          "end": 74
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 18,
+          "end": 28
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 49,
+          "end": 62
+        }
+      ]
+    },
+    {
+      "id": "entities-fresh-names",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "entities": [
+        {
+          "type": "Person",
+          "text": "Ada Lovelace",
+          "start": 0,
+          "end": 12
+        },
+        {
+          "type": "Person",
+          "text": "Alan Turing",
+          "start": 17,
+          "end": 28
+        },
+        {
+          "type": "Organization",
+          "text": "Mosaic Labs",
+          "start": 32,
+          "end": 43
+        }
+      ]
+    },
+    {
+      "id": "entities-none",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "entities": []
+    },
+    {
+      "id": "real-mobile-answer-visible",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "view": {
+        "top": 305.6875,
+        "bottom": 630.34375,
+        "viewport": 844,
+        "focused": true
+      }
+    }
+  ],
+  "retainedFirstAttempt": [
+    {
+      "id": "csv-example-to-fresh-orders",
+      "status": "passed",
+      "exampleLabel": "Load example: customers",
+      "explanation": "Three rows → two customer groups: 001 has two items, 002 has one.",
+      "checks": [
+        "fresh grouping",
+        "literal IDs/strings",
+        "download",
+        "cancel preserves source and result",
+        "accepted replacement clears result without AI"
+      ]
+    },
+    {
+      "id": "dates-example-to-fresh-values",
+      "status": "passed",
+      "exampleLabel": "Load example: mixed dates",
+      "explanation": "Try complete, unclear, invalid and month/year-only dates. Every original stays in the report.",
+      "checks": [
+        "fresh ambiguity retained",
+        "explicit convention",
+        "partial and invalid preserved",
+        "download"
+      ]
+    },
+    {
+      "id": "meeting-example-to-fresh-cities",
+      "status": "passed",
+      "exampleLabel": "Load example: working hours",
+      "explanation": "Sample London–Kolkata hours, not your availability. Find 30-minute overlaps.",
+      "checks": [
+        "optional names collapsed for initial and added participants",
+        "fresh cities",
+        "selected calendar export"
+      ]
+    },
+    {
+      "id": "json-example-to-fresh-records",
+      "status": "passed",
+      "exampleLabel": "Load example: orders",
+      "explanation": "Two orders become two spreadsheet rows, including customer.name as a column. Review the selected record sample before converting.",
+      "checks": [
+        "multiple-list choice stays explicit",
+        "nested list stop/keep recovery",
+        "leading-zero ID",
+        "download"
+      ]
+    },
+    {
+      "id": "diagram-example-to-fresh-steps",
+      "status": "failed",
+      "error": "page.waitForEvent: Timeout 30000ms exceeded while waiting for event \"download\"\n=========================== logs ===========================\nwaiting for event \"download\"\n============================================================\n    at download (/Users/tugrulguner/.hermes/cache/scratch/first-use-product-qa.mjs:33:39)\n    at /Users/tugrulguner/.hermes/cache/scratch/first-use-product-qa.mjs:90:19\n    at async run (/Users/tugrulguner/.hermes/cache/scratch/first-use-product-qa.mjs:44:24)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/first-use-product-qa.mjs:88:2"
+    },
+    {
+      "id": "entities-example-to-fresh-names-real-jev",
+      "status": "failed",
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  [\n+   'Alex',\n-   'Alex Rivera',\n    'Morgan Lee',\n+   'Alex',\n-   'Alex Rivera',\n    'Pine Studio'\n  ]\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/first-use-product-qa.mjs:95:33\n    at async run (file:///Users/tugrulguner/.hermes/cache/scratch/first-use-product-qa.mjs:44:24)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/first-use-product-qa.mjs:93:2"
+    },
+    {
+      "id": "qa-example-to-fresh-passage-real-jev",
+      "status": "passed",
+      "exampleLabel": "Load example: privacy passage",
+      "explanation": "Expected quotation: “The application does not store submitted text or require an account.”",
+      "model": "jev-1.13.0",
+      "checks": [
+        "fresh passage and question",
+        "real Jev",
+        "literal supporting source quotation"
+      ]
+    }
+  ],
+  "retainedSecondAttempt": [
+    {
+      "id": "csv-example-to-fresh-orders",
+      "status": "passed",
+      "exampleLabel": "Load example: customers",
+      "explanation": "Three rows → two customer groups: 001 has two items, 002 has one.",
+      "checks": [
+        "fresh grouping",
+        "literal IDs/strings",
+        "download",
+        "cancel preserves source and result",
+        "accepted replacement clears result without AI"
+      ]
+    },
+    {
+      "id": "dates-example-to-fresh-values",
+      "status": "passed",
+      "exampleLabel": "Load example: mixed dates",
+      "explanation": "Try complete, unclear, invalid and month/year-only dates. Every original stays in the report.",
+      "checks": [
+        "fresh ambiguity retained",
+        "explicit convention",
+        "partial and invalid preserved",
+        "download"
+      ]
+    },
+    {
+      "id": "meeting-example-to-fresh-cities",
+      "status": "passed",
+      "exampleLabel": "Load example: working hours",
+      "explanation": "Sample London–Kolkata hours, not your availability. Find 30-minute overlaps.",
+      "checks": [
+        "optional names collapsed for initial and added participants",
+        "fresh cities",
+        "selected calendar export"
+      ]
+    },
+    {
+      "id": "json-example-to-fresh-records",
+      "status": "passed",
+      "exampleLabel": "Load example: orders",
+      "explanation": "Two orders become two spreadsheet rows, including customer.name as a column. Review the selected record sample before converting.",
+      "checks": [
+        "multiple-list choice stays explicit",
+        "nested list stop/keep recovery",
+        "leading-zero ID",
+        "download"
+      ]
+    },
+    {
+      "id": "diagram-example-to-fresh-steps",
+      "status": "failed",
+      "error": "page.waitForEvent: Timeout 30000ms exceeded while waiting for event \"download\"\n=========================== logs ===========================\nwaiting for event \"download\"\n============================================================\n    at download (/Users/tugrulguner/.hermes/cache/scratch/first-use-product-qa.mjs:45:39)\n    at /Users/tugrulguner/.hermes/cache/scratch/first-use-product-qa.mjs:102:19\n    at async run (/Users/tugrulguner/.hermes/cache/scratch/first-use-product-qa.mjs:56:24)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/first-use-product-qa.mjs:100:2"
+    },
+    {
+      "id": "entities-example-to-fresh-names-real-jev",
+      "status": "passed-with-manual-correction",
+      "exampleLabel": "Load example: repeated names",
+      "explanation": "Find Ada, Lin and Acme Labs. Correct highlights in the manual mention editor.",
+      "model": "jev-1.13.0",
+      "rawProposal": {
+        "entities": [
+          {
+            "type": "Person",
+            "text": "Alex Rivera",
+            "start": 0,
+            "end": 11
+          },
+          {
+            "type": "Person",
+            "text": "Morgan Lee",
+            "start": 32,
+            "end": 42
+          },
+          {
+            "type": "Person",
+            "text": "Alex",
+            "start": 47,
+            "end": 51
+          },
+          {
+            "type": "Organization",
+            "text": "Pine Studio",
+            "start": 19,
+            "end": 30
+          }
+        ],
+        "needsReview": true,
+        "limit": "At most three mentions per type; additional mentions may be omitted."
+      },
+      "manualCorrections": [
+        {
+          "mention": 3,
+          "from": "Alex",
+          "to": "Alex Rivera",
+          "occurrence": 2
+        }
+      ],
+      "checks": [
+        "fresh names",
+        "real Jev",
+        "review and exact-source correction when needed",
+        "distinct repeated source spans",
+        "download verified"
+      ]
+    },
+    {
+      "id": "qa-example-to-fresh-passage-real-jev",
+      "status": "passed",
+      "exampleLabel": "Load example: privacy passage",
+      "explanation": "Expected quotation: “The application does not store submitted text or require an account.”",
+      "model": "jev-1.13.0",
+      "checks": [
+        "fresh passage and question",
+        "real Jev",
+        "literal supporting source quotation"
+      ]
+    }
+  ],
+  "geometry": {
+    "before": [
+      {
+        "slug": "csv-to-nested-json",
+        "title": "CSV to nested JSON",
+        "viewport": {
+          "width": 1280,
+          "height": 900
+        },
+        "overflow": false,
+        "example": "Load example",
+        "explanation": "",
+        "nameFieldsVisible": 0,
+        "visibleFormControls": 3,
+        "primaryActionTop": 702.859375
+      },
+      {
+        "slug": "json-to-csv",
+        "title": "JSON to CSV",
+        "viewport": {
+          "width": 1280,
+          "height": 900
+        },
+        "overflow": false,
+        "example": "Load example",
+        "explanation": "",
+        "nameFieldsVisible": 0,
+        "visibleFormControls": 2,
+        "primaryActionTop": 619.0625
+      },
+      {
+        "slug": "meeting-time-finder",
+        "title": "Find a meeting time",
+        "viewport": {
+          "width": 1280,
+          "height": 900
+        },
+        "overflow": false,
+        "example": "Load example",
+        "explanation": "",
+        "nameFieldsVisible": 2,
+        "visibleFormControls": 11,
+        "primaryActionTop": 788.21875
+      },
+      {
+        "slug": "csv-to-nested-json",
+        "title": "CSV to nested JSON",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "overflow": false,
+        "example": "Load example",
+        "explanation": "",
+        "nameFieldsVisible": 0,
+        "visibleFormControls": 3,
+        "primaryActionTop": 747.515625
+      },
+      {
+        "slug": "json-to-csv",
+        "title": "JSON to CSV",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "overflow": false,
+        "example": "Load example",
+        "explanation": "",
+        "nameFieldsVisible": 0,
+        "visibleFormControls": 2,
+        "primaryActionTop": 643.328125
+      },
+      {
+        "slug": "meeting-time-finder",
+        "title": "Find a meeting time",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "overflow": false,
+        "example": "Load example",
+        "explanation": "",
+        "nameFieldsVisible": 2,
+        "visibleFormControls": 11,
+        "primaryActionTop": 1074.875
+      }
+    ],
+    "after": [
+      {
+        "slug": "csv-to-nested-json",
+        "title": "CSV to nested JSON",
+        "viewport": {
+          "width": 1280,
+          "height": 900
+        },
+        "overflow": false,
+        "example": "Load example: customers",
+        "explanation": "Three rows → two customer groups: 001 has two items, 002 has one.",
+        "nameFieldsVisible": 0,
+        "visibleFormControls": 3,
+        "primaryActionTop": 744.453125
+      },
+      {
+        "slug": "json-to-csv",
+        "title": "JSON to CSV",
+        "viewport": {
+          "width": 1280,
+          "height": 900
+        },
+        "overflow": false,
+        "example": "Load example: orders",
+        "explanation": "Two orders become two spreadsheet rows, including customer.name as a column. Review the selected record sample before converting.",
+        "nameFieldsVisible": 0,
+        "visibleFormControls": 2,
+        "primaryActionTop": 642.65625
+      },
+      {
+        "slug": "meeting-time-finder",
+        "title": "Find a meeting time",
+        "viewport": {
+          "width": 1280,
+          "height": 900
+        },
+        "overflow": false,
+        "example": "Load example: working hours",
+        "explanation": "Sample London–Kolkata hours, not your availability. Find 30-minute overlaps.",
+        "nameFieldsVisible": 0,
+        "visibleFormControls": 9,
+        "primaryActionTop": 753.4375
+      },
+      {
+        "slug": "csv-to-nested-json",
+        "title": "CSV to nested JSON",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "overflow": false,
+        "example": "Load example: customers",
+        "explanation": "Three rows → two customer groups: 001 has two items, 002 has one.",
+        "nameFieldsVisible": 0,
+        "visibleFormControls": 3,
+        "primaryActionTop": 779.5
+      },
+      {
+        "slug": "json-to-csv",
+        "title": "JSON to CSV",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "overflow": false,
+        "example": "Load example: orders",
+        "explanation": "Two orders become two spreadsheet rows, including customer.name as a column. Review the selected record sample before converting.",
+        "nameFieldsVisible": 0,
+        "visibleFormControls": 2,
+        "primaryActionTop": 677.703125
+      },
+      {
+        "slug": "meeting-time-finder",
+        "title": "Find a meeting time",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "overflow": false,
+        "example": "Load example: working hours",
+        "explanation": "Sample London–Kolkata hours, not your availability. Find 30-minute overlaps.",
+        "nameFieldsVisible": 0,
+        "visibleFormControls": 9,
+        "primaryActionTop": 1057.28125
+      }
+    ]
+  },
+  "productionUnchanged": true,
+  "previewsRestoredDisabled": true,
+  "humanParticipants": false
+}

@@ -1,0 +1,1788 @@
+{
+  "candidateVersion": "28811494-1c28-43fa-ad38-956d23fdd5f9",
+  "runtimeCommit": "cf82c14fbdfc7e70d12a617e95eae8655d4b20d1",
+  "allTools": {
+    "total": 25,
+    "counts": {
+      "passed": 24,
+      "passed-with-manual-correction": 1
+    },
+    "firstUse": [
+      {
+        "id": "csv-example-to-fresh-orders",
+        "status": "passed",
+        "exampleLabel": "Load example: customers",
+        "explanation": "Three rows \u2192 two customer groups: 001 has two items, 002 has one.",
+        "checks": [
+          "fresh grouping",
+          "literal IDs/strings",
+          "download",
+          "cancel preserves source and result",
+          "accepted replacement clears result without AI"
+        ]
+      },
+      {
+        "id": "dates-example-to-fresh-values",
+        "status": "passed",
+        "exampleLabel": "Load example: mixed dates",
+        "explanation": "Try complete, unclear, invalid and month/year-only dates. Every original stays in the report.",
+        "checks": [
+          "fresh ambiguity retained",
+          "explicit convention",
+          "partial and invalid preserved",
+          "download"
+        ]
+      },
+      {
+        "id": "meeting-example-to-fresh-cities",
+        "status": "passed",
+        "exampleLabel": "Load example: working hours",
+        "explanation": "Sample London\u2013Kolkata hours, not your availability. Find 30-minute overlaps.",
+        "checks": [
+          "optional names collapsed for initial and added participants",
+          "fresh cities",
+          "selected calendar export"
+        ]
+      },
+      {
+        "id": "json-example-to-fresh-records",
+        "status": "passed",
+        "exampleLabel": "Load example: orders",
+        "explanation": "Two orders become two spreadsheet rows, including customer.name as a column. Review the selected record sample before converting.",
+        "checks": [
+          "multiple-list choice stays explicit",
+          "nested list stop/keep recovery",
+          "leading-zero ID",
+          "download"
+        ]
+      },
+      {
+        "id": "diagram-example-to-fresh-steps",
+        "status": "passed",
+        "exampleLabel": "Load example: approval steps",
+        "explanation": "Four steps form an approval flowchart with Yes and No branches. Edit connections privately; export Mermaid or SVG.",
+        "checks": ["fresh steps", "private rendering and Mermaid download"]
+      },
+      {
+        "id": "entities-example-to-fresh-names-real-jev",
+        "status": "passed",
+        "exampleLabel": "Load example: repeated names",
+        "explanation": "Find Ada, Lin and Acme Labs. Correct highlights in the manual mention editor.",
+        "model": "jev-1.13.0",
+        "rawProposal": {
+          "entities": [
+            {
+              "type": "Person",
+              "text": "Alex Rivera",
+              "start": 0,
+              "end": 11
+            },
+            {
+              "type": "Person",
+              "text": "Morgan Lee",
+              "start": 32,
+              "end": 42
+            },
+            {
+              "type": "Person",
+              "text": "Alex Rivera",
+              "start": 47,
+              "end": 58
+            },
+            {
+              "type": "Organization",
+              "text": "Pine Studio",
+              "start": 19,
+              "end": 30
+            }
+          ],
+          "needsReview": true,
+          "limit": "At most three mentions per type; additional mentions may be omitted."
+        },
+        "manualCorrections": [],
+        "checks": [
+          "fresh names",
+          "real Jev",
+          "review and exact-source correction when needed",
+          "distinct repeated source spans",
+          "download verified"
+        ]
+      },
+      {
+        "id": "qa-example-to-fresh-passage-real-jev",
+        "status": "passed",
+        "exampleLabel": "Load example: privacy passage",
+        "explanation": "Expected quotation: \u201cThe application does not store submitted text or require an account.\u201d",
+        "model": "jev-1.13.0",
+        "checks": [
+          "fresh passage and question",
+          "real Jev",
+          "literal supporting source quotation"
+        ]
+      }
+    ],
+    "standard": [
+      {
+        "id": "csv-to-nested-json",
+        "startedAt": "2026-10-15T20:35:10.665Z",
+        "network": [
+          {
+            "url": "https://28811494-utilitypot-site.tugrul-gunr.workers.dev/api/utilities/interpret",
+            "status": 200,
+            "fromServiceWorker": false,
+            "body": {
+              "source": "jev",
+              "model": "jev-1.13.0",
+              "plan": {
+                "fields": [
+                  {
+                    "path": "id",
+                    "column": "ClientID"
+                  },
+                  {
+                    "path": "name",
+                    "column": ""
+                  },
+                  {
+                    "path": "items[].sku",
+                    "column": "ProductCode"
+                  },
+                  {
+                    "path": "items[].quantity",
+                    "column": "Units"
+                  }
+                ],
+                "groupBy": "ClientID",
+                "needsReview": true
+              },
+              "needsReview": true,
+              "confidence": {
+                "field0": 0.99,
+                "field1": 0.79,
+                "field2": 0.99,
+                "field3": 1,
+                "group": 1
+              }
+            }
+          }
+        ],
+        "downloads": [
+          {
+            "path": "test-results-live/2026-10-15T20-35-09-453Z/csv-to-nested-json-result.json",
+            "suggestedFilename": "modepot-data.json",
+            "bytes": 323
+          }
+        ],
+        "status": "passed-with-manual-correction",
+        "interpretation": {
+          "http": 200,
+          "source": "jev",
+          "model": "jev-1.13.0",
+          "plan": {
+            "fields": [
+              {
+                "path": "id",
+                "column": "ClientID"
+              },
+              {
+                "path": "name",
+                "column": ""
+              },
+              {
+                "path": "items[].sku",
+                "column": "ProductCode"
+              },
+              {
+                "path": "items[].quantity",
+                "column": "Units"
+              }
+            ],
+            "groupBy": "ClientID",
+            "needsReview": true
+          },
+          "needsReview": true,
+          "confidence": {
+            "field0": 0.99,
+            "field1": 0.79,
+            "field2": 0.99,
+            "field3": 1,
+            "group": 1
+          }
+        },
+        "manualCorrections": [
+          {
+            "path": "name",
+            "from": "",
+            "to": "CustomerName",
+            "reason": "Real user review of an unresolved Jev mapping"
+          }
+        ],
+        "checks": [
+          "Jev returned fresh mapping proposals; any review correction is recorded",
+          "grouped 3 rows into 2 records",
+          "identifiers retained leading zeros",
+          "downloaded JSON exactly matches expected records"
+        ],
+        "finishedAt": "2026-10-15T20:35:12.036Z"
+      },
+      {
+        "id": "fix-excel-dates",
+        "startedAt": "2026-10-15T20:35:12.037Z",
+        "network": [
+          {
+            "url": "https://28811494-utilitypot-site.tugrul-gunr.workers.dev/api/utilities/interpret",
+            "status": 200,
+            "fromServiceWorker": false,
+            "body": {
+              "source": "jev",
+              "model": "jev-1.13.0",
+              "plan": {
+                "convention": "day-first",
+                "needsReview": true
+              },
+              "needsReview": true,
+              "confidence": {
+                "convention": 0.98
+              }
+            }
+          }
+        ],
+        "downloads": [
+          {
+            "path": "test-results-live/2026-10-15T20-35-09-453Z/fix-excel-dates-dates.csv",
+            "suggestedFilename": "modepot-dates.csv",
+            "bytes": 351
+          }
+        ],
+        "status": "passed",
+        "interpretation": {
+          "http": 200,
+          "source": "jev",
+          "model": "jev-1.13.0",
+          "plan": {
+            "convention": "day-first",
+            "needsReview": true
+          },
+          "needsReview": true,
+          "confidence": {
+            "convention": 0.98
+          }
+        },
+        "checks": [
+          "Jev chose day-first",
+          "ambiguous numeric date normalized using reviewed convention",
+          "partial date retained",
+          "invalid leap-day flagged in downloaded report"
+        ],
+        "finishedAt": "2026-10-15T20:35:25.063Z"
+      },
+      {
+        "id": "meeting-time-finder",
+        "startedAt": "2026-10-15T20:35:25.064Z",
+        "network": [
+          {
+            "url": "https://28811494-utilitypot-site.tugrul-gunr.workers.dev/api/utilities/interpret",
+            "status": 200,
+            "fromServiceWorker": false,
+            "body": {
+              "source": "jev",
+              "model": "jev-1.13.0",
+              "plan": {
+                "participants": [
+                  {
+                    "name": "London",
+                    "zone": "Europe/London",
+                    "start": "09:00",
+                    "end": "12:00",
+                    "excludeStart": "",
+                    "excludeEnd": "",
+                    "needsReview": true,
+                    "scope": "supported"
+                  },
+                  {
+                    "name": "India",
+                    "zone": "Asia/Kolkata",
+                    "start": "14:00",
+                    "end": "16:00",
+                    "excludeStart": "",
+                    "excludeEnd": "",
+                    "needsReview": true,
+                    "scope": "supported"
+                  }
+                ],
+                "needsReview": true
+              },
+              "needsReview": true,
+              "confidence": {
+                "p0_start": 0.98,
+                "p0_end": 0.98,
+                "p0_excludeStart": 1,
+                "p0_excludeEnd": 1,
+                "p0_scope": 0.96,
+                "p1_start": 1,
+                "p1_end": 0.97,
+                "p1_excludeStart": 1,
+                "p1_excludeEnd": 1,
+                "p1_scope": 0.96
+              }
+            }
+          }
+        ],
+        "downloads": [
+          {
+            "path": "test-results-live/2026-10-15T20-35-09-453Z/meeting-time-finder.ics",
+            "suggestedFilename": "modepot-meeting.ics"
+          }
+        ],
+        "status": "passed",
+        "interpretation": {
+          "http": 200,
+          "source": "jev",
+          "model": "jev-1.13.0",
+          "plan": {
+            "participants": [
+              {
+                "name": "London",
+                "zone": "Europe/London",
+                "start": "09:00",
+                "end": "12:00",
+                "excludeStart": "",
+                "excludeEnd": "",
+                "needsReview": true,
+                "scope": "supported"
+              },
+              {
+                "name": "India",
+                "zone": "Asia/Kolkata",
+                "start": "14:00",
+                "end": "16:00",
+                "excludeStart": "",
+                "excludeEnd": "",
+                "needsReview": true,
+                "scope": "supported"
+              }
+            ],
+            "needsReview": true
+          },
+          "needsReview": true,
+          "confidence": {
+            "p0_start": 0.98,
+            "p0_end": 0.98,
+            "p0_excludeStart": 1,
+            "p0_excludeEnd": 1,
+            "p0_scope": 0.96,
+            "p1_start": 1,
+            "p1_end": 0.97,
+            "p1_excludeStart": 1,
+            "p1_excludeEnd": 1,
+            "p1_scope": 0.96
+          }
+        },
+        "checks": [
+          "Jev populated previously empty windows from natural language",
+          "London/India half-hour offset calculated correctly",
+          "calendar download matches selected UTC instant"
+        ],
+        "finishedAt": "2026-10-15T20:35:38.042Z"
+      },
+      {
+        "id": "json-to-csv",
+        "startedAt": "2026-10-15T20:35:38.042Z",
+        "network": [
+          {
+            "url": "https://28811494-utilitypot-site.tugrul-gunr.workers.dev/api/utilities/interpret",
+            "status": 200,
+            "fromServiceWorker": false,
+            "body": {
+              "source": "jev",
+              "model": "jev-1.13.0",
+              "plan": {
+                "path": "invoices",
+                "arrays": "reject",
+                "needsReview": true
+              },
+              "needsReview": true,
+              "confidence": {
+                "rows": 1,
+                "arrays": 1
+              }
+            }
+          }
+        ],
+        "downloads": [
+          {
+            "path": "test-results-live/2026-10-15T20-35-09-453Z/json-to-csv-invoices.csv",
+            "suggestedFilename": "utilitypot-data.csv",
+            "bytes": 53
+          }
+        ],
+        "status": "passed",
+        "interpretation": {
+          "http": 200,
+          "source": "jev",
+          "model": "jev-1.13.0",
+          "plan": {
+            "path": "invoices",
+            "arrays": "reject",
+            "needsReview": true
+          },
+          "needsReview": true,
+          "confidence": {
+            "rows": 1,
+            "arrays": 1
+          }
+        },
+        "checks": [
+          "Jev selected actual invoice array",
+          "nested object flattened",
+          "metadata omitted",
+          "downloaded CSV values and leading zeros verified"
+        ],
+        "finishedAt": "2026-10-15T20:35:51.131Z"
+      },
+      {
+        "id": "entity-extractor",
+        "startedAt": "2026-10-15T20:35:51.131Z",
+        "network": [
+          {
+            "url": "https://28811494-utilitypot-site.tugrul-gunr.workers.dev/api/utilities/interpret",
+            "status": 200,
+            "fromServiceWorker": false,
+            "body": {
+              "source": "jev",
+              "model": "jev-1.13.0",
+              "plan": {
+                "entities": [
+                  {
+                    "type": "Person",
+                    "text": "Maya",
+                    "start": 0,
+                    "end": 4
+                  },
+                  {
+                    "type": "Person",
+                    "text": "Omar",
+                    "start": 24,
+                    "end": 28
+                  },
+                  {
+                    "type": "Organization",
+                    "text": "Cedar Labs",
+                    "start": 12,
+                    "end": 22
+                  },
+                  {
+                    "type": "Organization",
+                    "text": "Cedar Labs",
+                    "start": 38,
+                    "end": 48
+                  }
+                ],
+                "needsReview": true,
+                "limit": "At most three mentions per type; additional mentions may be omitted."
+              },
+              "needsReview": true,
+              "confidence": {
+                "t0_m0_start": 1,
+                "t0_m1_start": 1,
+                "t0_m2_start": 0.99,
+                "t1_m0_start": 0.99,
+                "t1_m1_start": 0.96,
+                "t1_m2_start": 0.96,
+                "t0_m0_end": 1,
+                "t0_m1_end": 1,
+                "t1_m0_end": 0.98,
+                "t1_m1_end": 0.88
+              }
+            }
+          }
+        ],
+        "downloads": [
+          {
+            "path": "test-results-live/2026-10-15T20-35-09-453Z/entity-extractor-entities.json",
+            "suggestedFilename": "utilitypot-entities.json",
+            "bytes": 352
+          }
+        ],
+        "status": "passed",
+        "interpretation": {
+          "http": 200,
+          "source": "jev",
+          "model": "jev-1.13.0",
+          "plan": {
+            "entities": [
+              {
+                "type": "Person",
+                "text": "Maya",
+                "start": 0,
+                "end": 4
+              },
+              {
+                "type": "Person",
+                "text": "Omar",
+                "start": 24,
+                "end": 28
+              },
+              {
+                "type": "Organization",
+                "text": "Cedar Labs",
+                "start": 12,
+                "end": 22
+              },
+              {
+                "type": "Organization",
+                "text": "Cedar Labs",
+                "start": 38,
+                "end": 48
+              }
+            ],
+            "needsReview": true,
+            "limit": "At most three mentions per type; additional mentions may be omitted."
+          },
+          "needsReview": true,
+          "confidence": {
+            "t0_m0_start": 1,
+            "t0_m1_start": 1,
+            "t0_m2_start": 0.99,
+            "t1_m0_start": 0.99,
+            "t1_m1_start": 0.96,
+            "t1_m2_start": 0.96,
+            "t0_m0_end": 1,
+            "t0_m1_end": 1,
+            "t1_m0_end": 0.98,
+            "t1_m1_end": 0.88
+          }
+        },
+        "checks": [
+          "real Jev found both people and both organization mentions",
+          "every span matches exact source offsets",
+          "reviewed export matches proposal",
+          "all four mentions highlighted"
+        ],
+        "finishedAt": "2026-10-15T20:36:04.731Z"
+      },
+      {
+        "id": "text-to-mermaid-linear",
+        "startedAt": "2026-10-15T20:36:04.731Z",
+        "network": [
+          {
+            "url": "https://28811494-utilitypot-site.tugrul-gunr.workers.dev/api/utilities/interpret",
+            "status": 200,
+            "fromServiceWorker": false,
+            "body": {
+              "source": "jev",
+              "model": "jev-1.13.0",
+              "plan": {
+                "graph": {
+                  "nodes": [
+                    {
+                      "id": "n0",
+                      "label": "Receive request",
+                      "type": "process"
+                    },
+                    {
+                      "id": "n1",
+                      "label": "Store request",
+                      "type": "process"
+                    },
+                    {
+                      "id": "n2",
+                      "label": "Send receipt",
+                      "type": "terminal"
+                    }
+                  ],
+                  "edges": [
+                    {
+                      "from": "n0",
+                      "to": "n1",
+                      "label": ""
+                    },
+                    {
+                      "from": "n1",
+                      "to": "n2",
+                      "label": ""
+                    }
+                  ]
+                },
+                "needsReview": true
+              },
+              "needsReview": true,
+              "confidence": {
+                "type0": 0.37,
+                "next0": 1,
+                "else0": 1,
+                "type1": 1,
+                "next1": 1,
+                "else1": 1,
+                "type2": 0.4,
+                "next2": 1,
+                "else2": 1
+              }
+            }
+          }
+        ],
+        "downloads": [
+          {
+            "path": "test-results-live/2026-10-15T20-35-09-453Z/text-to-mermaid-linear-sequential.mmd",
+            "suggestedFilename": "utilitypot-flowchart.mmd",
+            "bytes": 95
+          },
+          {
+            "path": "test-results-live/2026-10-15T20-35-09-453Z/text-to-mermaid-linear.svg",
+            "suggestedFilename": "utilitypot-flowchart.svg"
+          }
+        ],
+        "status": "passed",
+        "interpretation": {
+          "http": 200,
+          "source": "jev",
+          "model": "jev-1.13.0",
+          "plan": {
+            "graph": {
+              "nodes": [
+                {
+                  "id": "n0",
+                  "label": "Receive request",
+                  "type": "process"
+                },
+                {
+                  "id": "n1",
+                  "label": "Store request",
+                  "type": "process"
+                },
+                {
+                  "id": "n2",
+                  "label": "Send receipt",
+                  "type": "terminal"
+                }
+              ],
+              "edges": [
+                {
+                  "from": "n0",
+                  "to": "n1",
+                  "label": ""
+                },
+                {
+                  "from": "n1",
+                  "to": "n2",
+                  "label": ""
+                }
+              ]
+            },
+            "needsReview": true
+          },
+          "needsReview": true,
+          "confidence": {
+            "type0": 0.37,
+            "next0": 1,
+            "else0": 1,
+            "type1": 1,
+            "next1": 1,
+            "else1": 1,
+            "type2": 0.4,
+            "next2": 1,
+            "else2": 1
+          }
+        },
+        "checks": [
+          "real Jev sequential graph verified",
+          "actual webpage SVG rendered",
+          "downloaded Mermaid edges and SVG verified"
+        ],
+        "finishedAt": "2026-10-15T20:36:18.019Z"
+      },
+      {
+        "id": "text-to-mermaid",
+        "startedAt": "2026-10-15T20:36:18.020Z",
+        "network": [
+          {
+            "url": "https://28811494-utilitypot-site.tugrul-gunr.workers.dev/api/utilities/interpret",
+            "status": 200,
+            "fromServiceWorker": false,
+            "body": {
+              "source": "jev",
+              "model": "jev-1.13.0",
+              "plan": {
+                "graph": {
+                  "nodes": [
+                    {
+                      "id": "n0",
+                      "label": "Receive order",
+                      "type": "process"
+                    },
+                    {
+                      "id": "n1",
+                      "label": "Stock available?",
+                      "type": "decision"
+                    },
+                    {
+                      "id": "n2",
+                      "label": "Ship item",
+                      "type": "terminal"
+                    },
+                    {
+                      "id": "n3",
+                      "label": "Notify backorder",
+                      "type": "terminal"
+                    }
+                  ],
+                  "edges": [
+                    {
+                      "from": "n0",
+                      "to": "n1",
+                      "label": ""
+                    },
+                    {
+                      "from": "n1",
+                      "to": "n2",
+                      "label": "yes"
+                    },
+                    {
+                      "from": "n1",
+                      "to": "n3",
+                      "label": "no"
+                    }
+                  ]
+                },
+                "needsReview": true
+              },
+              "needsReview": true,
+              "confidence": {
+                "type0": 0.52,
+                "next0": 0.85,
+                "else0": 0.84,
+                "type1": 1,
+                "next1": 0.99,
+                "else1": 1,
+                "type2": 0.27,
+                "next2": 1,
+                "else2": 0.94,
+                "type3": 0.77,
+                "next3": 1,
+                "else3": 0.75
+              }
+            }
+          }
+        ],
+        "downloads": [
+          {
+            "path": "test-results-live/2026-10-15T20-35-09-453Z/text-to-mermaid-flowchart.mmd",
+            "suggestedFilename": "utilitypot-flowchart.mmd",
+            "bytes": 137
+          },
+          {
+            "path": "test-results-live/2026-10-15T20-35-09-453Z/text-to-mermaid.svg"
+          }
+        ],
+        "status": "passed",
+        "interpretation": {
+          "http": 200,
+          "source": "jev",
+          "model": "jev-1.13.0",
+          "plan": {
+            "graph": {
+              "nodes": [
+                {
+                  "id": "n0",
+                  "label": "Receive order",
+                  "type": "process"
+                },
+                {
+                  "id": "n1",
+                  "label": "Stock available?",
+                  "type": "decision"
+                },
+                {
+                  "id": "n2",
+                  "label": "Ship item",
+                  "type": "terminal"
+                },
+                {
+                  "id": "n3",
+                  "label": "Notify backorder",
+                  "type": "terminal"
+                }
+              ],
+              "edges": [
+                {
+                  "from": "n0",
+                  "to": "n1",
+                  "label": ""
+                },
+                {
+                  "from": "n1",
+                  "to": "n2",
+                  "label": "yes"
+                },
+                {
+                  "from": "n1",
+                  "to": "n3",
+                  "label": "no"
+                }
+              ]
+            },
+            "needsReview": true
+          },
+          "needsReview": true,
+          "confidence": {
+            "type0": 0.52,
+            "next0": 0.85,
+            "else0": 0.84,
+            "type1": 1,
+            "next1": 0.99,
+            "else1": 1,
+            "type2": 0.27,
+            "next2": 1,
+            "else2": 0.94,
+            "type3": 0.77,
+            "next3": 1,
+            "else3": 0.75
+          }
+        },
+        "checks": [
+          "real Jev selected decision and both supported branches",
+          "rendered actual Mermaid SVG in webpage",
+          "Mermaid and SVG downloads validated"
+        ],
+        "finishedAt": "2026-10-15T20:36:30.826Z"
+      },
+      {
+        "id": "ask-a-webpage-pasted",
+        "startedAt": "2026-10-15T20:36:30.826Z",
+        "network": [
+          {
+            "url": "https://28811494-utilitypot-site.tugrul-gunr.workers.dev/api/utilities/interpret",
+            "status": 200,
+            "fromServiceWorker": false,
+            "body": {
+              "source": "jev",
+              "model": "jev-1.13.0",
+              "plan": {
+                "status": "answered",
+                "excerpts": [
+                  {
+                    "id": "p1",
+                    "text": "Appointments can be cancelled without a fee at least 24 hours before the scheduled time.",
+                    "start": 65,
+                    "end": 153
+                  }
+                ],
+                "needsReview": true
+              },
+              "needsReview": true,
+              "confidence": {
+                "answerability": 1,
+                "passage": 1
+              }
+            }
+          }
+        ],
+        "downloads": [
+          {
+            "path": "test-results-live/2026-10-15T20-35-09-453Z/ask-a-webpage-pasted-evidence.json",
+            "suggestedFilename": "utilitypot-evidence.json",
+            "bytes": 242
+          }
+        ],
+        "status": "passed",
+        "interpretation": {
+          "http": 200,
+          "source": "jev",
+          "model": "jev-1.13.0",
+          "plan": {
+            "status": "answered",
+            "excerpts": [
+              {
+                "id": "p1",
+                "text": "Appointments can be cancelled without a fee at least 24 hours before the scheduled time.",
+                "start": 65,
+                "end": 153
+              }
+            ],
+            "needsReview": true
+          },
+          "needsReview": true,
+          "confidence": {
+            "answerability": 1,
+            "passage": 1
+          }
+        },
+        "checks": [
+          "real Jev selected answer-bearing source evidence",
+          "24-hour cancellation condition retained",
+          "exact excerpt offsets and downloaded evidence verified"
+        ],
+        "finishedAt": "2026-10-15T20:36:43.325Z"
+      },
+      {
+        "id": "ask-a-webpage-public-url",
+        "startedAt": "2026-10-15T20:36:43.325Z",
+        "network": [
+          {
+            "url": "https://28811494-utilitypot-site.tugrul-gunr.workers.dev/api/utilities/read-page",
+            "status": 200,
+            "fromServiceWorker": false,
+            "body": {
+              "url": "https://docs.python.org/3/library/asyncio.html",
+              "text": "asyncio \u2014 Asynchronous I/O\u00b6\n\nHello World!\n\nimport asyncio\n\nasync def main():\nprint('Hello ...')\nawait asyncio.sleep(1)\nprint('... World!')\n\nasyncio.run(main())\n\nasyncio is a library to write concurrent code using\nthe async/await syntax.\n\nasyncio is used as a foundation for multiple Python asynchronous\nframeworks that provide high-performance network and web-servers,\ndatabase connection libraries, distributed task queues, etc.\n\nasyncio is often a perfect fit for IO-bound and high-level\nstructured network code.\n\nSee also\n\nA conceptual overview of asyncio\n\nExplanation of the fundamentals of asyncio.\n\nasyncio provides a set of high-level APIs to:\n\nrun Python coroutines concurrently and\nhave full control over their execution;\n\nperform network IO and IPC;\n\ncontrol subprocesses;\n\ndistribute tasks via queues;\n\nsynchronize concurrent code;\n\nFor introspection, asyncio provides APIs and tools for:\n\ninspecting the async call graph of tasks and futures;\n\ninspecting tasks in another running Python process with\ncommand-line tools;\n\nAdditionally, there are low-level APIs for\nlibrary and framework developers to:\n\ncreate and manage event loops, which\nprovide asynchronous APIs for networking,\nrunning subprocesses,\nhandling OS signals, etc;\n\nimplement efficient protocols using\ntransports;\n\nbridge callback-based libraries and code\nwith async/await syntax.\n\nAvailability: not WASI.\n\nThis module does not work or is not available on WebAssembly. See\nWebAssembly platforms for more information.\n\nasyncio REPL\n\nYou can experiment with an asyncio concurrent context in the REPL:\n\n$ python -m asyncio\nasyncio REPL ...\nUse \"await\" directly instead of \"asyncio.run()\".\nType \"help\", \"copyright\", \"credits\" or \"license\" for more information.\n>>> import asyncio\n>>> await asyncio.sleep(10, result='hello')\n'hello'\n\nThis REPL provides limited compatibility with PYTHON_BASIC_REPL.\nIt is recommended that the default REPL is used\nfor full functionality and the latest features.\n\nRaises an auditing event cpython.run_stdin with no arguments.\n\nChanged in version 3.12.5: (also 3.11.10, 3.10.15, 3.9.20, and 3.8.20)\nEmits audit events.\n\nChanged in version 3.13: Uses PyREPL if possible, in which case PYTHONSTARTUP is\nalso executed. Emits audit events.\n\nReference\n\nHigh-level APIs\n\nRunners\n\nCoroutines and tasks\n\nStreams\n\nSynchronization Primitives\n\nSubprocesses\n\nQueues\n\nExceptions\n\nIntrospection APIs\n\nCall graph introspection\n\nCommand-line introspection tools\n\nLow-level APIs\n\nEvent loop\n\nFutures\n\nTransports and Protocols\n\nPolicies\n\nPlatform Support\n\nExtending\n\nGuides and Tutorials\n\nHigh-level API Index\n\nLow-level API Index\n\nDeveloping with asyncio\n\nasyncio and free-threaded Python\n\nNote\n\nThe source code for asyncio can be found in Lib/asyncio/.",
+              "truncated": false,
+              "redirects": []
+            }
+          },
+          {
+            "url": "https://28811494-utilitypot-site.tugrul-gunr.workers.dev/api/utilities/interpret",
+            "status": 200,
+            "fromServiceWorker": false,
+            "body": {
+              "source": "jev",
+              "model": "jev-1.13.0",
+              "plan": {
+                "status": "answered",
+                "excerpts": [
+                  {
+                    "id": "p5",
+                    "text": "asyncio is a library to write concurrent code using\nthe async/await syntax.",
+                    "start": 161,
+                    "end": 236
+                  }
+                ],
+                "needsReview": true
+              },
+              "needsReview": true,
+              "confidence": {
+                "answerability": 1,
+                "passage": 0.88
+              }
+            }
+          }
+        ],
+        "downloads": [
+          {
+            "path": "test-results-live/2026-10-15T20-35-09-453Z/ask-a-webpage-public-url-public-evidence.json",
+            "suggestedFilename": "utilitypot-evidence.json",
+            "bytes": 231
+          }
+        ],
+        "status": "passed",
+        "interpretation": {
+          "http": 200,
+          "source": "jev",
+          "model": "jev-1.13.0",
+          "plan": {
+            "status": "answered",
+            "excerpts": [
+              {
+                "id": "p5",
+                "text": "asyncio is a library to write concurrent code using\nthe async/await syntax.",
+                "start": 161,
+                "end": 236
+              }
+            ],
+            "needsReview": true
+          },
+          "needsReview": true,
+          "confidence": {
+            "answerability": 1,
+            "passage": 0.88
+          }
+        },
+        "checks": [
+          "public URL read through actual webpage button",
+          "fetched source sent to real Jev",
+          "relevant source-backed asyncio evidence verified"
+        ],
+        "finishedAt": "2026-10-15T20:36:56.762Z"
+      },
+      {
+        "id": "ask-a-webpage-absent-answer",
+        "startedAt": "2026-10-15T20:36:56.763Z",
+        "network": [
+          {
+            "url": "https://28811494-utilitypot-site.tugrul-gunr.workers.dev/api/utilities/interpret",
+            "status": 200,
+            "fromServiceWorker": false,
+            "body": {
+              "source": "jev",
+              "model": "jev-1.13.0",
+              "plan": {
+                "status": "not-answered",
+                "excerpts": [],
+                "needsReview": true
+              },
+              "needsReview": true,
+              "confidence": {
+                "answerability": 1,
+                "passage": 1
+              }
+            }
+          }
+        ],
+        "downloads": [],
+        "status": "passed",
+        "interpretation": {
+          "http": 200,
+          "source": "jev",
+          "model": "jev-1.13.0",
+          "plan": {
+            "status": "not-answered",
+            "excerpts": [],
+            "needsReview": true
+          },
+          "needsReview": true,
+          "confidence": {
+            "answerability": 1,
+            "passage": 1
+          }
+        },
+        "checks": [
+          "real Jev abstained when answer is absent",
+          "no invented phone number or excerpt"
+        ],
+        "finishedAt": "2026-10-15T20:37:08.601Z"
+      },
+      {
+        "id": "date-ambiguity",
+        "startedAt": "2026-10-15T20:37:08.601Z",
+        "network": [
+          {
+            "url": "https://28811494-utilitypot-site.tugrul-gunr.workers.dev/api/utilities/interpret",
+            "status": 200,
+            "fromServiceWorker": false,
+            "body": {
+              "source": "jev",
+              "model": "jev-1.13.0",
+              "plan": {
+                "convention": "auto",
+                "needsReview": true
+              },
+              "needsReview": true,
+              "confidence": {
+                "convention": 1
+              }
+            }
+          }
+        ],
+        "downloads": [],
+        "status": "passed",
+        "interpretation": {
+          "http": 200,
+          "source": "jev",
+          "model": "jev-1.13.0",
+          "plan": {
+            "convention": "auto",
+            "needsReview": true
+          },
+          "needsReview": true,
+          "confidence": {
+            "convention": 1
+          }
+        },
+        "checks": [
+          "real Jev preserved explicit ambiguity",
+          "local result flags the unresolved date rather than guessing"
+        ],
+        "finishedAt": "2026-10-15T20:37:21.758Z"
+      }
+    ],
+    "targeted": [
+      {
+        "id": "meeting-cities-selected-calendar",
+        "status": "passed",
+        "readable": "Selected meeting time \u00b7 30 minutes\nLondon\nNov 3, 2026, 2:15 PM \u2013 Nov 3, 2026, 2:45 PM\nNew York\nNov 3, 2026, 9:15 AM \u2013 Nov 3, 2026, 9:45 AM",
+        "calendarSelectedSlot": 1
+      },
+      {
+        "id": "single-object-nested-array-recovery",
+        "status": "passed",
+        "csv": "id,name,tags\r\n001,Ada,\"[\"\"alpha\"\"]\""
+      },
+      {
+        "id": "empty-date-recovery",
+        "status": "passed",
+        "message": "Enter at least one date; blank rows are preserved within a non-empty list."
+      },
+      {
+        "id": "entities-original-repeated",
+        "status": "passed",
+        "model": "jev-1.13.0",
+        "entities": [
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 0,
+            "end": 10
+          },
+          {
+            "type": "Person",
+            "text": "Noah Chen",
+            "start": 30,
+            "end": 39
+          },
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 64,
+            "end": 74
+          },
+          {
+            "type": "Organization",
+            "text": "Orion Labs",
+            "start": 18,
+            "end": 28
+          },
+          {
+            "type": "Organization",
+            "text": "Cedar Systems",
+            "start": 49,
+            "end": 62
+          }
+        ]
+      },
+      {
+        "id": "entities-fresh-names",
+        "status": "passed",
+        "model": "jev-1.13.0",
+        "entities": [
+          {
+            "type": "Person",
+            "text": "Ada Lovelace",
+            "start": 0,
+            "end": 12
+          },
+          {
+            "type": "Person",
+            "text": "Alan Turing",
+            "start": 17,
+            "end": 28
+          },
+          {
+            "type": "Organization",
+            "text": "Mosaic Labs",
+            "start": 32,
+            "end": 43
+          }
+        ]
+      },
+      {
+        "id": "entities-none",
+        "status": "passed",
+        "model": "jev-1.13.0",
+        "entities": []
+      },
+      {
+        "id": "real-mobile-answer-visible",
+        "status": "passed",
+        "model": "jev-1.13.0",
+        "view": {
+          "top": 295.6875,
+          "bottom": 620.34375,
+          "viewport": 844,
+          "focused": true
+        }
+      }
+    ]
+  },
+  "publicReader": {
+    "uniqueScenarios": 17,
+    "attemptCount": 18,
+    "finalCounts": {
+      "passed": 15,
+      "expected-access-limitation": 2
+    },
+    "initialFinalCandidateRun": [
+      {
+        "id": "read-modepot",
+        "status": "passed",
+        "inputUrl": "https://modepot.io/",
+        "finalUrl": "https://modepot.io/",
+        "characters": 6620,
+        "truncated": false,
+        "sample": "OPEN SOURCE / BUILT FOR THE NEXT ERA\n\nmodepot\n\nWe simplify, modernize, and performance-optimize the software people build on.\n\nModePot is an open-source workshop for modernizing software foundations\u2014and inventing what comes next. AI-native and agent-friendly where they add real value.\n\nExplore the work \n\nCreated by Tugrul Guner\n\nGitHub LinkedIn X \n"
+      },
+      {
+        "id": "read-dexpot",
+        "status": "passed",
+        "inputUrl": "https://dexpot.modepot.io/",
+        "finalUrl": "https://dexpot.modepot.io/",
+        "characters": 4237,
+        "truncated": false,
+        "sample": "Python APIs for GIL and Free-Threaded CPython\n\nSYNCHRONOUS PYTHON APIS\n\nSynchronous APIs. GIL or free-threaded.\n\nKeep plain synchronous handlers while Dexpot adapts bounded admission and scheduling to standard GIL or free-threaded CPython.\n\nCreated by Tugrul Guner\n\nGET STARTED\n\nInstall Dexpot\n\npip install \"dexpot[cli]\"Quick start guide \n\nDexpot is "
+      },
+      {
+        "id": "read-intpot",
+        "status": "passed",
+        "inputUrl": "https://intpot.modepot.io/",
+        "finalUrl": "https://intpot.modepot.io/",
+        "characters": 2568,
+        "truncated": false,
+        "sample": "Python CLI, API, and MCP Interface Framework\n\nTYPED PYTHON INTERFACES\n\nOne typed definition. Three interfaces.\n\nDefine typed tools once for CLI, HTTP, or MCP. Convert apps between Typer, FastAPI, and FastMCP.\n\nCreated by Tugrul Guner\n\nGET STARTED\n\nInstall Intpot\n\npip install \"intpot[all]\"Quick start guide \n\nEXPLORE THE MECHANISM\n\nOne definition, th"
+      },
+      {
+        "id": "read-summonpot",
+        "status": "passed",
+        "inputUrl": "https://summonpot.modepot.io/",
+        "finalUrl": "https://summonpot.modepot.io/",
+        "characters": 7498,
+        "truncated": false,
+        "sample": "Typed APIs with Bounded Agent-Owned Decisions\n\nCONTRACT-FIRST PYTHON APIS\n\nDefine the endpoint. Summonpot owns the orchestration.\n\nDeclare the request, fixed goal, exact application-owned operations, and response. Summonpot orchestrates those operations; the agent chooses only where the contract leaves a bounded choice.\n\nCreated by Tugrul Guner\n\nGE"
+      },
+      {
+        "id": "read-lifepot",
+        "status": "passed",
+        "inputUrl": "https://lifepot.modepot.io/learn",
+        "finalUrl": "https://lifepot.modepot.io/learn",
+        "characters": 393,
+        "truncated": false,
+        "sample": "\u2190 LifePot overview\n\nPLAY \u00b7 UNDERSTAND \u00b7 BUILD\n\nLifePot documentation\n\nStart with a first world, investigate its history, then explore the contracts and internals. Jev proposes bounded choices; application validation and deterministic code own what executes. Replay proves reproducibility, not biological validity.\n\nPlay the game\n\nStart\n\nPractical gui"
+      },
+      {
+        "id": "read-refpot",
+        "status": "passed",
+        "inputUrl": "https://refpot.modepot.io/",
+        "finalUrl": "https://refpot.modepot.io/",
+        "characters": 5390,
+        "truncated": false,
+        "sample": "MODEPOT \u00b7 EXPERIMENTAL ALPHA\n\nA custom embedded database for Python.\n\nRefPot is an experimental alpha: a native C++ redo-and-checkpoint engine with a small Python CRUD and explicit-transaction interface. Check PyPI for the latest published version; qualification remains limited.\n\nCreated by Tugrul Guner\n\nINSTALL FROM PYPI\n\nTry the experimental alph"
+      },
+      {
+        "id": "read-utilitypot",
+        "status": "passed",
+        "inputUrl": "https://utilitypot.modepot.io/",
+        "finalUrl": "https://utilitypot.modepot.io/",
+        "characters": 2337,
+        "truncated": false,
+        "sample": "OPEN-SOURCE UTILITIES / PART OF MODEPOT\n\nConvert data.\n\nFind a time.\n\nConvert CSV and JSON, clean up dates, and find a time across cities. Extract names, sketch a flowchart or find a passage in your text.\n\nNo signup. Local tools stay in your browser. AI tools send context only when you ask.\n\nBrowse tools \u2192How it worksGitHub\n\nCreated by Tugrul Guner"
+      },
+      {
+        "id": "read-iana",
+        "status": "passed",
+        "inputUrl": "https://www.iana.org/help/example-domains",
+        "finalUrl": "https://www.iana.org/help/example-domains",
+        "characters": 781,
+        "truncated": false,
+        "sample": "Instructions and Guides\n\nExample Domains\n\nA number of domains such as example.com and example.org are maintained\nfor documentation purposes. These domains may be used as illustrative\nexamples in documents without prior coordination with us. They are not\navailable for registration or transfer.\n\nWe provide a web service on the example domain hosts to"
+      },
+      {
+        "id": "read-python",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"AI rate limit reached. Wait a minute or use manual controls.\"}\n\n429 !== 200\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:419\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:28"
+      },
+      {
+        "id": "ui-modepot-bare",
+        "status": "passed",
+        "inputUrl": "modepot.io",
+        "finalUrl": "https://modepot.io/",
+        "sourceCharacters": 6620,
+        "truncated": false,
+        "model": "jev-1.13.0",
+        "answer": {
+          "status": "answered",
+          "excerpts": [
+            {
+              "id": "p74",
+              "text": "We are building an open-source family of fast, approachable frameworks, tools, engines, and games, with AI-native and agent-friendly approaches where they add value. Dexpot, Intpot, Summonpot, LifePot, RefPot, and UtilityPot are only the beginning. ModePot was created by Tugrul Guner.",
+              "start": 6335,
+              "end": 6620
+            }
+          ],
+          "needsReview": true
+        },
+        "checks": [
+          "real page read",
+          "real Jev",
+          "exact source snapshot offsets",
+          "rendered answer"
+        ]
+      },
+      {
+        "id": "ui-modepot-http",
+        "status": "passed",
+        "inputUrl": "http://modepot.io/",
+        "finalUrl": "http://modepot.io/",
+        "sourceCharacters": 6620,
+        "truncated": false,
+        "model": "jev-1.13.0",
+        "answer": {
+          "status": "answered",
+          "excerpts": [
+            {
+              "id": "p73",
+              "text": "ModePot exists to remove accumulated complexity. We simplify how frameworks are used, modernize how they are built, and optimize the paths that matter without passing the machinery on to developers.",
+              "start": 6135,
+              "end": 6333
+            }
+          ],
+          "needsReview": true
+        },
+        "checks": [
+          "real page read",
+          "real Jev",
+          "exact source snapshot offsets",
+          "rendered answer"
+        ]
+      },
+      {
+        "id": "ui-iana",
+        "status": "passed",
+        "inputUrl": "https://www.iana.org/help/example-domains",
+        "finalUrl": "https://www.iana.org/help/example-domains",
+        "sourceCharacters": 781,
+        "truncated": false,
+        "model": "jev-1.13.0",
+        "answer": {
+          "status": "answered",
+          "excerpts": [
+            {
+              "id": "p2",
+              "text": "A number of domains such as example.com and example.org are maintained\nfor documentation purposes. These domains may be used as illustrative\nexamples in documents without prior coordination with us. They are not\navailable for registration or transfer.",
+              "start": 42,
+              "end": 293
+            }
+          ],
+          "needsReview": true
+        },
+        "checks": [
+          "real page read",
+          "real Jev",
+          "exact source snapshot offsets",
+          "rendered answer"
+        ]
+      },
+      {
+        "id": "ui-python",
+        "status": "expected-access-limitation",
+        "inputUrl": "https://www.python.org/",
+        "limitation": "upstream_forbidden",
+        "error": "This site denied the page reader access. Paste page text instead.",
+        "checks": [
+          "actual publisher denial visible",
+          "no fabricated answer",
+          "paste fallback offered"
+        ]
+      },
+      {
+        "id": "reject-local",
+        "status": "passed",
+        "http": 400,
+        "code": "unsafe_url",
+        "error": "Use a public hostname with HTTP or HTTPS and its default port. IP addresses, local names and credentials are not supported. Paste page text instead.",
+        "checks": [
+          "rejected with specific explanation",
+          "no interpretation submitted"
+        ]
+      },
+      {
+        "id": "reject-credentials",
+        "status": "passed",
+        "http": 400,
+        "code": "unsafe_url",
+        "error": "Use a public hostname with HTTP or HTTPS and its default port. IP addresses, local names and credentials are not supported. Paste page text instead.",
+        "checks": [
+          "rejected with specific explanation",
+          "no interpretation submitted"
+        ]
+      },
+      {
+        "id": "reject-media",
+        "status": "passed",
+        "http": 400,
+        "code": "unsupported_content",
+        "error": "Only HTML or plain text pages are supported, not PDF or binary files. Paste page text instead.",
+        "checks": [
+          "rejected with specific explanation",
+          "no interpretation submitted"
+        ]
+      },
+      {
+        "id": "ui-pasted-fallback",
+        "status": "passed",
+        "model": "jev-1.13.0",
+        "answer": {
+          "status": "answered",
+          "excerpts": [
+            {
+              "id": "p0",
+              "text": "This utility returns exact source passages.",
+              "start": 0,
+              "end": 43
+            }
+          ],
+          "needsReview": true
+        },
+        "checks": [
+          "pasted source still works",
+          "no URL fetch",
+          "exact source evidence"
+        ]
+      }
+    ],
+    "pacedFollowup": [
+      {
+        "id": "read-python",
+        "status": "expected-access-limitation",
+        "inputUrl": "https://www.python.org/",
+        "limitation": "upstream_forbidden",
+        "error": "This site denied the page reader access. Paste page text instead.",
+        "checks": [
+          "publisher access denial explained, not host-allowlist rejection"
+        ]
+      }
+    ],
+    "finalOutcomes": [
+      {
+        "id": "read-modepot",
+        "status": "passed",
+        "inputUrl": "https://modepot.io/",
+        "finalUrl": "https://modepot.io/",
+        "characters": 6620,
+        "truncated": false,
+        "sample": "OPEN SOURCE / BUILT FOR THE NEXT ERA\n\nmodepot\n\nWe simplify, modernize, and performance-optimize the software people build on.\n\nModePot is an open-source workshop for modernizing software foundations\u2014and inventing what comes next. AI-native and agent-friendly where they add real value.\n\nExplore the work \n\nCreated by Tugrul Guner\n\nGitHub LinkedIn X \n"
+      },
+      {
+        "id": "read-dexpot",
+        "status": "passed",
+        "inputUrl": "https://dexpot.modepot.io/",
+        "finalUrl": "https://dexpot.modepot.io/",
+        "characters": 4237,
+        "truncated": false,
+        "sample": "Python APIs for GIL and Free-Threaded CPython\n\nSYNCHRONOUS PYTHON APIS\n\nSynchronous APIs. GIL or free-threaded.\n\nKeep plain synchronous handlers while Dexpot adapts bounded admission and scheduling to standard GIL or free-threaded CPython.\n\nCreated by Tugrul Guner\n\nGET STARTED\n\nInstall Dexpot\n\npip install \"dexpot[cli]\"Quick start guide \n\nDexpot is "
+      },
+      {
+        "id": "read-intpot",
+        "status": "passed",
+        "inputUrl": "https://intpot.modepot.io/",
+        "finalUrl": "https://intpot.modepot.io/",
+        "characters": 2568,
+        "truncated": false,
+        "sample": "Python CLI, API, and MCP Interface Framework\n\nTYPED PYTHON INTERFACES\n\nOne typed definition. Three interfaces.\n\nDefine typed tools once for CLI, HTTP, or MCP. Convert apps between Typer, FastAPI, and FastMCP.\n\nCreated by Tugrul Guner\n\nGET STARTED\n\nInstall Intpot\n\npip install \"intpot[all]\"Quick start guide \n\nEXPLORE THE MECHANISM\n\nOne definition, th"
+      },
+      {
+        "id": "read-summonpot",
+        "status": "passed",
+        "inputUrl": "https://summonpot.modepot.io/",
+        "finalUrl": "https://summonpot.modepot.io/",
+        "characters": 7498,
+        "truncated": false,
+        "sample": "Typed APIs with Bounded Agent-Owned Decisions\n\nCONTRACT-FIRST PYTHON APIS\n\nDefine the endpoint. Summonpot owns the orchestration.\n\nDeclare the request, fixed goal, exact application-owned operations, and response. Summonpot orchestrates those operations; the agent chooses only where the contract leaves a bounded choice.\n\nCreated by Tugrul Guner\n\nGE"
+      },
+      {
+        "id": "read-lifepot",
+        "status": "passed",
+        "inputUrl": "https://lifepot.modepot.io/learn",
+        "finalUrl": "https://lifepot.modepot.io/learn",
+        "characters": 393,
+        "truncated": false,
+        "sample": "\u2190 LifePot overview\n\nPLAY \u00b7 UNDERSTAND \u00b7 BUILD\n\nLifePot documentation\n\nStart with a first world, investigate its history, then explore the contracts and internals. Jev proposes bounded choices; application validation and deterministic code own what executes. Replay proves reproducibility, not biological validity.\n\nPlay the game\n\nStart\n\nPractical gui"
+      },
+      {
+        "id": "read-refpot",
+        "status": "passed",
+        "inputUrl": "https://refpot.modepot.io/",
+        "finalUrl": "https://refpot.modepot.io/",
+        "characters": 5390,
+        "truncated": false,
+        "sample": "MODEPOT \u00b7 EXPERIMENTAL ALPHA\n\nA custom embedded database for Python.\n\nRefPot is an experimental alpha: a native C++ redo-and-checkpoint engine with a small Python CRUD and explicit-transaction interface. Check PyPI for the latest published version; qualification remains limited.\n\nCreated by Tugrul Guner\n\nINSTALL FROM PYPI\n\nTry the experimental alph"
+      },
+      {
+        "id": "read-utilitypot",
+        "status": "passed",
+        "inputUrl": "https://utilitypot.modepot.io/",
+        "finalUrl": "https://utilitypot.modepot.io/",
+        "characters": 2337,
+        "truncated": false,
+        "sample": "OPEN-SOURCE UTILITIES / PART OF MODEPOT\n\nConvert data.\n\nFind a time.\n\nConvert CSV and JSON, clean up dates, and find a time across cities. Extract names, sketch a flowchart or find a passage in your text.\n\nNo signup. Local tools stay in your browser. AI tools send context only when you ask.\n\nBrowse tools \u2192How it worksGitHub\n\nCreated by Tugrul Guner"
+      },
+      {
+        "id": "read-iana",
+        "status": "passed",
+        "inputUrl": "https://www.iana.org/help/example-domains",
+        "finalUrl": "https://www.iana.org/help/example-domains",
+        "characters": 781,
+        "truncated": false,
+        "sample": "Instructions and Guides\n\nExample Domains\n\nA number of domains such as example.com and example.org are maintained\nfor documentation purposes. These domains may be used as illustrative\nexamples in documents without prior coordination with us. They are not\navailable for registration or transfer.\n\nWe provide a web service on the example domain hosts to"
+      },
+      {
+        "id": "read-python",
+        "status": "expected-access-limitation",
+        "inputUrl": "https://www.python.org/",
+        "limitation": "upstream_forbidden",
+        "error": "This site denied the page reader access. Paste page text instead.",
+        "checks": [
+          "publisher access denial explained, not host-allowlist rejection"
+        ]
+      },
+      {
+        "id": "ui-modepot-bare",
+        "status": "passed",
+        "inputUrl": "modepot.io",
+        "finalUrl": "https://modepot.io/",
+        "sourceCharacters": 6620,
+        "truncated": false,
+        "model": "jev-1.13.0",
+        "answer": {
+          "status": "answered",
+          "excerpts": [
+            {
+              "id": "p74",
+              "text": "We are building an open-source family of fast, approachable frameworks, tools, engines, and games, with AI-native and agent-friendly approaches where they add value. Dexpot, Intpot, Summonpot, LifePot, RefPot, and UtilityPot are only the beginning. ModePot was created by Tugrul Guner.",
+              "start": 6335,
+              "end": 6620
+            }
+          ],
+          "needsReview": true
+        },
+        "checks": [
+          "real page read",
+          "real Jev",
+          "exact source snapshot offsets",
+          "rendered answer"
+        ]
+      },
+      {
+        "id": "ui-modepot-http",
+        "status": "passed",
+        "inputUrl": "http://modepot.io/",
+        "finalUrl": "http://modepot.io/",
+        "sourceCharacters": 6620,
+        "truncated": false,
+        "model": "jev-1.13.0",
+        "answer": {
+          "status": "answered",
+          "excerpts": [
+            {
+              "id": "p73",
+              "text": "ModePot exists to remove accumulated complexity. We simplify how frameworks are used, modernize how they are built, and optimize the paths that matter without passing the machinery on to developers.",
+              "start": 6135,
+              "end": 6333
+            }
+          ],
+          "needsReview": true
+        },
+        "checks": [
+          "real page read",
+          "real Jev",
+          "exact source snapshot offsets",
+          "rendered answer"
+        ]
+      },
+      {
+        "id": "ui-iana",
+        "status": "passed",
+        "inputUrl": "https://www.iana.org/help/example-domains",
+        "finalUrl": "https://www.iana.org/help/example-domains",
+        "sourceCharacters": 781,
+        "truncated": false,
+        "model": "jev-1.13.0",
+        "answer": {
+          "status": "answered",
+          "excerpts": [
+            {
+              "id": "p2",
+              "text": "A number of domains such as example.com and example.org are maintained\nfor documentation purposes. These domains may be used as illustrative\nexamples in documents without prior coordination with us. They are not\navailable for registration or transfer.",
+              "start": 42,
+              "end": 293
+            }
+          ],
+          "needsReview": true
+        },
+        "checks": [
+          "real page read",
+          "real Jev",
+          "exact source snapshot offsets",
+          "rendered answer"
+        ]
+      },
+      {
+        "id": "ui-python",
+        "status": "expected-access-limitation",
+        "inputUrl": "https://www.python.org/",
+        "limitation": "upstream_forbidden",
+        "error": "This site denied the page reader access. Paste page text instead.",
+        "checks": [
+          "actual publisher denial visible",
+          "no fabricated answer",
+          "paste fallback offered"
+        ]
+      },
+      {
+        "id": "reject-local",
+        "status": "passed",
+        "http": 400,
+        "code": "unsafe_url",
+        "error": "Use a public hostname with HTTP or HTTPS and its default port. IP addresses, local names and credentials are not supported. Paste page text instead.",
+        "checks": [
+          "rejected with specific explanation",
+          "no interpretation submitted"
+        ]
+      },
+      {
+        "id": "reject-credentials",
+        "status": "passed",
+        "http": 400,
+        "code": "unsafe_url",
+        "error": "Use a public hostname with HTTP or HTTPS and its default port. IP addresses, local names and credentials are not supported. Paste page text instead.",
+        "checks": [
+          "rejected with specific explanation",
+          "no interpretation submitted"
+        ]
+      },
+      {
+        "id": "reject-media",
+        "status": "passed",
+        "http": 400,
+        "code": "unsupported_content",
+        "error": "Only HTML or plain text pages are supported, not PDF or binary files. Paste page text instead.",
+        "checks": [
+          "rejected with specific explanation",
+          "no interpretation submitted"
+        ]
+      },
+      {
+        "id": "ui-pasted-fallback",
+        "status": "passed",
+        "model": "jev-1.13.0",
+        "answer": {
+          "status": "answered",
+          "excerpts": [
+            {
+              "id": "p0",
+              "text": "This utility returns exact source passages.",
+              "start": 0,
+              "end": 43
+            }
+          ],
+          "needsReview": true
+        },
+        "checks": [
+          "pasted source still works",
+          "no URL fetch",
+          "exact source evidence"
+        ]
+      }
+    ],
+    "initialBrokenDnsQualification": [
+      {
+        "id": "read-modepot",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"Public DNS could not be verified. Try again or paste page text.\",\"code\":\"dns_unavailable\"}\n\n502 !== 200\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:216\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:28"
+      },
+      {
+        "id": "read-dexpot",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"Public DNS could not be verified. Try again or paste page text.\",\"code\":\"dns_unavailable\"}\n\n502 !== 200\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:216\n    at runNextTicks (node:internal/process/task_queues:65:5)\n    at process.processImmediate (node:internal/timers:541:9)\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:28"
+      },
+      {
+        "id": "read-intpot",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"Public DNS could not be verified. Try again or paste page text.\",\"code\":\"dns_unavailable\"}\n\n502 !== 200\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:216\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:28"
+      },
+      {
+        "id": "read-summonpot",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"Public DNS could not be verified. Try again or paste page text.\",\"code\":\"dns_unavailable\"}\n\n502 !== 200\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:216\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:28"
+      },
+      {
+        "id": "read-lifepot",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"Public DNS could not be verified. Try again or paste page text.\",\"code\":\"dns_unavailable\"}\n\n502 !== 200\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:216\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:28"
+      },
+      {
+        "id": "read-refpot",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"Public DNS could not be verified. Try again or paste page text.\",\"code\":\"dns_unavailable\"}\n\n502 !== 200\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:216\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:28"
+      },
+      {
+        "id": "read-utilitypot",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"Public DNS could not be verified. Try again or paste page text.\",\"code\":\"dns_unavailable\"}\n\n502 !== 200\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:216\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:28"
+      },
+      {
+        "id": "read-iana",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"Public DNS could not be verified. Try again or paste page text.\",\"code\":\"dns_unavailable\"}\n\n502 !== 200\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:216\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:28"
+      },
+      {
+        "id": "read-python",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"Public DNS could not be verified. Try again or paste page text.\",\"code\":\"dns_unavailable\"}\n\n502 !== 200\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:216\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:13:28"
+      },
+      {
+        "id": "ui-modepot-bare",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"Public DNS could not be verified. Try again or paste page text.\",\"code\":\"dns_unavailable\"}\n\n502 !== 200\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:11:523\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async uiQuestion (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:11:44)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:14:2"
+      },
+      {
+        "id": "ui-modepot-http",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"Public DNS could not be verified. Try again or paste page text.\",\"code\":\"dns_unavailable\"}\n\n502 !== 200\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:11:523\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async uiQuestion (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:11:44)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:15:2"
+      },
+      {
+        "id": "ui-iana",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"Public DNS could not be verified. Try again or paste page text.\",\"code\":\"dns_unavailable\"}\n\n502 !== 200\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:11:523\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async uiQuestion (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:11:44)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:16:2"
+      },
+      {
+        "id": "ui-python",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"Public DNS could not be verified. Try again or paste page text.\",\"code\":\"dns_unavailable\"}\n\n502 !== 200\n\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:11:523\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async uiQuestion (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:11:44)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:17:2"
+      },
+      {
+        "id": "reject-local",
+        "status": "passed",
+        "http": 400,
+        "code": "unsafe_url",
+        "error": "Use a public hostname with HTTP or HTTPS and its default port. IP addresses, local names and credentials are not supported. Paste page text instead.",
+        "checks": [
+          "rejected with specific explanation",
+          "no interpretation submitted"
+        ]
+      },
+      {
+        "id": "reject-credentials",
+        "status": "passed",
+        "http": 400,
+        "code": "unsafe_url",
+        "error": "Use a public hostname with HTTP or HTTPS and its default port. IP addresses, local names and credentials are not supported. Paste page text instead.",
+        "checks": [
+          "rejected with specific explanation",
+          "no interpretation submitted"
+        ]
+      },
+      {
+        "id": "reject-media",
+        "status": "failed",
+        "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"Public DNS could not be verified. Try again or paste page text.\",\"code\":\"dns_unavailable\"}\n    at file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:18:404\n    at async record (file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:8:102)\n    at async file:///Users/tugrulguner/.hermes/cache/scratch/public-reader-product-qa.mjs:18:149"
+      },
+      {
+        "id": "ui-pasted-fallback",
+        "status": "passed",
+        "model": "jev-1.13.0",
+        "answer": {
+          "status": "answered",
+          "excerpts": [
+            {
+              "id": "p0",
+              "text": "This utility returns exact source passages.",
+              "start": 0,
+              "end": 43
+            }
+          ],
+          "needsReview": true
+        },
+        "checks": [
+          "pasted source still works",
+          "no URL fetch",
+          "exact source evidence"
+        ]
+      }
+    ]
+  },
+  "limits": [
+    "Version URL acceptance, not production deployment.",
+    "Python.org publisher denial is not a successful source read; pasted fallback is available.",
+    "The initial final-candidate Python API attempt hit the existing app rate limit; retained, followed by a paced publisher-denial result.",
+    "Control-plane readback and static/API readiness failures before actions are not model calls or fabricated successes."
+  ],
+  "productionUnchanged": true,
+  "previewAccessRestoredDisabled": true
+}

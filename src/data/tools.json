@@ -29,14 +29,14 @@
   },
   {
     "slug": "entity-extractor",
-    "title": "Custom entity extraction",
+    "title": "Find people and companies",
     "description": "Highlight people, companies or your own categories in short text.",
     "tool": "entities",
     "processing": "Uses AI"
   },
   {
     "slug": "text-to-mermaid",
-    "title": "Text to Mermaid flowchart",
+    "title": "Turn steps into a flowchart",
     "description": "Turn up to eight listed steps into a flowchart you can edit and export.",
     "tool": "diagram",
     "processing": "Local · AI optional"

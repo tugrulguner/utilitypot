@@ -37,11 +37,17 @@ import UtilityLayout from "../layouts/UtilityLayout.astro";
     </p>
     <h2>Public-page reading</h2>
     <p>
-      Read public page sends the URL to our server, which fetches only approved
-      HTTPS documentation hosts and checks every redirect. It forwards no
-      browser cookies, executes no scripts, accepts only HTML/plain text, and
-      caps redirects, bytes and elapsed time. Unsupported sites can be used by
-      pasting text. This is not an authenticated browser or paywall bypass.
+      Reading a public page sends its URL to our server. Cloudflare resolves the
+      public hostname and fetches HTTP/HTTPS pages through its public Internet
+      network boundary; URL and DNS checks repeat on every redirect. The
+      destination receives the requested URL, and Cloudflare DNS receives the
+      hostname. No browser cookies, authorization or provider secrets are
+      forwarded. The reader executes no scripts or embedded requests, accepts
+      only UTF-8 HTML/plain text, and caps reading at 250,000 bytes, eight
+      seconds and three redirects. Only 10,000 characters / 100 paragraphs are
+      searched, with truncation disclosed. Blocked, authenticated,
+      JavaScript-only or unsupported pages can be used by pasting text. This is
+      not a paywall bypass.
     </p>
     <h2>Secrets and spending</h2>
     <p>

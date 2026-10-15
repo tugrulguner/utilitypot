@@ -16,10 +16,13 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
       This tool returns exact supporting paragraphs, not a generated essay. Jev
       checks answer presence separately from selecting a passage. Unsupported
       questions return not answered; partial evidence is labeled. Pasted text
-      can come from any source. URL fetching is deliberately restricted to the
-      documentation hosts listed above, revalidates every redirect and does not
-      execute scripts. Paywalls, logins, JS-only content and sources outside
-      that allowlist require pasted text.
+      can come from any source. Public HTTP/HTTPS hostname URLs are supported,
+      including bare hostnames (HTTPS by default). Every redirect repeats URL
+      and DNS safety checks. The reader executes no scripts or embedded
+      requests. Logins, paywalls, access blocks, JavaScript-only content, PDFs
+      and large pages may require pasted text. UTF-8 HTML/plain text is limited
+      to 250,000 bytes, eight seconds and three redirects; only the first 10,000
+      characters and 100 paragraphs are searched, with truncation disclosed.
     </p>
     <h2>Privacy and uncertainty</h2>
     <p>

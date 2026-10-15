@@ -39,7 +39,7 @@ test("editing a URL during its fixture read cancels the whole answer pipeline", 
 
 test("JSON to CSV downloads actual nested values locally", async ({ page }) => {
   await page.goto("/tools/json-to-csv/");
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.getByRole("button", { name: "Convert" }).click();
   await expect(page.locator("#extra-output")).toContainText("customer.name");
   const promise = page.waitForEvent("download");
@@ -53,7 +53,7 @@ test("entity review validates exact offsets and highlights real source text", as
   page,
 }) => {
   await page.goto("/tools/entity-extractor/");
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.locator("#entity-review > summary").click();
   await page.getByRole("button", { name: "Update preview" }).click();
   await expect(page.locator("#extra-visual mark")).toHaveText([
@@ -73,7 +73,7 @@ test("reviewed Mermaid flowchart renders SVG and downloads valid Mermaid source"
   page,
 }) => {
   await page.goto("/tools/text-to-mermaid/");
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.locator("#graph-panel > summary").click();
   await page.getByRole("button", { name: "Update diagram" }).click();
   await expect(page.locator("#extra-status")).toContainText("sandboxed");
@@ -111,7 +111,7 @@ test("webpage questions show selected exact evidence and no-answer, using explic
     });
   });
   await page.goto("/tools/ask-a-webpage/");
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.getByRole("button", { name: "Find answer", exact: true }).click();
   await expect(page.locator("#extra-output")).toContainText(
     "does not store submitted text",
@@ -166,4 +166,40 @@ test("all seven utility pages are readable at desktop and mobile widths without 
     }
   }
   expect(errors).toEqual([]);
+});
+
+test("bare ModePot URL submits a page read; fetch failure is distinct and never submits AI", async ({
+  page,
+}) => {
+  let inference = 0,
+    reads = 0;
+  await page.route("**/api/utilities/read-page", async (route) => {
+    reads++;
+    expect(route.request().postDataJSON()).toEqual({ url: "modepot.io/about" });
+    await route.fulfill({
+      status: 502,
+      json: {
+        code: "fetch_unavailable",
+        error:
+          "The public page could not be fetched. Try again or paste page text.",
+      },
+    });
+  });
+  await page.route("**/api/utilities/interpret", async (route) => {
+    inference++;
+    await route.fulfill({ status: 503, json: { error: "Must not be called" } });
+  });
+  await page.goto("/tools/ask-a-webpage/");
+  await page.getByRole("tab", { name: "Public URL", exact: true }).click();
+  await expect(page.getByLabel("Public page URL")).toBeVisible();
+  await expect(page.locator("#url-panel")).toContainText("Public HTTP/HTTPS");
+  await page.locator("#page-url").fill("modepot.io/about");
+  await page.locator("#instructions").fill("What is ModePot?");
+  await page.locator("#extra-ask").click();
+  await expect(page.locator("#extra-status")).toContainText(
+    "could not be fetched",
+  );
+  expect(reads).toBe(1);
+  expect(inference).toBe(0);
+  await expect(page.locator("#source-inspection")).toBeHidden();
 });

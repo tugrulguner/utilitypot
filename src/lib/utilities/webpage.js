@@ -1,13 +1,14 @@
 import { Parser } from "htmlparser2";
-export const PUBLIC_HOSTS = [
-  "docs.python.org",
-  "developer.mozilla.org",
-  "docs.typesafe.ai",
-  "mermaid.js.org",
-  "developers.cloudflare.com",
-  "www.rfc-editor.org",
-  "en.wikipedia.org",
-];
+import {
+  PageReadError,
+  canonicalPageUrl,
+  validatePublicDns,
+  abortable,
+  boundedBytes,
+  boundedFetch,
+  cancelBody,
+} from "./page-url-safety.js";
+export { PageReadError } from "./page-url-safety.js";
 export function extractPageText(html) {
   if (typeof html !== "string" || html.length > 250000)
     throw new Error("Page is too large.");
@@ -102,86 +103,163 @@ export function extractPageText(html) {
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
-function safeUrl(value) {
-  const u = new URL(value);
-  if (
-    u.protocol !== "https:" ||
-    u.username ||
-    u.password ||
-    u.port ||
-    !PUBLIC_HOSTS.includes(u.hostname)
-  )
-    throw new Error(
-      "Use an approved public HTTPS documentation host, or paste page text.",
-    );
-  u.hash = "";
-  return u;
-}
-export async function readPublicPage(value, fetcher = fetch) {
-  let url = safeUrl(value);
-  const signal = AbortSignal.timeout(8000);
-  for (let hop = 0; hop < 4; hop++) {
-    const r = await fetcher(url.href, {
-      redirect: "manual",
-      signal,
-      headers: {
-        Accept: "text/html,text/plain",
-        "User-Agent": "UtilityPot/0.1 public page reader",
-      },
-    });
-    if ([301, 302, 303, 307, 308].includes(r.status)) {
-      await r.body?.cancel();
-      const location = r.headers.get("location");
-      if (!location) throw new Error("Redirect has no destination.");
-      url = safeUrl(new URL(location, url).href);
-      continue;
-    }
-    if (!r.ok) {
-      await r.body?.cancel();
-      throw new Error("Public page could not be read.");
-    }
-    const type = r.headers.get("content-type") || "";
-    if (!/^text\/(html|plain)\b/i.test(type)) {
-      await r.body?.cancel();
-      throw new Error("Only HTML or plain text pages are supported.");
-    }
-    const reader = r.body?.getReader();
-    if (!reader) throw new Error("Page is empty.");
-    const chunks = [];
-    let size = 0;
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        size += value.byteLength;
-        if (size > 250000) {
-          await reader.cancel();
-          throw new Error("Page exceeds 250 KB.");
-        }
-        chunks.push(value);
+// Options are server-owned test seams; request JSON only ever supplies value.
+export async function readPublicPage(value, fetcher = fetch, options = {}) {
+  const controller = new AbortController();
+  const signal = controller.signal;
+  const timer = setTimeout(
+    () => controller.abort(new PageReadError("timeout")),
+    Math.min(options.timeoutMs ?? 8000, 8000),
+  );
+  const cancelled = () => controller.abort(new PageReadError("cancelled"));
+  options.signal?.addEventListener("abort", cancelled, { once: true });
+  if (options.signal?.aborted) cancelled();
+  const resolve =
+    options.resolve ??
+    ((host, signal) => validatePublicDns(host, fetcher, signal));
+  try {
+    let url = canonicalPageUrl(value);
+    const visited = new Set();
+    const redirects = [];
+    for (let hop = 0; hop < 4; hop++) {
+      signal.throwIfAborted();
+      if (visited.has(url.href)) throw new PageReadError("redirect_loop");
+      visited.add(url.href);
+      try {
+        await abortable(resolve(url.hostname, signal), signal);
+      } catch (error) {
+        if (signal.aborted) throw signal.reason;
+        throw error instanceof PageReadError
+          ? error
+          : new PageReadError("dns_unavailable");
       }
-    } finally {
-      reader.releaseLock();
+      const r = await boundedFetch(fetcher, url.href, {
+        method: "GET",
+        redirect: "manual",
+        credentials: "omit",
+        signal,
+        headers: {
+          Accept: "text/html,text/plain",
+          "User-Agent": "UtilityPot/0.1 public page reader",
+        },
+      });
+      if ([301, 302, 303, 307, 308].includes(r.status)) {
+        cancelBody(r.body);
+        if (hop === 3) throw new PageReadError("redirect_limit");
+        const location = r.headers.get("location");
+        let next;
+        try {
+          if (!location || /[\\\x00-\x20\x7f]/.test(location)) throw Error();
+          next = canonicalPageUrl(new URL(location, url).href);
+          if (url.protocol === "https:" && next.protocol !== "https:")
+            throw Error();
+        } catch {
+          throw new PageReadError("unsafe_redirect");
+        }
+        redirects.push({ from: url.href, to: next.href });
+        url = next;
+        continue;
+      }
+      if (!r.ok) {
+        cancelBody(r.body);
+        throw new PageReadError(
+          {
+            401: "upstream_auth",
+            403: "upstream_forbidden",
+            429: "upstream_rate_limited",
+          }[r.status] || "fetch_unavailable",
+        );
+      }
+      const type = r.headers.get("content-type") || "";
+      const mime = type.split(";")[0].trim().toLowerCase();
+      if (!["text/html", "text/plain"].includes(mime)) {
+        cancelBody(r.body);
+        throw new PageReadError("unsupported_content");
+      }
+      const charsetParameters = type
+        .split(";")
+        .slice(1)
+        .map((part) => part.trim())
+        .filter((part) => /^charset\b/i.test(part));
+      if (
+        charsetParameters.length > 1 ||
+        charsetParameters.some(
+          (part) => !/^charset\s*=\s*(?:utf-?8|"utf-?8")$/i.test(part),
+        )
+      ) {
+        cancelBody(r.body);
+        throw new PageReadError("unsupported_encoding");
+      }
+      const bytes = await boundedBytes(r, 250000, signal, "page_too_large");
+      let raw;
+      try {
+        raw = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+      } catch {
+        throw new PageReadError("unsupported_encoding");
+      }
+      // Parse actual elements: quoted '>' and inert comments are not tag boundaries.
+      if (mime === "text/html") {
+        const inert = new Set(["template", "script", "style", "noscript"]);
+        const stack = [];
+        let ignored = 0,
+          conflict = false;
+        const check = (encoding) => {
+          if (!/^utf-?8$/i.test(encoding.trim())) conflict = true;
+        };
+        const parser = new Parser(
+          {
+            onopentag(name, attrs) {
+              const skip = inert.has(name);
+              stack.push(skip);
+              if (skip) ignored++;
+              if (ignored || name !== "meta") return;
+              if (Object.hasOwn(attrs, "charset")) check(attrs.charset);
+              if (
+                attrs["http-equiv"]?.trim().toLowerCase() === "content-type"
+              ) {
+                const content = attrs.content || "";
+                const declaration = content.match(
+                  /\bcharset\s*=\s*(?:"([^"]*)"|'([^']*)'|([^;\s]*))/i,
+                );
+                if (declaration)
+                  check(declaration[1] ?? declaration[2] ?? declaration[3]);
+              }
+            },
+            onclosetag() {
+              if (stack.pop()) ignored--;
+            },
+          },
+          { decodeEntities: true },
+        );
+        parser.write(raw);
+        parser.end();
+        if (conflict) throw new PageReadError("unsupported_encoding");
+      }
+      let text;
+      try {
+        text = mime === "text/html" ? extractPageText(raw) : raw.trim();
+      } catch {
+        throw new PageReadError("unsupported_content");
+      }
+      if (!text || /\x00/.test(text)) throw new PageReadError("empty_page");
+      const paragraphs = text.slice(0, 10000).split(/\n\s*\n/);
+      return {
+        url: url.href,
+        text: paragraphs.slice(0, 100).join("\n\n"),
+        truncated: text.length > 10000 || paragraphs.length > 100,
+        redirects,
+      };
     }
-    const bytes = new Uint8Array(size);
-    let offset = 0;
-    for (const c of chunks) {
-      bytes.set(c, offset);
-      offset += c.byteLength;
-    }
-    const raw = new TextDecoder().decode(bytes);
-    const text = type.startsWith("text/html")
-      ? extractPageText(raw)
-      : raw.trim();
-    const paragraphs = text.slice(0, 10000).split(/\n\s*\n/);
-    const bounded = paragraphs.slice(0, 100).join("\n\n");
-    return {
-      url: url.href,
-      text: bounded,
-      truncated: text.length > 10000 || paragraphs.length > 100,
-    };
+    throw new PageReadError("redirect_limit");
+  } catch (error) {
+    if (signal.aborted) throw signal.reason;
+    throw error instanceof PageReadError
+      ? error
+      : new PageReadError("fetch_unavailable");
+  } finally {
+    clearTimeout(timer);
+    options.signal?.removeEventListener("abort", cancelled);
   }
-  throw new Error("Too many redirects.");
 }
 export function createQaInterpretation(input) {
   if (
