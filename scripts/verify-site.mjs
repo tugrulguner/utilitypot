@@ -44,7 +44,7 @@ for (const file of generated) {
   const html = await fs.readFile(file, "utf8");
   for (const token of [
     "/utilitypot-mark-v1.svg",
-    "https://utilitypot.modepot.io/utilitypot-social-v1.png",
+    "https://utilitypot.modepot.io/utilitypot-social-v1.png?v=wordmark-2",
     "Color theme",
     "family-menu",
     "https://modepot.io/",

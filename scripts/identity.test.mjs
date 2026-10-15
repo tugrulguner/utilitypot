@@ -1,10 +1,23 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+test("UtilityPot wordmark keeps the name white and pot orange in every SVG", async () => {
+  for (const file of [
+    "docs/assets/utilitypot-lockup-v1.svg",
+    "public/utilitypot-social-v1.svg",
+  ]) {
+    const svg = await readFile(file, "utf8");
+    assert.match(
+      svg,
+      /<text[^>]*fill="#F4F0E7"[^>]*>utility<tspan fill="#F2B84B">pot<\/tspan><\/text>/,
+    );
+  }
+});
+
 test("UtilityPot identity uses canonical family geometry and a consistent README resource row", async () => {
   const readme = await readFile("README.md", "utf8");
   const firstImage = readme.match(/<img\b[^>]*>/)?.[0] ?? "";
-  assert.match(firstImage, /src="utilitypot.png"/);
+  assert.match(firstImage, /src="utilitypot\.png\?v=wordmark-2"/);
   assert.match(firstImage, /width="600"/);
   const resources =
     readme.match(/<p align="center">Part of[\s\S]*?<\/p>/)?.[0] ?? "";
