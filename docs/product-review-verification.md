@@ -2,7 +2,11 @@
 
 ## Delivery state
 
-Source changes are implemented and regression-tested. **Live qualification remains blocked** by one intermittent repeated-name extraction HTTP 503 in the latest browser run. Keep this change in draft; do not describe green CI or later successful diagnostic requests as resolving that failure. No production traffic was moved.
+The latest UX fixes are committed and pushed. Current source `5f6544a87620aef75ed0a61d32787c4d1d28a104`, uploaded as non-production Worker `d01269c1-3dd1-45da-bdb2-fc7b96a5dc4b`, passed all 18 final live scenarios: 17 automatically and one with an explicitly recorded CSV mapping correction. Current local gates passed 68 unit/security, 6 release/contract and 77 browser tests, Worker execution, extracted-release execution, check/build/format and dependency audit.
+
+The earlier intermittent repeated-name extraction HTTP 503 remains unexplained and is preserved below; do not describe later successful requests as establishing its cause or elimination. PR #9 remains draft pending disposition of that reliability risk. No production traffic was moved. Preview access was restored to disabled and production deployment metadata was unchanged.
+
+See [fresh-user UX testing](./user-experience-testing.md) and [final machine-readable evidence](./product-review-final-evidence.json). The older failed-candidate evidence below is historical, not the latest run.
 
 ## Implemented changes
 
@@ -31,9 +35,9 @@ A subsequent QA-only fix gives the new real-provider acceptance runner an explic
 
 The initial review's entity-recovery finding was addressed and independently confirmed. The next review identified the frontend/Worker timeout mismatch, which was reproduced with an actual 22-second delayed fixture and fixed. Follow-up confirmed that fix and identified the acceptance runner's separate 30-second default response wait; it now explicitly waits 45 seconds. No additional blocking security finding was reported. These code-review results do not clear the live failure below.
 
-## Real browser and provider evidence
+## Earlier browser/provider evidence and retained failure
 
-The final application candidate was uploaded without deploying production:
+The earlier application candidate was uploaded without deploying production:
 
 - Runtime source: `2cbbea2876a2ec72841f87d4d834781cc893f903`.
 - Worker version: `3e275fbf-0a9d-4439-bae2-a0a968d45d7d`.

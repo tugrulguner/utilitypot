@@ -1,0 +1,442 @@
+[
+  {
+    "id": "CSV-D1",
+    "tool": "CSV",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Quoted customer and leading-zero orders grouped and downloaded",
+    "status": "pass",
+    "notes": {
+      "suggested": "modepot-data.json",
+      "content": "[\n  {\n    \"Customer\": \"Acme, Ltd\",\n    \"rows\": [\n      {\n        \"Order\": \"00017\",\n        \"Item\": \"Bolt, zinc\",\n        \"Qty\": \"2\"\n      },\n      {\n        \"Order\": \"00018\",\n        \"Item\": \"Washer \\\"wide\\\"\",\n        \"Qty\": \"3\"\n      }\n    ]\n  },\n  {\n    \"Customer\": \"Nova\",\n    \"rows\": [\n      {\n        \"Order\": \"00019\",\n        \"Item\": \"Nut\",\n        \"Qty\": \"1\"\n      }\n    ]\n  }\n]"
+    }
+  },
+  {
+    "id": "DATE-D1",
+    "tool": "Dates",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Partial ambiguous invalid and embedded empty line",
+    "status": "pass",
+    "notes": "Original first input retained"
+  },
+  {
+    "id": "DATE-D2",
+    "tool": "Dates",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Explicit day-first correction and download",
+    "status": "pass",
+    "notes": {
+      "suggested": "modepot-dates.csv",
+      "content": "row,original,normalized,status,note\r\n1,2027,2027,partial,Year only; no month/day invented.\r\n2,2027-02,2027-02,partial,Month precision preserved; no day invented.\r\n3,04/05/2027,2027-05-04,converted,Calendar-valid under the selected interpretation.\r\n4,2027-02-30,,invalid,Unsupported or invalid date. No value was inferred.\r\n5,,,empty,Blank preserved.\r\n6,2027-12-09,2027-12-09,converted,Calendar-valid under the selected interpretation."
+    }
+  },
+  {
+    "id": "DATE-D3",
+    "tool": "Dates",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Entirely empty input after previous result",
+    "status": "pass",
+    "notes": "Check recovery"
+  },
+  {
+    "id": "MEET-D1",
+    "tool": "Meeting",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "London/New York unnamed participants 09–17 January 19 2027",
+    "status": "pass",
+    "notes": "First submitted input, no names"
+  },
+  {
+    "id": "MEET-D2",
+    "tool": "Meeting",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Select fifth local slot and calendar export",
+    "status": "pass",
+    "notes": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//ModePot//Meeting time finder//EN\r\nBEGIN:VEVENT\r\nUID:7770bce6-c1ad-4db1-8809-f421df9785d1@modepot.io\r\nDTSTAMP:20261015T152526Z\r\nDTSTART:20270119T150000Z\r\nDTEND:20270119T153000Z\r\nSUMMARY:Meeting\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+  },
+  {
+    "id": "MEET-D3",
+    "tool": "Meeting",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Unknown city after successful result",
+    "status": "pass",
+    "notes": "Atlantis"
+  },
+  {
+    "id": "JSON-D1",
+    "tool": "JSON",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Single object with nested object",
+    "status": "pass",
+    "notes": "{\"order\":\"00042\",\"customer\":{\"name\":\"Rae\",\"city\":\"Leeds\"},\"total\":12.5}"
+  },
+  {
+    "id": "JSON-D2",
+    "tool": "JSON",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Explicit single-object row choice",
+    "status": "pass",
+    "notes": "Selected exposed record choice"
+  },
+  {
+    "id": "JSON-D3",
+    "tool": "JSON",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Replace single object with multiple arrays before record selection",
+    "status": "fail",
+    "notes": "No nested arrays found in these records remains despite no selection and orders.tags arrays"
+  },
+  {
+    "id": "JSON-D4",
+    "tool": "JSON",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Reject nested arrays explicitly",
+    "status": "pass",
+    "notes": "Default Stop policy"
+  },
+  {
+    "id": "JSON-D5",
+    "tool": "JSON",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Keep arrays as JSON and download",
+    "status": "pass",
+    "notes": "id,buyer.name,tags\r\n0007,Lee,\"[\"\"rush\"\",\"\"gift\"\"]\"\r\n0008,Jo,[]"
+  },
+  {
+    "id": "JSON-D6",
+    "tool": "JSON",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Explicit omission policy",
+    "status": "pass",
+    "notes": "tags removed by explicit choice"
+  },
+  {
+    "id": "DIAG-D1",
+    "tool": "Diagram",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Private decision with Yes/No branches edited via normal controls",
+    "status": "pass",
+    "notes": "No JSON plan import, no AI"
+  },
+  {
+    "id": "DIAG-D2",
+    "tool": "Diagram",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "SVG and Mermaid downloads",
+    "status": "pass",
+    "notes": "flowchart TD\nn0[\"Receive refund request\"]\nn1{\"Eligible?\"}\nn2[\"Approve refund\"]\nn3[\"Decline refund\"]\nn0 --> n1\nn1 -->|yes| n2\nn1 -->|no| n3"
+  },
+  {
+    "id": "ENTITY-D1",
+    "tool": "Entity",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Select second repeated Mira manually",
+    "status": "pass",
+    "notes": "Expected offsets 15..19"
+  },
+  {
+    "id": "ENTITY-D2",
+    "tool": "Entity",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Correct mention to second Owen and download",
+    "status": "pass",
+    "notes": "[\n  {\n    \"type\": \"Person\",\n    \"text\": \"Owen\",\n    \"start\": 28,\n    \"end\": 32\n  }\n]"
+  },
+  {
+    "id": "QA-D1",
+    "tool": "QA",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "task": "Pasted text/question and URL mode disclosure without submission",
+    "status": "limited",
+    "notes": "No Find answer click; no source fetched"
+  },
+  {
+    "id": "CSV-M0",
+    "tool": "CSV",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "First mobile paste immediately after navigation",
+    "status": "fail",
+    "notes": "Group-by Customer option did not appear; preserve input state before retry"
+  },
+  {
+    "id": "CSV-M1",
+    "tool": "CSV",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "Explicit retry with identical input after first failure; mobile download",
+    "status": "pass",
+    "notes": {
+      "suggested": "modepot-data.json",
+      "content": "[\n  {\n    \"Customer\": \"Acme, Ltd\",\n    \"rows\": [\n      {\n        \"Order\": \"00017\",\n        \"Item\": \"Bolt, zinc\",\n        \"Qty\": \"2\"\n      },\n      {\n        \"Order\": \"00018\",\n        \"Item\": \"Washer \\\"wide\\\"\",\n        \"Qty\": \"3\"\n      }\n    ]\n  },\n  {\n    \"Customer\": \"Nova\",\n    \"rows\": [\n      {\n        \"Order\": \"00019\",\n        \"Item\": \"Nut\",\n        \"Qty\": \"1\"\n      }\n    ]\n  }\n]"
+    }
+  },
+  {
+    "id": "DATE-M1",
+    "tool": "Dates",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "Mobile partial/ambiguous/invalid/empty result",
+    "status": "pass",
+    "notes": "Six rows visible"
+  },
+  {
+    "id": "MEET-M1",
+    "tool": "Meeting",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "Mobile unnamed city pair, select fifth local slot",
+    "status": "pass",
+    "notes": "London 15:00 / New York 10:00"
+  },
+  {
+    "id": "JSON-M1",
+    "tool": "JSON",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "Mobile multi-array Stop policy recovery",
+    "status": "pass",
+    "notes": "Nested tags detected"
+  },
+  {
+    "id": "JSON-M2",
+    "tool": "JSON",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "Mobile keep arrays result and download",
+    "status": "pass",
+    "notes": "id,buyer.name,tags\r\n0007,Lee,\"[\"\"rush\"\",\"\"gift\"\"]\"\r\n0008,Jo,[]"
+  },
+  {
+    "id": "DIAG-M1",
+    "tool": "Diagram",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "Mobile private branch editor and rendered result",
+    "status": "pass",
+    "notes": "Yes/No refund paths"
+  },
+  {
+    "id": "ENTITY-M1",
+    "tool": "Entity",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "Mobile third Mira corrected to second Owen, download",
+    "status": "pass",
+    "notes": "[\n  {\n    \"type\": \"Person\",\n    \"text\": \"Owen\",\n    \"start\": 28,\n    \"end\": 32\n  }\n]"
+  },
+  {
+    "id": "QA-M1",
+    "tool": "QA",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "Mobile source modes, disclosure and readability without AI",
+    "status": "limited",
+    "notes": "Results/download deliberately untested"
+  },
+  {
+    "id": "NAV-M1",
+    "tool": "Navigation",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "Mobile menu tap and Escape",
+    "status": "pass",
+    "notes": {
+      "expandedAfterEscape": "false"
+    }
+  },
+  {
+    "id": "KEY-M1",
+    "tool": "Navigation",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "Skip link keyboard activation and category label targets",
+    "status": "pass",
+    "notes": {
+      "focused": "Skip to tool",
+      "target": {
+        "hash": "#main",
+        "active": "BODY"
+      },
+      "labels": [
+        {
+          "text": "People",
+          "rect": {
+            "x": 42.796875,
+            "y": 421.96875,
+            "width": 100.765625,
+            "height": 44,
+            "top": 421.96875,
+            "right": 143.5625,
+            "bottom": 465.96875,
+            "left": 42.796875
+          }
+        },
+        {
+          "text": "Companies",
+          "rect": {
+            "x": 149.15625,
+            "y": 421.96875,
+            "width": 130.53125,
+            "height": 44,
+            "top": 421.96875,
+            "right": 279.6875,
+            "bottom": 465.96875,
+            "left": 149.15625
+          }
+        },
+        {
+          "text": "Custom",
+          "rect": {
+            "x": 42.796875,
+            "y": 471.5625,
+            "width": 106.609375,
+            "height": 44,
+            "top": 471.5625,
+            "right": 149.40625,
+            "bottom": 515.5625,
+            "left": 42.796875
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "JSON-M3",
+    "tool": "JSON",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "Reproduce stale no-nested-arrays helper after replacing source",
+    "status": "fail",
+    "notes": "Same stale helper on mobile; record choice resets but helper does not"
+  },
+  {
+    "id": "CSV-M2",
+    "tool": "CSV",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "Three immediate-navigation identical-paste follow-up trials",
+    "status": "pass",
+    "notes": [
+      {
+        "trial": 1,
+        "ready": true,
+        "input": "Customer,Order,Item,Qty\n\"Acme, Ltd\",00017,\"Bolt, zinc\",2\n\"Acme, Ltd\",00018,\"Washer \"\"wide\"\"\",3\nNova,00019,Nut,1",
+        "options": "Customer\nOrder\nItem\nQty"
+      },
+      {
+        "trial": 2,
+        "ready": true,
+        "input": "Customer,Order,Item,Qty\n\"Acme, Ltd\",00017,\"Bolt, zinc\",2\n\"Acme, Ltd\",00018,\"Washer \"\"wide\"\"\",3\nNova,00019,Nut,1",
+        "options": "Customer\nOrder\nItem\nQty"
+      },
+      {
+        "trial": 3,
+        "ready": true,
+        "input": "Customer,Order,Item,Qty\n\"Acme, Ltd\",00017,\"Bolt, zinc\",2\n\"Acme, Ltd\",00018,\"Washer \"\"wide\"\"\",3\nNova,00019,Nut,1",
+        "options": "Customer\nOrder\nItem\nQty"
+      }
+    ]
+  },
+  {
+    "id": "DATE-M2",
+    "tool": "Dates",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "Mobile result readability",
+    "status": "fail",
+    "notes": "Headers and statuses split mid-word: Origi/nal, Norm/alized, Statu/s, partia/l, inval/id. No horizontal overflow, but difficult row scanning."
+  },
+  {
+    "id": "MEET-M2",
+    "tool": "Meeting",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "task": "Mobile collapsed slot selector readability",
+    "status": "fail",
+    "notes": "Second city/time is clipped in collapsed native select. Full selected times remain readable in cards below."
+  }
+]
