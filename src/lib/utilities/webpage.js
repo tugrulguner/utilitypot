@@ -23,9 +23,42 @@ export function extractPageText(html) {
     "template",
     "iframe",
   ]);
+  const blockTags = new Set([
+    "p",
+    "div",
+    "main",
+    "article",
+    "li",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "section",
+    "dt",
+    "dd",
+    "table",
+    "thead",
+    "tbody",
+    "tfoot",
+    "tr",
+    "blockquote",
+    "figure",
+    "figcaption",
+    "pre",
+    "br",
+  ]);
   let ignored = 0;
   const stack = [],
-    parts = [];
+    parts = [],
+    primaryParts = [];
+  let primaryDepth = 0,
+    primaryFound = false;
+  const append = (text) => {
+    parts.push(text);
+    if (primaryDepth) primaryParts.push(text);
+  };
   const parser = new Parser(
     {
       onopentag(name, attrs) {
@@ -38,35 +71,31 @@ export function extractPageText(html) {
         if (hidden) ignored++;
         if (
           !ignored &&
-          [
-            "p",
-            "div",
-            "main",
-            "article",
-            "li",
-            "h1",
-            "h2",
-            "h3",
-            "h4",
-            "pre",
-            "br",
-          ].includes(name)
-        )
-          parts.push("\n\n");
+          !primaryFound &&
+          (name === "main" || attrs.role === "main")
+        ) {
+          primaryFound = true;
+          primaryDepth = stack.length;
+        }
+        if (!ignored && blockTags.has(name)) append("\n\n");
       },
       ontext(t) {
-        if (!ignored) parts.push(t);
+        if (!ignored) append(t);
       },
-      onclosetag() {
+      onclosetag(name) {
+        const closesPrimary = primaryDepth === stack.length;
         if (stack.pop()) ignored--;
-        parts.push("\n");
+        // Inline markup does not create a new source paragraph.
+        if (!ignored && blockTags.has(name)) append("\n\n");
+        else if (!ignored && (name === "td" || name === "th")) append("\t");
+        if (closesPrimary) primaryDepth = 0;
       },
     },
     { decodeEntities: true },
   );
   parser.write(html);
   parser.end();
-  return parts
+  return (primaryParts.some((part) => part.trim()) ? primaryParts : parts)
     .join("")
     .replace(/[ \t]+/g, " ")
     .replace(/\n[ \t]+/g, "\n")
@@ -144,10 +173,12 @@ export async function readPublicPage(value, fetcher = fetch) {
     const text = type.startsWith("text/html")
       ? extractPageText(raw)
       : raw.trim();
+    const paragraphs = text.slice(0, 10000).split(/\n\s*\n/);
+    const bounded = paragraphs.slice(0, 100).join("\n\n");
     return {
       url: url.href,
-      text: text.slice(0, 10000),
-      truncated: text.length > 10000,
+      text: bounded,
+      truncated: text.length > 10000 || paragraphs.length > 100,
     };
   }
   throw new Error("Too many redirects.");

@@ -184,7 +184,7 @@ if (root) {
       $("page-url").value = data.url;
       status(
         data.truncated
-          ? "Page read, truncated to 10,000 characters. Inspect it before asking Jev."
+          ? "Page read, truncated to the character or paragraph limit. Inspect it before asking Jev."
           : "Page read. Review the extracted text before asking Jev.",
       );
     } catch (e) {
