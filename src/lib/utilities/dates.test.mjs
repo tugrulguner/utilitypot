@@ -33,3 +33,10 @@ test("unambiguous day-first and month-first values work in auto, partial year 00
     "2024-02-29",
   );
 });
+test("wholly empty dates are rejected while blank lines in data remain rows", () => {
+  assert.throws(() => normalizeDates("  \n\r\n"), /Enter at least one date/);
+  assert.deepEqual(
+    normalizeDates("2026-01-02\n\n2026-01-03").map((x) => x.status),
+    ["converted", "empty", "converted"],
+  );
+});

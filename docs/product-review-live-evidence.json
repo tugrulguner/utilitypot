@@ -1,0 +1,456 @@
+{
+  "runtimeSourceCommit": "2cbbea2876a2ec72841f87d4d834781cc893f903",
+  "candidateVersion": "3e275fbf-0a9d-4439-bae2-a0a968d45d7d",
+  "productionDeployed": false,
+  "baseline": [
+    {
+      "id": "csv-to-nested-json",
+      "status": "passed-with-manual-correction",
+      "manualCorrections": [
+        {
+          "path": "name",
+          "from": "",
+          "to": "CustomerName",
+          "reason": "Real user review of an unresolved Jev mapping"
+        }
+      ],
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "fix-excel-dates",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "meeting-time-finder",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "json-to-csv",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "entity-extractor",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "text-to-mermaid-linear",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "text-to-mermaid",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "ask-a-webpage-pasted",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "ask-a-webpage-public-url",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "ask-a-webpage-absent-answer",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "date-ambiguity",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    }
+  ],
+  "targeted": [
+    {
+      "id": "meeting-cities-selected-calendar",
+      "status": "passed"
+    },
+    {
+      "id": "single-object-nested-array-recovery",
+      "status": "passed"
+    },
+    {
+      "id": "empty-date-recovery",
+      "status": "passed"
+    },
+    {
+      "id": "entities-original-repeated",
+      "status": "failed",
+      "error": "AssertionError [ERR_ASSERTION]: {\"error\":\"AI interpretation could not be verified. Use manual controls or try later.\"}"
+    },
+    {
+      "id": "entities-fresh-names",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "entities": [
+        {
+          "type": "Person",
+          "text": "Ada Lovelace",
+          "start": 0,
+          "end": 12
+        },
+        {
+          "type": "Person",
+          "text": "Alan Turing",
+          "start": 17,
+          "end": 28
+        },
+        {
+          "type": "Organization",
+          "text": "Mosaic Labs",
+          "start": 32,
+          "end": 43
+        }
+      ]
+    },
+    {
+      "id": "entities-none",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "entities": []
+    },
+    {
+      "id": "real-mobile-answer-visible",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "view": {
+        "top": 296.09375,
+        "bottom": 620.75,
+        "viewport": 844,
+        "focused": true
+      }
+    }
+  ],
+  "diagnostic": {
+    "version": "5674b012-3fe9-4592-983c-cc2686ce9100",
+    "input": {
+      "text": "Mina Patel joined Orion Labs. Noah Chen works at Cedar Systems. Mina Patel will meet Noah Chen.",
+      "definitions": "Person: a named human\nOrganization: a named company or employer"
+    },
+    "attempts": [
+      {
+        "status": 200,
+        "latencyMs": 269,
+        "providerStages": 2,
+        "model": "jev-1.13.0",
+        "entities": [
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 0,
+            "end": 10
+          },
+          {
+            "type": "Person",
+            "text": "Noah Chen",
+            "start": 30,
+            "end": 39
+          },
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 64,
+            "end": 74
+          },
+          {
+            "type": "Organization",
+            "text": "Orion Labs",
+            "start": 18,
+            "end": 28
+          },
+          {
+            "type": "Organization",
+            "text": "Cedar Systems",
+            "start": 49,
+            "end": 62
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "latencyMs": 213,
+        "providerStages": 2,
+        "model": "jev-1.13.0",
+        "entities": [
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 0,
+            "end": 10
+          },
+          {
+            "type": "Person",
+            "text": "Noah Chen",
+            "start": 30,
+            "end": 39
+          },
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 64,
+            "end": 74
+          },
+          {
+            "type": "Organization",
+            "text": "Orion Labs",
+            "start": 18,
+            "end": 28
+          },
+          {
+            "type": "Organization",
+            "text": "Cedar Systems",
+            "start": 49,
+            "end": 62
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "latencyMs": 181,
+        "providerStages": 2,
+        "model": "jev-1.13.0",
+        "entities": [
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 0,
+            "end": 10
+          },
+          {
+            "type": "Person",
+            "text": "Noah Chen",
+            "start": 30,
+            "end": 39
+          },
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 64,
+            "end": 74
+          },
+          {
+            "type": "Organization",
+            "text": "Orion Labs",
+            "start": 18,
+            "end": 28
+          },
+          {
+            "type": "Organization",
+            "text": "Cedar Systems",
+            "start": 49,
+            "end": 62
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "latencyMs": 204,
+        "providerStages": 2,
+        "model": "jev-1.13.0",
+        "entities": [
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 0,
+            "end": 10
+          },
+          {
+            "type": "Person",
+            "text": "Noah Chen",
+            "start": 30,
+            "end": 39
+          },
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 64,
+            "end": 74
+          },
+          {
+            "type": "Organization",
+            "text": "Orion Labs",
+            "start": 18,
+            "end": 28
+          },
+          {
+            "type": "Organization",
+            "text": "Cedar Systems",
+            "start": 49,
+            "end": 62
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "latencyMs": 172,
+        "providerStages": 2,
+        "model": "jev-1.13.0",
+        "entities": [
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 0,
+            "end": 10
+          },
+          {
+            "type": "Person",
+            "text": "Noah Chen",
+            "start": 30,
+            "end": 39
+          },
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 64,
+            "end": 74
+          },
+          {
+            "type": "Organization",
+            "text": "Orion Labs",
+            "start": 18,
+            "end": 28
+          },
+          {
+            "type": "Organization",
+            "text": "Cedar Systems",
+            "start": 49,
+            "end": 62
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "latencyMs": 299,
+        "providerStages": 2,
+        "model": "jev-1.13.0",
+        "entities": [
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 0,
+            "end": 10
+          },
+          {
+            "type": "Person",
+            "text": "Noah Chen",
+            "start": 30,
+            "end": 39
+          },
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 64,
+            "end": 74
+          },
+          {
+            "type": "Organization",
+            "text": "Orion Labs",
+            "start": 18,
+            "end": 28
+          },
+          {
+            "type": "Organization",
+            "text": "Cedar Systems",
+            "start": 49,
+            "end": 62
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "latencyMs": 202,
+        "providerStages": 2,
+        "model": "jev-1.13.0",
+        "entities": [
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 0,
+            "end": 10
+          },
+          {
+            "type": "Person",
+            "text": "Noah Chen",
+            "start": 30,
+            "end": 39
+          },
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 64,
+            "end": 74
+          },
+          {
+            "type": "Organization",
+            "text": "Orion Labs",
+            "start": 18,
+            "end": 28
+          },
+          {
+            "type": "Organization",
+            "text": "Cedar Systems",
+            "start": 49,
+            "end": 62
+          }
+        ]
+      },
+      {
+        "status": 200,
+        "latencyMs": 433,
+        "providerStages": 2,
+        "model": "jev-1.13.0",
+        "entities": [
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 0,
+            "end": 10
+          },
+          {
+            "type": "Person",
+            "text": "Noah Chen",
+            "start": 30,
+            "end": 39
+          },
+          {
+            "type": "Person",
+            "text": "Mina Patel",
+            "start": 64,
+            "end": 74
+          },
+          {
+            "type": "Organization",
+            "text": "Orion Labs",
+            "start": 18,
+            "end": 28
+          },
+          {
+            "type": "Organization",
+            "text": "Cedar Systems",
+            "start": 49,
+            "end": 62
+          }
+        ]
+      }
+    ]
+  },
+  "qualification": "BLOCKED: one latest browser entity action returned 503; subsequent diagnostic passes do not establish its cause or resolution."
+}

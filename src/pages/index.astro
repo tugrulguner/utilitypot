@@ -5,7 +5,7 @@ import tools from "../data/tools.json";
 
 <UtilityLayout
   title="Free data, text and planning tools"
-  description="UtilityPot combines Jev interpretation with reviewed, deterministic utilities for CSV, JSON, dates, meetings, entities, diagrams and webpage evidence."
+  description="Convert CSV and JSON, clean up dates, find meeting times and work with short text. Local tools, optional AI help and results you can inspect."
   slug=""
   overview
 >
@@ -13,14 +13,17 @@ import tools from "../data/tools.json";
     <section class="hero-copy">
       <p class="coordinate">OPEN-SOURCE UTILITIES / PART OF MODEPOT</p>
       <h1>
-        Useful tools.
+        Convert data.
         <br />
-        Inspectable results.
+        Find a time.
       </h1>
       <p class="utility-intro">
-        Map messy data, plan across time zones, extract entities or sketch a
-        flowchart. Jev interprets what you mean; you review the proposal; code
-        performs the exact work.
+        Convert CSV and JSON, clean up dates, and find a time across cities.
+        Extract names, sketch a flowchart or find a passage in your text.
+      </p>
+      <p class="notice">
+        No signup. Local tools stay in your browser. AI tools send context only
+        when you ask.
       </p>
       <div class="hero-actions">
         <a class="primary" href="#tools">
@@ -49,9 +52,10 @@ import tools from "../data/tools.json";
     <p class="coordinate">CHOOSE A TASK</p>
     <h2>Seven tools. No signup.</h2>
     <div class="tool-cards">
-      {tools.map(({ slug, title, description }) => (
+      {tools.map(({ slug, title, description, processing }) => (
         <article class="panel">
           <h3>{title}</h3>
+          <p class="coordinate tool-processing">{processing}</p>
           <p class="notice">{description}</p>
           <a
             class="tool-link"
@@ -66,32 +70,32 @@ import tools from "../data/tools.json";
   </section>
   <section id="how-it-works" class="prose">
     <p class="coordinate">HOW THE TOOLS WORK</p>
-    <h2>Interpret. Review. Run.</h2>
+    <h2>Add your input. Preview the result.</h2>
     <p>
-      Jev selects bounded interpretations and source evidence. You review
-      mappings, time windows, entities or graph structure. Deterministic code
-      then transforms data, computes times, checks exact source spans or renders
-      the diagram.
+      Choose a task, paste your data or upload a supported file, and use the
+      main action. Check the result, adjust anything unclear, then copy or
+      download it.
     </p>
     <ol class="mechanism-steps">
       <li>
-        <strong>Interpret meaning.</strong> Send limited context only after
-        explicit consent.
+        <strong>Add your input.</strong> Each tool explains the formats and
+        limits it supports.
       </li>
       <li>
-        <strong>Review the proposal.</strong> Inspect the selected settings and
-        uncertainty before using them.
+        <strong>Check the preview.</strong> See what changed and correct unclear
+        choices.
       </li>
       <li>
-        <strong>Run exact operations.</strong> Preview and download the result;
-        no arbitrary generated code is executed.
+        <strong>Copy or download.</strong> Take the result into your
+        spreadsheet, calendar or document.
       </li>
     </ol>
     <p>
-      Ordinary conversion, date cleanup, scheduling and manual diagram rendering
-      run locally without an AI call. AI success is not a correctness guarantee;
-      entity extraction is bounded, Mermaid output is limited to reviewed
-      flowcharts, and webpage answers are source excerpts rather than generated
+      Conversion, date cleanup, scheduling and manual diagrams work locally.
+      Optional AI can help interpret your input. Extracting entities and finding
+      source passages use Jev by TypeSafe; their action buttons explain what is
+      sent. Review AI results: extraction is limited to short text, diagrams to
+      eight steps, and webpage answers quote the source rather than generate
       essays.
     </p>
     <p>

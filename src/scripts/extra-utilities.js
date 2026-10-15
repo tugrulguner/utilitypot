@@ -71,6 +71,16 @@ if (root) {
     if (e.target.id === "source-text" && tool === "jsonCsv") {
       $("row-path").replaceChildren();
       $("array-options").hidden = true;
+      if (e.target.value.trim()) {
+        try {
+          paths();
+          status(
+            "Choose the records to convert. Review any nested-array paths before converting.",
+          );
+        } catch {
+          /* Incomplete JSON is reported when the user converts. */
+        }
+      }
     }
     if (
       tool === "qa" &&
@@ -345,6 +355,10 @@ if (root) {
     if ($("diagram-mode").value === "jev") return askJev();
     try {
       clear();
+      if (!$("source-text").value.trim())
+        throw new Error(
+          "Add at least one step in the Steps field before creating a diagram.",
+        );
       $("review-plan").value = JSON.stringify(
         sequentialGraph($("source-text").value),
       );
@@ -372,6 +386,12 @@ if (root) {
       (text.length > 50000 ? "\n… download contains the full result." : "");
     $("extra-visual").replaceChildren();
     $("extra-results").hidden = false;
+    const results = $("extra-results");
+    const rect = results.getBoundingClientRect();
+    if (rect.top < 0 || rect.bottom > window.innerHeight) {
+      results.focus({ preventScroll: true });
+      results.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
   }
   function download() {
     if (!output) return;
@@ -385,25 +405,82 @@ if (root) {
   function jsonData() {
     const s = $("source-text").value;
     if (s.length > 2000000) throw new Error("JSON exceeds 2 MB.");
-    return JSON.parse(s);
+    if (!s.trim()) throw new Error("Enter a JSON document before converting.");
+    try {
+      return JSON.parse(s);
+    } catch {
+      throw new Error(
+        "Check the JSON document: add matching braces and brackets, commas, and double quotes.",
+      );
+    }
   }
   function paths(selected) {
-    const choices = recordChoices(jsonData());
+    const data = jsonData();
+    const choices = recordChoices(data);
+    if (
+      !choices.length &&
+      data &&
+      typeof data === "object" &&
+      !Array.isArray(data)
+    )
+      choices.push({
+        path: "$object",
+        count: 1,
+        label: "Single object — 1 row",
+      });
     $("array-options").hidden = false;
     $("row-path").replaceChildren(
       new Option("Choose records", ""),
       ...choices.map(
         (v) =>
           new Option(
-            `${v.path === "$" ? "Top-level records" : v.path} — ${v.count} rows`,
+            v.label ||
+              `${v.path === "$" ? "Top-level records" : v.path} — ${v.count} rows`,
             v.path,
           ),
       ),
     );
     $("row-path").value =
-      selected ?? (choices.length === 1 ? choices[0].path : "");
+      selected ??
+      (choices.length === 1 && choices[0].path !== "$object"
+        ? choices[0].path
+        : "");
+    $("row-path").dispatchEvent(new Event("change", { bubbles: true }));
     if (!choices.length) throw Error("No supported array of objects found.");
   }
+  function showNestedPaths() {
+    const path = $("row-path").value;
+    if (!path) {
+      $("nested-array-help").textContent =
+        "Choose records to inspect nested arrays before conversion.";
+      return;
+    }
+    const data = jsonData();
+    const records =
+      path === "$object"
+        ? [data]
+        : path === "$"
+          ? data
+          : path.split(".").reduce((v, k) => v[k], data);
+    const found = new Set();
+    const walk = (value, prefix = "", depth = 0) => {
+      if (depth > 6)
+        throw Error(`Nesting at ${prefix || "record"} exceeds six levels.`);
+      if (Array.isArray(value)) {
+        if (prefix) found.add(prefix);
+        return;
+      }
+      if (value && typeof value === "object")
+        for (const [key, child] of Object.entries(value))
+          walk(child, prefix ? `${prefix}.${key}` : key, depth + 1);
+    };
+    for (const row of records || []) walk(row);
+    $("nested-array-help").textContent = found.size
+      ? `Nested arrays found in selected records (${path}): ${[...found].join(", ")}. Choose “Keep as JSON text” to preserve them, “Omit” to explicitly remove those fields, or “Stop” to make no CSV. Omission is never automatic.`
+      : "No nested arrays found in these records.";
+  }
+  $("row-path")?.addEventListener("change", showNestedPaths);
+  $("array-policy")?.addEventListener("change", showNestedPaths);
   function sample(v, depth = 0) {
     if (depth > 6) throw new Error("Use a shallower sample.");
     if (Array.isArray(v)) return v.slice(0, 5).map((x) => sample(x, depth + 1));
@@ -527,6 +604,13 @@ if (root) {
     }
   }
   async function askJev() {
+    if (tool === "diagram" && !$("source-text").value.trim()) {
+      status(
+        "Add at least one step in the Steps field before creating a diagram.",
+        true,
+      );
+      return;
+    }
     clear();
     const attempt = begin("ai_interpretation");
     let outcome = "unexpected_failure",
@@ -567,7 +651,8 @@ if (root) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tool, input }),
-        signal: AbortSignal.timeout(20000),
+        // Entity extraction may use two bounded 15-second provider stages.
+        signal: AbortSignal.timeout(tool === "entities" ? 35000 : 20000),
       });
       responseStatus = r.status;
       const data = await r.json();
@@ -647,6 +732,7 @@ if (root) {
           ? "rejected"
           : "unexpected_failure";
       if (token === revision) {
+        if (tool === "entities") $("entity-review").open = true;
         if (tool === "diagram") {
           $("graph-panel").hidden = false;
           $("graph-panel").open = true;
@@ -657,7 +743,9 @@ if (root) {
             : e.message +
                 (tool === "diagram"
                   ? " No AI graph was accepted. Start a private sequential diagram below, then edit types and destinations."
-                  : ""),
+                  : tool === "entities"
+                    ? " No AI matches were accepted. Shorten the text and try again, or use Add mention manually below to select exact source text and its occurrence."
+                    : ""),
           true,
         );
       }
@@ -754,6 +842,10 @@ if (root) {
         );
       }
       if (tool === "diagram") {
+        if (!$("source-text").value.trim())
+          throw new Error(
+            "Add at least one step in the Steps field before creating a diagram.",
+          );
         const code = mermaidSource(JSON.parse($("review-plan").value));
         outcome = "unexpected_failure";
         const { default: mermaid } = await import("mermaid");

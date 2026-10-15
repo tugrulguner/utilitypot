@@ -3,6 +3,11 @@ import Papa from "papaparse";
 import { parseCsv, templatePaths, transformCsv } from "../lib/utilities/csv.js";
 import { normalizeDates } from "../lib/utilities/dates.js";
 import { findSlots, calendarEvent } from "../lib/utilities/meeting.js";
+import {
+  resolveMeetingZone,
+  presentMeetingSlot,
+  compactMeetingSlot,
+} from "../lib/utilities/meeting-presentation.js";
 const root = document.querySelector("[data-utility]");
 if (root) {
   const tool = root.getAttribute("data-utility"),
@@ -56,6 +61,11 @@ if (root) {
     $("results").hidden = true;
   };
   root.addEventListener("input", (e) => {
+    if (e.target.id === "slot-choice") return;
+    if (e.target.dataset.field === "zone") {
+      e.target.setCustomValidity("");
+      e.target.removeAttribute("aria-invalid");
+    }
     invalidate();
     if (["csv-input", "json-example", "csv-intent"].includes(e.target.id)) {
       $("mapping-panel").hidden = true;
@@ -178,14 +188,26 @@ if (root) {
     $("mapping-panel").hidden = false;
   }
   function participants() {
-    return [...root.querySelectorAll(".participant")].map((p) =>
-      Object.fromEntries(
+    return [...root.querySelectorAll(".participant")].map((p, index) => {
+      const person = Object.fromEntries(
         [...p.querySelectorAll("[data-field]")].map((e) => [
           e.dataset.field,
           e.value,
         ]),
-      ),
-    );
+      );
+      const field = p.querySelector('[data-field="zone"]');
+      try {
+        person.zone = resolveMeetingZone(person.zone).zone;
+        field.setCustomValidity("");
+        field.removeAttribute("aria-invalid");
+      } catch (e) {
+        field.setCustomValidity(e.message);
+        field.setAttribute("aria-invalid", "true");
+        field.reportValidity();
+        throw new Error(`Participant ${index + 1}: ${e.message}`);
+      }
+      return person;
+    });
   }
   function setPeople(people) {
     [...root.querySelectorAll(".participant")].forEach((p, i) => {
@@ -528,10 +550,30 @@ if (root) {
           body.append(tr);
         }
         table.append(body);
+        const cards = document.createElement("div");
+        cards.className = "date-records";
+        const labels = {
+          original: "Original",
+          normalized: "Normalized",
+          status: "Status",
+          note: "Note",
+        };
+        for (const row of result.slice(0, 100)) {
+          const card = document.createElement("dl");
+          card.className = "date-record";
+          for (const [key, label] of Object.entries(labels)) {
+            const term = document.createElement("dt"),
+              value = document.createElement("dd");
+            term.textContent = label;
+            value.textContent = row[key] || "—";
+            card.append(term, value);
+          }
+          cards.append(card);
+        }
         const wrapper = document.createElement("div");
         wrapper.className = "table-scroll";
         wrapper.append(table);
-        $("result-view").replaceChildren(wrapper);
+        $("result-view").replaceChildren(wrapper, cards);
         status(
           `Processed ${result.length} rows locally. ${result.filter((r) => r.status === "review").length} need review; ${result.filter((r) => r.status === "invalid").length} are invalid. Preview shows at most 100 rows; download includes every row.`,
         );
@@ -553,16 +595,62 @@ if (root) {
           `Found ${slots.length} feasible slots. Times are computed locally, not by AI.`,
         );
         if (slots.length) {
+          const technical = document.createElement("details");
+          const summary = document.createElement("summary");
+          summary.textContent = "Technical times and all options";
+          technical.append(summary, ...$("result-view").childNodes);
           const label = document.createElement("label");
           label.htmlFor = "slot-choice";
-          label.textContent = "Choose a slot for calendar download";
+          label.textContent = `Choose a meeting time · ${$("meeting-date").value} · local times (24-hour)`;
           const select = document.createElement("select");
           select.id = "slot-choice";
-          slots.forEach((s, i) =>
-            select.append(new Option(`${i + 1}. ${s.start}`, String(i))),
+          const choices = slots.map((s) =>
+            compactMeetingSlot(s, $("meeting-date").value),
           );
+          slots.forEach((s, i) => {
+            // Repeated DST wall times must remain distinguishable choices.
+            const duplicate =
+              choices.indexOf(choices[i]) !== choices.lastIndexOf(choices[i]);
+            const utc = duplicate
+              ? new Intl.DateTimeFormat(undefined, {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hourCycle: "h23",
+                  timeZone: "UTC",
+                }).format(new Date(s.start)) + " UTC · "
+              : "";
+            select.append(
+              new Option(`${i + 1}. ${utc}${choices[i]}`, String(i)),
+            );
+          });
+          const comparison = document.createElement("section");
+          comparison.className = "meeting-comparison";
+          comparison.setAttribute("aria-live", "polite");
+          comparison.setAttribute("aria-label", "Selected meeting time");
+          const renderChoice = () => {
+            const title = document.createElement("h3");
+            title.textContent = `Selected meeting time · ${duration} minutes`;
+            const list = document.createElement("ul");
+            for (const person of presentMeetingSlot(
+              slots[Number(select.value)],
+            )) {
+              const row = document.createElement("li"),
+                who = document.createElement("strong"),
+                time = document.createElement("span");
+              who.textContent =
+                person.label === person.city
+                  ? person.city
+                  : `${person.label} · ${person.city}`;
+              time.textContent = `${person.start} – ${person.end}`;
+              row.append(who, time);
+              list.append(row);
+            }
+            comparison.replaceChildren(title, list);
+          };
+          select.addEventListener("change", renderChoice);
+          renderChoice();
           const b = document.createElement("button");
-          b.textContent = "Download calendar event";
+          b.textContent = "Add to calendar";
           b.addEventListener("click", () =>
             download(
               calendarEvent(slots[Number(select.value)], duration),
@@ -571,7 +659,13 @@ if (root) {
               "calendar_download",
             ),
           );
-          $("result-view").append(label, select, b);
+          $("result-view").replaceChildren(
+            label,
+            select,
+            comparison,
+            b,
+            technical,
+          );
         }
       }
       outcome = "success";
@@ -604,4 +698,6 @@ if (root) {
       status("Clipboard is unavailable. Use Download result instead.", true);
     }
   });
+  // Preserve text entered or restored before the module attached its listeners.
+  if (tool === "csv" && $("csv-input").value.trim()) syncCsv();
 }

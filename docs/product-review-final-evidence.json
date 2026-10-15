@@ -1,0 +1,444 @@
+{
+  "runtimeSourceCommit": "5f6544a87620aef75ed0a61d32787c4d1d28a104",
+  "workerVersion": "d01269c1-3dd1-45da-bdb2-fc7b96a5dc4b",
+  "mode": "non-production Worker UI and real Jev; no inference retries or mocked responses",
+  "productionUnchanged": true,
+  "previewsRestoredDisabled": true,
+  "standardCases": [
+    {
+      "id": "csv-to-nested-json",
+      "status": "passed-with-manual-correction",
+      "manualCorrections": [
+        {
+          "path": "name",
+          "from": "",
+          "to": "CustomerName",
+          "reason": "Real user review of an unresolved Jev mapping"
+        }
+      ],
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "fix-excel-dates",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "meeting-time-finder",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "json-to-csv",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "entity-extractor",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "text-to-mermaid-linear",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "text-to-mermaid",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "ask-a-webpage-pasted",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "ask-a-webpage-public-url",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "ask-a-webpage-absent-answer",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "date-ambiguity",
+      "status": "passed",
+      "http": 200,
+      "model": "jev-1.13.0"
+    }
+  ],
+  "targetedCases": [
+    {
+      "id": "meeting-cities-selected-calendar",
+      "status": "passed",
+      "readable": "Selected meeting time · 30 minutes\nLondon\nNov 3, 2026, 2:15 PM – Nov 3, 2026, 2:45 PM\nNew York\nNov 3, 2026, 9:15 AM – Nov 3, 2026, 9:45 AM",
+      "calendarSelectedSlot": 1
+    },
+    {
+      "id": "single-object-nested-array-recovery",
+      "status": "passed",
+      "csv": "id,name,tags\r\n001,Ada,\"[\"\"alpha\"\"]\""
+    },
+    {
+      "id": "empty-date-recovery",
+      "status": "passed",
+      "message": "Enter at least one date; blank rows are preserved within a non-empty list."
+    },
+    {
+      "id": "entities-original-repeated",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "entities": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 0,
+          "end": 10
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 30,
+          "end": 39
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 64,
+          "end": 74
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 18,
+          "end": 28
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 49,
+          "end": 62
+        }
+      ]
+    },
+    {
+      "id": "entities-fresh-names",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "entities": [
+        {
+          "type": "Person",
+          "text": "Ada Lovelace",
+          "start": 0,
+          "end": 12
+        },
+        {
+          "type": "Person",
+          "text": "Alan Turing",
+          "start": 17,
+          "end": 28
+        },
+        {
+          "type": "Organization",
+          "text": "Mosaic Labs",
+          "start": 32,
+          "end": 43
+        }
+      ]
+    },
+    {
+      "id": "entities-none",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "entities": []
+    },
+    {
+      "id": "real-mobile-answer-visible",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "view": {
+        "top": 296.09375,
+        "bottom": 620.75,
+        "viewport": 844,
+        "focused": true
+      }
+    }
+  ],
+  "instrumentedEntityActions": [
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 1,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 2,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 3,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 4,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 5,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 6,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 7,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 8,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 9,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 10,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 11,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 12,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 13,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 14,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 15,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-captures",
+      "attempt": 16,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 1,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": false,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 2,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 3,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": false,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 4,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 5,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": false,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 6,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 7,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": false,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 8,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 9,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": false,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 10,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 11,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": false,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 12,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 13,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": false,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 14,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 15,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": false,
+      "failure": null
+    },
+    {
+      "batch": "utilitypot-entity-browser-mixed",
+      "attempt": 16,
+      "http": 200,
+      "model": "jev-1.13.0",
+      "originalParagraph": true,
+      "failure": null
+    }
+  ],
+  "usabilityCounts": {
+    "pass": 26,
+    "fail": 5,
+    "limited": 2
+  },
+  "historical503": "One earlier repeated-name HTTP503 remains unexplained; successful reruns are not proof of its cause or elimination."
+}

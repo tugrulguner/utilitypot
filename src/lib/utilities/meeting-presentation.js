@@ -1,0 +1,78 @@
+const zones = Intl.supportedValuesOf("timeZone");
+const city = (zone) => zone.split("/").at(-1).replaceAll("_", " ");
+const alias = new Map();
+for (const zone of zones) {
+  const key = city(zone).toLocaleLowerCase("en");
+  const found = alias.get(key) || [];
+  found.push(zone);
+  alias.set(key, found);
+}
+export function resolveMeetingZone(input) {
+  const value = String(input ?? "").trim();
+  try {
+    const canonical = new Intl.DateTimeFormat("en", {
+      timeZone: value,
+    }).resolvedOptions().timeZone;
+    // Keep explicit area/city IDs; expand supported aliases for the scheduler.
+    const zone = value.includes("/")
+      ? value
+      : canonical === "UTC"
+        ? "Etc/UTC"
+        : canonical;
+    if (zone.includes("/")) return { zone, label: city(zone) };
+  } catch {
+    /* Resolve only supported IANA IDs or listed cities. */
+  }
+  const matches = alias.get(value.toLocaleLowerCase("en")) || [];
+  if (matches.length > 1)
+    throw new Error(
+      `“${value}” is ambiguous; choose a listed city or IANA timezone.`,
+    );
+  if (matches.length === 1)
+    return { zone: matches[0], label: city(matches[0]) };
+  throw new Error(
+    `Unknown city or timezone “${value}”; choose a listed city or IANA timezone.`,
+  );
+}
+export function compactMeetingSlot(slot, baseDate, locale) {
+  return slot.local
+    .map((person) => {
+      const resolved = resolveMeetingZone(person.zone),
+        instant = new Date(person.start.split("[")[0]);
+      const time = new Intl.DateTimeFormat(locale, {
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+        timeZone: resolved.zone,
+      }).format(instant);
+      const day =
+        person.start.slice(0, 10) === baseDate
+          ? ""
+          : new Intl.DateTimeFormat(locale, {
+              month: "short",
+              day: "numeric",
+              timeZone: resolved.zone,
+            }).format(instant) + " ";
+      return `${resolved.label} ${day}${time}`;
+    })
+    .join(" · ");
+}
+export function presentMeetingSlot(slot, locale) {
+  return slot.local.map((person) => {
+    const resolved = resolveMeetingZone(person.zone);
+    const label = person.name.trim() || resolved.label;
+    const formatter = (value) =>
+      new Intl.DateTimeFormat(locale, {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: resolved.zone,
+      }).format(new Date(value.split("[")[0]));
+    return {
+      label,
+      city: resolved.label,
+      zone: resolved.zone,
+      start: formatter(person.start),
+      end: formatter(person.end),
+    };
+  });
+}

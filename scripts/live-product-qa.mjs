@@ -245,7 +245,7 @@ const cases = [
       );
       const promise = page.waitForEvent("download");
       await page
-        .getByRole("button", { name: "Download calendar event", exact: true })
+        .getByRole("button", { name: "Add to calendar", exact: true })
         .click();
       const d = await promise;
       await d.saveAs(root + "/" + current.id + ".ics");

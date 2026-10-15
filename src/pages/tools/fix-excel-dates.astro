@@ -8,6 +8,10 @@ import UtilityApp from "../../components/UtilityApp.astro";
   description="Clean up a list of dates, with unclear values kept visible for review."
   slug="fix-excel-dates"
 >
+  <p class="notice">
+    For date text only. Excel serial numbers, timestamps and spreadsheet files
+    are not supported.
+  </p>
   <UtilityApp tool="dates" />
   <details class="prose tool-help">
     <summary>How this tool works &amp; limits</summary>
