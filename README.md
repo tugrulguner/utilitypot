@@ -1,10 +1,18 @@
 # UtilityPot
 
-**Jev interprets. You review. Code executes.**
+<p align="center"><img src="utilitypot.png" alt="UtilityPot — Jev interprets. You review. Code executes." width="600"></p>
 
-Focused public utilities for data, text, diagrams and planning. Part of [ModePot](https://modepot.io/), created by [Tugrul Guner](https://tugrul.modepot.io/).
+<p align="center">Part of <a href="https://modepot.io/">ModePot</a>. &nbsp; <a href="https://utilitypot.modepot.io/">Project website</a> &nbsp; <a href="https://tugrul.modepot.io/">Created by Tugrul Guner</a></p>
 
-Intended production origin: **https://utilitypot.modepot.io/**. The source implementation is available; a configured origin is not proof of deployment or live inference.
+<p align="center"><strong>Jev interprets. You review. Code executes.</strong></p>
+
+<p align="center">Open-source utilities for messy data, shared text, diagrams and planning. Bounded AI proposals become inspectable settings and exact operations—not arbitrary generated code.</p>
+
+<p align="center"><a href="https://github.com/tugrulguner/utilitypot/actions/workflows/ci.yml"><img src="https://github.com/tugrulguner/utilitypot/actions/workflows/ci.yml/badge.svg" alt="CI"></a> <a href="https://discord.gg/u3AANZr6RG"><img src="https://img.shields.io/badge/Discord-ModePot-5865F2?logo=discord&logoColor=white" alt="ModePot Discord"></a> <a href="LICENSE"><img src="https://img.shields.io/github/license/tugrulguner/utilitypot" alt="MIT license"></a> <a href="https://github.com/tugrulguner/utilitypot"><img src="https://img.shields.io/github/stars/tugrulguner/utilitypot?style=flat" alt="GitHub stars"></a></p>
+
+<p align="center"><a href="https://utilitypot.modepot.io/#tools">Browse tools</a> · <a href="#utilities">What ships</a> · <a href="#local-setup">Run locally</a> · <a href="https://utilitypot.modepot.io/privacy/">Privacy & limits</a> · <a href="docs/deployment-and-releases.md">Deployment & releases</a> · <a href="#contributing">Contribute</a></p>
+
+**Live app:** https://utilitypot.modepot.io/ — free, no signup. Manual computation stays in your browser; optional AI interpretation sends only the disclosed context after consent.
 
 ## Utilities
 
@@ -42,10 +50,13 @@ npm run check
 npm run build
 npm run test:browser
 npm run test:worker
-npx wrangler deploy --dry-run
+npm run test:release
+npm run format:check
+npm run release:bundle
+npm run test:release-artifact
 ```
 
-Browser AI-success tests intercept requests with explicitly labeled fixtures. They prove consent, transport consumption and review behavior, **not live Jev quality**. Unit tests also validate real typed-response envelopes and deterministic execution. Live provider verification requires a separately available server-side credential; no public AI launch should be claimed until exercised.
+Browser AI-success tests intercept requests with explicitly labeled fixtures. They prove consent, transport consumption and review behavior, **not live Jev quality**. Unit tests also validate real typed-response envelopes and deterministic execution. The production integration has been smoke-tested with real Jev date-convention selection. Automated success fixtures do not establish the accuracy of every utility or replace representative model evaluation.
 
 ## Server and deployment
 
@@ -53,7 +64,7 @@ Astro generates static assets; a small Cloudflare Worker owns `/api/utilities/in
 
 The `UTILITY_RATE_LIMIT` and `UTILITY_GLOBAL_RATE_LIMIT` bindings allow 6/client and 30/aggregate requests per minute **per Cloudflare location**. They are eventually consistent abuse controls, not exact global spend caps. Read-page requests share the same limits. Missing bindings fail closed. Configure provider-side spend limits before enabling public AI.
 
-The intended Worker is `utilitypot-site`, independent of `modepot-site` and LifePot. `wrangler.jsonc` declares the intended custom domain. The separate deployment workflow runs full CI and deploys only from `main` using the `production` environment and durable Cloudflare credentials. Tagged releases validate version/changelog and publish verified website artifacts, not npm/PyPI packages. Neither a configured route nor automation source proves a live deployment. See [deployment and releases](docs/deployment-and-releases.md) for prerequisites, release preparation and end-to-end verification. Do not repoint the umbrella Worker.
+The production Worker is `utilitypot-site`, independent of `modepot-site` and LifePot. `wrangler.jsonc` declares the intended custom domain. The separate deployment workflow runs full CI and deploys only from `main` using the `production` environment and durable Cloudflare credentials. Tagged releases validate version/changelog and publish verified website artifacts, not npm/PyPI packages. Neither a configured route nor automation source proves a live deployment. See [deployment and releases](docs/deployment-and-releases.md) for prerequisites, release preparation and end-to-end verification. Do not repoint the umbrella Worker.
 
 The compatibility date is supported by the bundled workerd runtime. No application input database, cookies, SDK tracking or session replay is introduced. See the user-visible `/privacy/` page for limits and third-party processing disclosures.
 
