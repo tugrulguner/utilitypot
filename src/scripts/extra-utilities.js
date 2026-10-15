@@ -648,7 +648,8 @@ if (root) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tool, input }),
-        signal: AbortSignal.timeout(20000),
+        // Entity extraction may use two bounded 15-second provider stages.
+        signal: AbortSignal.timeout(tool === "entities" ? 35000 : 20000),
       });
       responseStatus = r.status;
       const data = await r.json();

@@ -1,5 +1,33 @@
 import { test, expect } from "@playwright/test";
 
+test("local latency fixture: two valid 11-second entity stages fit the client deadline", async ({
+  page,
+}) => {
+  test.setTimeout(45000);
+  await page.route("**/api/utilities/interpret", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 22000));
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        source: "jev",
+        model: "local-latency-fixture",
+        plan: {
+          entities: [{ type: "Person", text: "Mina", start: 0, end: 4 }],
+        },
+        confidence: {},
+        needsReview: true,
+      }),
+    });
+  });
+  await page.goto("/tools/entity-extractor/");
+  await page.locator("#source-text").fill("Mina met Noah.");
+  await page.locator("#extra-ask").click();
+  await expect(page.locator("#extra-results")).toBeVisible({ timeout: 25000 });
+  await expect(page.locator("#extra-visual mark")).toHaveText("Mina");
+  await expect(page.locator("#extra-status")).not.toContainText("timed out");
+});
+
 test("local failure fixture: rejected entity boundaries offer manual recovery without accepting spans", async ({
   page,
 }) => {
