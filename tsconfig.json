@@ -1,5 +1,13 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"]
+  "exclude": [
+    "dist",
+    "release",
+    ".release-worker",
+    ".wrangler",
+    "node_modules",
+    "test-results*/**",
+    "playwright-report"
+  ]
 }

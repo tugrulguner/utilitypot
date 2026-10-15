@@ -1,0 +1,41 @@
+name: Deploy website
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: deploy-website-production
+  cancel-in-progress: false
+jobs:
+  ci:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/ci.yml
+  deploy:
+    needs: ci
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://utilitypot.modepot.io
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: Require durable deployment credentials
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { printf '%s\n' '::error::Missing CLOUDFLARE_ACCOUNT_ID variable'; exit 1; }
+          test -n "$CLOUDFLARE_API_TOKEN" || { printf '%s\n' '::error::Missing durable CLOUDFLARE_API_TOKEN secret'; exit 1; }
+      - run: npm ci
+      - run: npm run build
+      - run: npx wrangler deploy
