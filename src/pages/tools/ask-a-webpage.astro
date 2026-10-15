@@ -5,11 +5,12 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
 
 <UtilityLayout
   title="Ask a webpage"
-  description="Read a public page or paste text and find exact source excerpts answering your question."
+  description="Ask about a public page or pasted text. Get the exact supporting passage."
   slug="ask-a-webpage"
 >
   <ExtraUtilityApp tool="qa" />
-  <section class="prose">
+  <details class="prose tool-help">
+    <summary>How this tool works &amp; limits</summary>
     <h2>What this tool does</h2>
     <p>
       This tool returns exact supporting paragraphs, not a generated essay. Jev
@@ -27,5 +28,5 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
       database. AI classifications can be wrong; typed output is not proof of
       truth. <a href="/privacy/">Read privacy and operating limits.</a>
     </p>
-  </section>
+  </details>
 </UtilityLayout>

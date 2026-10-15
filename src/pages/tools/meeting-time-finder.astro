@@ -5,11 +5,12 @@ import UtilityApp from "../../components/UtilityApp.astro";
 
 <UtilityLayout
   title="Find a meeting time"
-  description="Turn availability statements into editable windows and find exact meeting overlaps across time zones. No calendar access needed."
+  description="Find a time that works across time zones. No calendar connection needed."
   slug="meeting-time-finder"
 >
   <UtilityApp tool="meeting" />
-  <section class="prose">
+  <details class="prose tool-help">
+    <summary>How this tool works &amp; limits</summary>
     <h2>Find shared time, not just timezone offsets</h2>
     <p>
       Enter each participant’s timezone and available window for a specific
@@ -41,5 +42,5 @@ import UtilityApp from "../../components/UtilityApp.astro";
       contact anyone or establish their availability. Calendar files contain a
       generic Meeting title; private availability statements are not included.
     </p>
-  </section>
+  </details>
 </UtilityLayout>

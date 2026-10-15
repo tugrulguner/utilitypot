@@ -16,13 +16,17 @@
 
 ## Utilities
 
-- CSV to nested JSON: editable column mappings, parent grouping and one child array; preserves strings.
+- CSV to nested JSON: paste/upload, choose a grouping column, preview parent records and child rows. Custom schemas and Jev-assisted mappings are optional advanced controls; strings and literal headers are preserved.
 - JSON to CSV: select a record array, flatten objects, explicitly omit/join/reject other arrays; escape spreadsheet formulas.
 - Mixed spreadsheet dates: preserve original values, flag ambiguous dates and retain partial precision.
 - Meeting time finder: reviewed one-off windows, exclusions, timezone-aware overlap and calendar export.
 - Custom entity extraction: up to four definitions, three mentions per type and 120 source tokens. Exact offsets are validated; not exhaustive NER.
 - Text to Mermaid: up to eight listed steps, reviewable graph, local flowchart rendering and Mermaid/SVG downloads. Not arbitrary code generation.
 - Ask a webpage: exact supporting paragraphs with separate answer-presence judgment. Public URL reading is limited to documented approved hosts; other sources can be pasted. Not generated essays or independent fact verification.
+
+## Simple workflows
+
+Start with your source and the outcome-named action, then review the readable preview and copy/download. Entity and diagram corrections use normal controls; raw JSON import is optional. Meetings show either time fields or natural-language availability, never both at once. Webpage questions combine reading and evidence selection into one explicitly disclosed action. AI buttons explain what is sent to Jev/TypeSafe before you click; local modes never send your input.
 
 ## Local setup
 
@@ -58,7 +62,7 @@ npm run release:bundle
 npm run test:release-artifact
 ```
 
-Browser AI-success tests intercept requests with explicitly labeled fixtures. They prove consent, transport consumption and review behavior, **not live Jev quality**. Unit tests also validate real typed-response envelopes and deterministic execution. The production integration has been smoke-tested with real Jev date-convention selection. Automated success fixtures do not establish the accuracy of every utility or replace representative model evaluation.
+Browser AI-success tests intercept requests with explicitly labeled fixtures. They prove consent, transport consumption and review behavior, **not live Jev quality**. Unit tests also validate real typed-response envelopes and deterministic execution. The live-product report records real browser-driven Jev calls, outputs, manual corrections and remaining failures. Candidate local-UI tests against the real backend are labelled separately from deployed-UI verification. Automated success fixtures do not establish the accuracy of every utility or replace representative model evaluation.
 
 ## Server and deployment
 

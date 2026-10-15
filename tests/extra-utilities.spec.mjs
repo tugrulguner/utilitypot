@@ -1,69 +1,46 @@
 import { test, expect } from "@playwright/test";
 import fs from "node:fs/promises";
 
-test("a newer Jev request invalidates an older pending page read", async ({
+test("editing a URL during its fixture read cancels the whole answer pipeline", async ({
   page,
 }) => {
-  let releaseRead, releaseAsk;
-  const readStarted = new Promise((resolve) => {
-    page.route("**/api/utilities/read-page", async (route) => {
-      await new Promise((release) => {
-        releaseRead = release;
-        resolve();
-      });
-      await route.fulfill({
-        json: {
-          text: "Different source B.",
-          url: "https://docs.python.org/3/",
-          truncated: false,
-        },
-      });
+  let release;
+  const gate = new Promise((r) => (release = r));
+  let inference = 0;
+  await page.route("**/api/utilities/read-page", async (route) => {
+    await gate;
+    await route.fulfill({
+      json: {
+        text: "Old source",
+        url: "https://docs.python.org/3/",
+        truncated: false,
+      },
     });
   });
-  const askStarted = new Promise((resolve) => {
-    page.route("**/api/utilities/interpret", async (route) => {
-      const source = route.request().postDataJSON().input.text;
-      await new Promise((release) => {
-        releaseAsk = release;
-        resolve();
-      });
-      await route.fulfill({
-        json: {
-          source: "jev",
-          model: "fixture",
-          plan: { status: "answered", excerpts: [{ id: "p0", text: source }] },
-          confidence: {},
-        },
-      });
-    });
+  await page.route("**/api/utilities/interpret", async (route) => {
+    inference++;
+    await route.fulfill({ status: 503, json: { error: "Must not be called" } });
   });
   await page.goto("/tools/ask-a-webpage/");
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
-  const original = await page.locator("#source-text").inputValue();
+  await page.getByRole("tab", { name: "Public URL", exact: true }).click();
   await page.locator("#page-url").fill("https://docs.python.org/3/");
-  await page.locator("#extra-consent").check();
-  await page.locator("#read-page").click();
-  await readStarted;
+  await page.locator("#instructions").fill("What is this?");
+  const pending = page.waitForRequest("**/api/utilities/read-page");
   await page.locator("#extra-ask").click();
-  await askStarted;
-  releaseRead();
-  await expect(page.locator("#read-page")).toBeEnabled();
-  await expect(page.locator("#source-text")).toHaveValue(original);
-  releaseAsk();
-  await expect(page.locator("#extra-results")).toBeVisible();
-  await expect(page.locator("#extra-output")).toContainText(
-    "does not store submitted text",
-  );
-  await expect(page.locator("#source-text")).toHaveValue(original);
+  await pending;
+  await page
+    .locator("#page-url")
+    .fill("https://docs.python.org/3/library/json.html");
+  release();
+  await expect(page.locator("#extra-ask")).toBeEnabled();
+  expect(inference).toBe(0);
+  await expect(page.locator("#extra-results")).toBeHidden();
 });
 
 test("JSON to CSV downloads actual nested values locally", async ({ page }) => {
   await page.goto("/tools/json-to-csv/");
   await page.getByRole("button", { name: "Load example", exact: true }).click();
-  await page.locator("#extra-reviewed").check();
-  await page
-    .getByRole("button", { name: "Convert JSON to CSV locally" })
-    .click();
+  await page.getByRole("button", { name: "Convert" }).click();
   await expect(page.locator("#extra-output")).toContainText("customer.name");
   const promise = page.waitForEvent("download");
   await page
@@ -77,21 +54,19 @@ test("entity review validates exact offsets and highlights real source text", as
 }) => {
   await page.goto("/tools/entity-extractor/");
   await page.getByRole("button", { name: "Load example", exact: true }).click();
-  await page.locator("#extra-reviewed").check();
-  await page
-    .getByRole("button", { name: "Validate and export entities" })
-    .click();
+  await page.locator("#entity-review > summary").click();
+  await page.getByRole("button", { name: "Update preview" }).click();
   await expect(page.locator("#extra-visual mark")).toHaveText([
     "Ada",
     "Acme Labs",
   ]);
   await page
+    .locator("details")
+    .evaluateAll((es) => es.forEach((e) => (e.open = true)));
+  await page
     .locator("#review-plan")
     .fill('[{"type":"Person","text":"Invented","start":0,"end":3}]');
-  await page.locator("#extra-reviewed").check();
-  await page
-    .getByRole("button", { name: "Validate and export entities" })
-    .click();
+  await page.getByRole("button", { name: "Update preview" }).click();
   await expect(page.locator("#extra-status")).toContainText("exactly match");
 });
 test("reviewed Mermaid flowchart renders SVG and downloads valid Mermaid source", async ({
@@ -99,8 +74,8 @@ test("reviewed Mermaid flowchart renders SVG and downloads valid Mermaid source"
 }) => {
   await page.goto("/tools/text-to-mermaid/");
   await page.getByRole("button", { name: "Load example", exact: true }).click();
-  await page.locator("#extra-reviewed").check();
-  await page.getByRole("button", { name: "Render Mermaid locally" }).click();
+  await page.locator("#graph-panel > summary").click();
+  await page.getByRole("button", { name: "Update diagram" }).click();
   await expect(page.locator("#extra-status")).toContainText("sandboxed");
   await expect(page.getByTitle("Rendered Mermaid flowchart")).toHaveAttribute(
     "sandbox",
@@ -123,15 +98,21 @@ test("webpage questions show selected exact evidence and no-answer, using explic
         confidence: { answerability: 0.95, passage: 0.9 },
         plan: {
           status: "answered",
-          excerpts: [{ id: "p2", text: text.split("\n\n")[2] }],
+          excerpts: [
+            {
+              id: "p2",
+              text: text.split("\n\n")[2],
+              start: text.indexOf(text.split("\n\n")[2]),
+              end: text.length,
+            },
+          ],
         },
       },
     });
   });
   await page.goto("/tools/ask-a-webpage/");
   await page.getByRole("button", { name: "Load example", exact: true }).click();
-  await page.locator("#extra-consent").check();
-  await page.getByRole("button", { name: "Ask Jev", exact: true }).click();
+  await page.getByRole("button", { name: "Find answer", exact: true }).click();
   await expect(page.locator("#extra-output")).toContainText(
     "does not store submitted text",
   );
@@ -147,7 +128,7 @@ test("webpage questions show selected exact evidence and no-answer, using explic
       },
     }),
   );
-  await page.getByRole("button", { name: "Ask Jev", exact: true }).click();
+  await page.getByRole("button", { name: "Find answer", exact: true }).click();
   await expect(page.locator("#extra-visual")).toHaveText(
     "Not answered by the supplied source.",
   );

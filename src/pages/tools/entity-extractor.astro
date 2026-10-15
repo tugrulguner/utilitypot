@@ -5,11 +5,12 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
 
 <UtilityLayout
   title="Custom entity extraction"
-  description="Define categories and extract reviewable mentions with exact source offsets."
+  description="Highlight people, companies, or a category you choose."
   slug="entity-extractor"
 >
   <ExtraUtilityApp tool="entities" />
-  <section class="prose">
+  <details class="prose tool-help">
+    <summary>How this tool works &amp; limits</summary>
     <h2>What this tool does</h2>
     <p>
       Define up to four categories, with at most three selected mentions per
@@ -26,5 +27,5 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
       database. AI classifications can be wrong; typed output is not proof of
       truth. <a href="/privacy/">Read privacy and operating limits.</a>
     </p>
-  </section>
+  </details>
 </UtilityLayout>

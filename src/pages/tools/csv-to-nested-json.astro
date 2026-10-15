@@ -5,16 +5,19 @@ import UtilityApp from "../../components/UtilityApp.astro";
 
 <UtilityLayout
   title="CSV to nested JSON"
-  description="Map CSV columns into nested JSON, group repeated rows, and review every mapping before converting locally."
+  description="Group repeated rows into nested JSON. Paste a CSV and choose a grouping column."
   slug="csv-to-nested-json"
 >
   <UtilityApp tool="csv" />
-  <section class="prose">
+  <details class="prose tool-help">
+    <summary>How this tool works &amp; limits</summary>
     <h2>Group CSV rows without writing a transformation script</h2>
     <p>
       A flat converter creates one JSON object per row. This tool also supports
-      grouping a parent record and collecting child records into one array.
-      Paste one representative parent object as the desired shape; each leaf
+      grouping a parent record and collecting child records into one array. The
+      default path needs only your CSV and a grouping column. It keeps the
+      original column names in child rows. Advanced custom mapping can instead
+      use one representative parent object as the desired shape; each leaf
       becomes an editable source-column mapping.
     </p>
     <h2>Example: one customer, several items</h2>
@@ -33,5 +36,5 @@ import UtilityApp from "../../components/UtilityApp.astro";
       supported. Jev proposes a mapping from your example and instructions; you
       remain responsible for reviewing it.
     </p>
-  </section>
+  </details>
 </UtilityLayout>

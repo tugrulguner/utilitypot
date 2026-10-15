@@ -1,4 +1,10 @@
-import { arrayPaths, jsonToCsv } from "../lib/utilities/json-csv.js";
+import Papa from "papaparse";
+import {
+  recordChoices,
+  sequentialGraph,
+  sourceMention,
+} from "../lib/utilities/outcome.js";
+import { jsonToCsv } from "../lib/utilities/json-csv.js";
 import { mermaidSource } from "../lib/utilities/diagram.js";
 import { createEntitiesInterpretation } from "../lib/utilities/entities.js";
 const root = document.querySelector("[data-extra-utility]");
@@ -49,16 +55,313 @@ if (root) {
     revision++;
     output = "";
     $("extra-results").hidden = true;
-    if ($("extra-reviewed")) $("extra-reviewed").checked = false;
   }
   root.addEventListener("input", (e) => {
-    if (["extra-consent", "extra-reviewed"].includes(e.target.id)) return;
     clear();
     if (
       ["source-text", "instructions"].includes(e.target.id) &&
       $("review-plan")
-    )
+    ) {
       $("review-plan").value = "";
+      $(
+        tool === "entities" ? "entity-editor" : "graph-editor",
+      ).replaceChildren();
+      if (tool === "diagram") $("graph-panel").hidden = true;
+    }
+    if (e.target.id === "source-text" && tool === "jsonCsv") {
+      $("row-path").replaceChildren();
+      $("array-options").hidden = true;
+    }
+    if (
+      tool === "qa" &&
+      ["source-text", "page-url", "source-mode"].includes(e.target.id)
+    ) {
+      fetchedUrl = "";
+      $("source-coverage").textContent = "";
+      $("source-inspection").hidden = true;
+    }
+  });
+  let fetchedUrl = "";
+  function definitions() {
+    if (tool !== "entities") return $("instructions").value;
+    return [
+      $("people-category").checked ? "Person: a named human" : "",
+      $("companies-category").checked
+        ? "Organization: a named company or employer"
+        : "",
+      $("custom-category").checked ? $("instructions").value : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
+  function syncModes() {
+    if (tool === "entities")
+      $("custom-definitions").hidden = !$("custom-category").checked;
+    if (tool === "diagram") {
+      const ai = $("diagram-mode").value === "jev";
+      $("connection-description").hidden = !ai;
+      $("create-diagram").textContent = ai
+        ? "Create diagram with Jev"
+        : "Create diagram";
+    }
+    if (tool === "qa") {
+      const url = $("source-mode").value === "url";
+      $("url-panel").hidden = !url;
+      $("source-panel").hidden = url;
+      root.querySelectorAll("[data-source-mode]").forEach((tab) => {
+        const selected = tab.dataset.sourceMode === $("source-mode").value;
+        tab.setAttribute("aria-selected", String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+      });
+    }
+  }
+  for (const id of ["custom-category", "diagram-mode", "source-mode"])
+    $(id)?.addEventListener("change", syncModes);
+  const sourceTabs = [...root.querySelectorAll("[data-source-mode]")];
+  sourceTabs.forEach((tab, i) => {
+    tab.addEventListener("click", () => {
+      $("source-mode").value = tab.dataset.sourceMode;
+      $("source-mode").dispatchEvent(new Event("input", { bubbles: true }));
+      syncModes();
+    });
+    tab.addEventListener("keydown", (event) => {
+      if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
+        event.preventDefault();
+        const next =
+          event.key === "Home"
+            ? 0
+            : event.key === "End"
+              ? sourceTabs.length - 1
+              : (i + 1) % sourceTabs.length;
+        sourceTabs[next].click();
+        sourceTabs[next].focus();
+      }
+    });
+  });
+  $("source-file")?.addEventListener("change", async (e) => {
+    clear();
+    const token = revision,
+      file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2000000) {
+      status("JSON exceeds 2 MB.", true);
+      return;
+    }
+    const text = await file.text();
+    if (token !== revision) return;
+    $("source-text").value = text;
+    $("row-path").replaceChildren();
+    $("array-options").hidden = true;
+  });
+  function control(label, value, options, change) {
+    const wrap = document.createElement("label");
+    wrap.append(document.createTextNode(label));
+    const input = document.createElement(options ? "select" : "input");
+    if (options)
+      for (const [value, text] of options)
+        input.append(new Option(text, value));
+    input.value = value;
+    input.setAttribute("aria-label", label);
+    input.addEventListener("change", () => change(input.value));
+    wrap.append(input);
+    return wrap;
+  }
+  function editEntities() {
+    const items = JSON.parse($("review-plan").value || "[]");
+    const types = createEntitiesInterpretation({
+      text: $("source-text").value,
+      definitions: definitions(),
+    }).state.types;
+    $("entity-editor").replaceChildren();
+    items.forEach((entity, i) => {
+      const row = document.createElement("div");
+      row.className = "mention-row";
+      const update = (value) => {
+        items[i] = value;
+        $("review-plan").value = JSON.stringify(items);
+        clear();
+      };
+      row.append(
+        control(`Mention ${i + 1}`, entity.text, null, (text) => {
+          try {
+            update(sourceMention($("source-text").value, items[i].type, text));
+            editEntities();
+          } catch (e) {
+            update({ ...items[i], text });
+            status(e.message, true);
+          }
+        }),
+      );
+      const occurrences = [];
+      let pos = -1;
+      while (
+        entity.text &&
+        (pos = $("source-text").value.indexOf(entity.text, pos + 1)) >= 0
+      )
+        occurrences.push([
+          String(occurrences.length),
+          `Occurrence ${occurrences.length + 1}: …${$("source-text").value.slice(Math.max(0, pos - 15), pos + entity.text.length + 15)}…`,
+        ]);
+      let selected = 0,
+        idx = -1;
+      for (let n = 0; n < occurrences.length; n++) {
+        idx = $("source-text").value.indexOf(entity.text, idx + 1);
+        if (idx === entity.start) selected = n;
+      }
+      row.append(
+        control(
+          `Source occurrence ${i + 1}`,
+          String(selected),
+          occurrences,
+          (n) => {
+            try {
+              update(
+                sourceMention(
+                  $("source-text").value,
+                  items[i].type,
+                  items[i].text,
+                  Number(n),
+                ),
+              );
+            } catch (e) {
+              status(e.message, true);
+            }
+          },
+        ),
+      );
+      row.append(
+        control(
+          `Category ${i + 1}`,
+          entity.type,
+          types.map((t) => [t.name, t.name]),
+          (type) => update({ ...items[i], type }),
+        ),
+      );
+      const remove = document.createElement("button");
+      remove.textContent = `Remove mention ${i + 1}`;
+      remove.addEventListener("click", () => {
+        items.splice(i, 1);
+        $("review-plan").value = JSON.stringify(items);
+        clear();
+        editEntities();
+        runLocal();
+      });
+      row.append(remove);
+      $("entity-editor").append(row);
+    });
+  }
+  for (const id of ["people-category", "companies-category", "custom-category"])
+    $(id)?.addEventListener("change", () => {
+      if (!$("review-plan").value) return;
+      try {
+        editEntities();
+      } catch (e) {
+        status(e.message, true);
+      }
+    });
+  $("add-mention")?.addEventListener("click", () => {
+    try {
+      const spec = createEntitiesInterpretation({
+        text: $("source-text").value,
+        definitions: definitions(),
+      });
+      const items = JSON.parse($("review-plan").value || "[]");
+      if (items.length >= 12) throw Error("At most 12 mentions.");
+      const token = spec.state.tokens[0];
+      items.push({
+        type: spec.state.types[0].name,
+        text: token.text,
+        start: token.start,
+        end: token.end,
+      });
+      $("review-plan").value = JSON.stringify(items);
+      clear();
+      editEntities();
+    } catch (e) {
+      status(e.message, true);
+    }
+  });
+  function editGraph() {
+    const graph = JSON.parse($("review-plan").value);
+    mermaidSource(graph);
+    $("graph-panel").hidden = false;
+    $("graph-editor").replaceChildren();
+    const save = () => {
+      $("review-plan").value = JSON.stringify(graph);
+      clear();
+    };
+    graph.nodes.forEach((node, i) => {
+      const row = document.createElement("div");
+      row.className = "panel";
+      row.append(
+        control(`Step ${i + 1} label`, node.label, null, (label) => {
+          node.label = label;
+          save();
+        }),
+      );
+      row.append(
+        control(
+          `Step ${i + 1} type`,
+          node.type,
+          [
+            ["process", "Action"],
+            ["decision", "Decision"],
+            ["terminal", "Start / end"],
+          ],
+          (type) => {
+            node.type = type;
+            graph.edges = graph.edges.filter((e) => e.from !== node.id);
+            save();
+            editGraph();
+          },
+        ),
+      );
+      for (const label of node.type === "decision" ? ["yes", "no"] : [""]) {
+        const edge = graph.edges.find(
+          (e) => e.from === node.id && (e.label || "") === label,
+        );
+        row.append(
+          control(
+            `Step ${i + 1} ${label || "next"} destination`,
+            edge?.to || "",
+            [
+              ["", "No destination"],
+              ...graph.nodes.map((n) => [n.id, n.label]),
+            ],
+            (to) => {
+              graph.edges = graph.edges.filter(
+                (e) => !(e.from === node.id && (e.label || "") === label),
+              );
+              if (to) graph.edges.push({ from: node.id, to, label });
+              save();
+            },
+          ),
+        );
+      }
+      $("graph-editor").append(row);
+    });
+  }
+  $("create-diagram")?.addEventListener("click", () => {
+    if ($("diagram-mode").value === "jev") return askJev();
+    try {
+      clear();
+      $("review-plan").value = JSON.stringify(
+        sequentialGraph($("source-text").value),
+      );
+      editGraph();
+      runLocal();
+    } catch (e) {
+      status(e.message, true);
+    }
+  });
+  $("import-plan")?.addEventListener("click", () => {
+    try {
+      clear();
+      tool === "diagram" ? editGraph() : editEntities();
+      runLocal();
+    } catch (e) {
+      status(e.message, true);
+    }
   });
   function show(text, name, type = "text/plain") {
     output = text;
@@ -85,12 +388,21 @@ if (root) {
     return JSON.parse(s);
   }
   function paths(selected) {
-    const p = arrayPaths(jsonData());
+    const choices = recordChoices(jsonData());
+    $("array-options").hidden = false;
     $("row-path").replaceChildren(
-      new Option("Choose the row array", ""),
-      ...p.map((v) => new Option(v, v)),
+      new Option("Choose records", ""),
+      ...choices.map(
+        (v) =>
+          new Option(
+            `${v.path === "$" ? "Top-level records" : v.path} — ${v.count} rows`,
+            v.path,
+          ),
+      ),
     );
-    if (selected) $("row-path").value = selected;
+    $("row-path").value =
+      selected ?? (choices.length === 1 ? choices[0].path : "");
+    if (!choices.length) throw Error("No supported array of objects found.");
   }
   function sample(v, depth = 0) {
     if (depth > 6) throw new Error("Use a shallower sample.");
@@ -121,8 +433,7 @@ if (root) {
     }
     if (tool === "entities") {
       $("source-text").value = "Ada works at Acme Labs. Lin joined Acme Labs.";
-      $("instructions").value =
-        "Person: a named human\nOrganization: a named employer";
+      $("instructions").value = "";
       $("review-plan").value = JSON.stringify(
         [
           { type: "Person", text: "Ada", start: 0, end: 3 },
@@ -161,49 +472,32 @@ if (root) {
       $("instructions").value = "Does the application store my submitted text?";
       $("page-url").value = "";
     }
+    if (tool === "entities") editEntities();
+    if (tool === "diagram") {
+      $("diagram-mode").value = "local";
+      syncModes();
+      editGraph();
+    }
+    if (tool === "qa") {
+      $("source-mode").value = "paste";
+      syncModes();
+    }
     status("Example loaded. This is sample data, not live AI output.");
   });
   $("prepare-extra")?.addEventListener("click", () => {
     try {
       clear();
-      if (tool === "jsonCsv") {
-        paths();
-        status("Choose a record array and confirm the nested-array policy.");
-      } else {
-        const labels = $("source-text")
-          .value.split(/\r?\n/)
-          .map((s) => s.trim())
-          .filter(Boolean);
-        if (!labels.length || labels.length > 8)
-          throw new Error("Use 1–8 short steps.");
-        const graph = {
-          nodes: labels.map((label, i) => ({
-            id: `n${i}`,
-            label,
-            type: "process",
-          })),
-          edges: labels
-            .slice(1)
-            .map((_, i) => ({ from: `n${i}`, to: `n${i + 1}`, label: "" })),
-        };
-        mermaidSource(graph);
-        $("review-plan").value = JSON.stringify(graph, null, 2);
-        status(
-          "Sequential manual draft prepared. This does not infer branching; review or ask Jev.",
-        );
-      }
+      $("review-plan").value = JSON.stringify(
+        sequentialGraph($("source-text").value),
+      );
+      editGraph();
+      runLocal();
     } catch (e) {
       status(e.message, true);
     }
   });
-  $("read-page")?.addEventListener("click", async () => {
+  async function readPage(token) {
     const attempt = begin("read_page");
-    let outcome = "unexpected_failure",
-      responseStatus = 0;
-    clear();
-    const token = revision,
-      button = $("read-page");
-    button.disabled = true;
     try {
       status("Reading the approved public page…");
       const r = await fetch("/api/utilities/read-page", {
@@ -212,46 +506,41 @@ if (root) {
         body: JSON.stringify({ url: $("page-url").value }),
         signal: AbortSignal.timeout(12000),
       });
-      responseStatus = r.status;
       const data = await r.json();
       if (token !== revision) {
-        outcome = "cancelled";
-        return;
+        complete(attempt, "cancelled");
+        return false;
       }
-      if (!r.ok) throw new Error(data.error || "Could not read the page.");
+      if (!r.ok) throw Error(data.error || "Could not read the page.");
       $("source-text").value = data.text;
-      $("page-url").value = data.url;
-      status(
-        data.truncated
-          ? "Page read, truncated to the character or paragraph limit. Inspect it before asking Jev."
-          : "Page read. Review the extracted text before asking Jev.",
-      );
-      outcome = "success";
+      fetchedUrl = data.url;
+      $("source-inspection").hidden = false;
+      $("fetched-source").textContent = data.text;
+      $("source-coverage").textContent = data.truncated
+        ? "Source truncated: only the first 10,000 characters / 100 paragraphs are searched. An absent answer may exist outside this coverage."
+        : "Fetched source is within the 10,000 character / 100 paragraph limit. Inspect the source below.";
+      complete(attempt, "success");
+      return true;
     } catch (e) {
-      outcome =
-        e.name === "TimeoutError" ||
-        (responseStatus >= 400 && responseStatus < 500)
-          ? "rejected"
-          : "unexpected_failure";
-      if (token === revision) status(e.message, true);
-    } finally {
-      complete(attempt, outcome);
-      button.disabled = false;
+      complete(attempt, "rejected");
+      throw e;
     }
-  });
-  $("extra-ask").addEventListener("click", async () => {
-    if (!$("extra-consent").checked) {
-      status("Confirm consent before sending context to Jev.", true);
-      return;
-    }
+  }
+  async function askJev() {
     clear();
     const attempt = begin("ai_interpretation");
     let outcome = "unexpected_failure",
       responseStatus = 0;
     const token = revision,
-      button = $("extra-ask");
+      button = $("extra-ask") || $("create-diagram");
     button.disabled = true;
     try {
+      if (
+        tool === "qa" &&
+        $("source-mode").value === "url" &&
+        !(await readPage(token))
+      )
+        return;
       let input;
       if (tool === "jsonCsv")
         input = {
@@ -261,7 +550,7 @@ if (root) {
       if (tool === "entities")
         input = {
           text: $("source-text").value,
-          definitions: $("instructions").value,
+          definitions: definitions(),
         };
       if (tool === "diagram")
         input = {
@@ -293,14 +582,25 @@ if (root) {
         paths(data.plan.path);
         $("array-policy").value = data.plan.arrays;
       }
-      if (tool === "entities")
+      if (tool === "entities") {
         $("review-plan").value = JSON.stringify(data.plan.entities, null, 2);
-      if (tool === "diagram")
+        editEntities();
+      }
+      if (tool === "diagram") {
         $("review-plan").value = JSON.stringify(data.plan.graph, null, 2);
+        editGraph();
+      }
       if (tool === "qa") {
         const result = data.plan;
         if (!["answered", "partial", "not-answered"].includes(result.status))
           throw new Error("Invalid answer status.");
+        for (const e of result.excerpts || [])
+          if (
+            !Number.isInteger(e.start) ||
+            !Number.isInteger(e.end) ||
+            $("source-text").value.slice(e.start, e.end) !== e.text
+          )
+            throw Error("Evidence does not match the source snapshot.");
         show(
           JSON.stringify(result, null, 2),
           "utilitypot-evidence.json",
@@ -311,6 +611,23 @@ if (root) {
             ? "Not answered by the supplied source."
             : `${result.status === "partial" ? "Partial evidence" : "Selected source evidence"} — review the exact excerpt below. This is not independent fact verification.`;
       }
+      if (tool === "qa") {
+        for (const e of data.plan.excerpts) {
+          const quote = document.createElement("blockquote");
+          quote.textContent = e.text;
+          $("extra-visual").append(quote);
+        }
+        if (fetchedUrl && $("source-mode").value === "url") {
+          const link = document.createElement("a");
+          link.href = fetchedUrl;
+          link.textContent = `Source: ${fetchedUrl}`;
+          link.rel = "noopener noreferrer";
+          $("extra-visual").append(link);
+        }
+      } else if (!(await runLocal(false))) {
+        outcome = token !== revision ? "cancelled" : "rejected";
+        return;
+      }
       const weak = Object.values(data.confidence || {}).some(
         (c) => typeof c !== "number" || c < 0.6,
       );
@@ -320,33 +637,44 @@ if (root) {
       );
       outcome = "success";
     } catch (e) {
+      if (token !== revision) {
+        outcome = "cancelled";
+        return;
+      }
       outcome =
         e.name === "TimeoutError" ||
         (responseStatus >= 400 && responseStatus < 500)
           ? "rejected"
           : "unexpected_failure";
-      if (token === revision)
+      if (token === revision) {
+        if (tool === "diagram") {
+          $("graph-panel").hidden = false;
+          $("graph-panel").open = true;
+        }
         status(
           e.name === "TimeoutError"
             ? "Jev timed out. No result was accepted."
-            : e.message,
+            : e.message +
+                (tool === "diagram"
+                  ? " No AI graph was accepted. Start a private sequential diagram below, then edit types and destinations."
+                  : ""),
           true,
         );
+      }
     } finally {
       complete(attempt, outcome);
       button.disabled = false;
     }
-  });
-  $("extra-run")?.addEventListener("click", async () => {
-    const attempt = begin("manual_run");
+  }
+  $("extra-ask")?.addEventListener("click", askJev);
+  $("extra-run")?.addEventListener("click", () => runLocal());
+  async function runLocal(emit = true) {
+    const attempt = emit ? begin("manual_run") : null;
     let outcome = "rejected";
     try {
-      if (!$("extra-reviewed").checked) {
-        outcome = "rejected";
-        throw new Error("Review and confirm the proposal first.");
-      }
       const token = revision;
       if (tool === "jsonCsv") {
+        if (!$("row-path").options.length) paths();
         const result = jsonToCsv(
           jsonData(),
           $("row-path").value,
@@ -354,8 +682,23 @@ if (root) {
         );
         outcome = "unexpected_failure";
         show(result, "utilitypot-data.csv", "text/csv");
+        const parsed = Papa.parse(result).data;
+        const table = document.createElement("table");
+        for (const row of parsed.slice(0, 101)) {
+          const tr = document.createElement("tr");
+          for (const value of row) {
+            const td = document.createElement("td");
+            td.textContent = value;
+            tr.append(td);
+          }
+          table.append(tr);
+        }
+        const wrap = document.createElement("div");
+        wrap.className = "table-scroll";
+        wrap.append(table);
+        $("extra-visual").append(wrap);
         status(
-          "CSV computed locally. Formula-like cells are escaped for spreadsheet safety.",
+          "CSV computed locally. Preview shows up to 100 rows; download includes every row. Formula-like cells are escaped for spreadsheet safety.",
         );
       }
       if (tool === "entities") {
@@ -363,7 +706,7 @@ if (root) {
           source = $("source-text").value;
         const spec = createEntitiesInterpretation({
           text: source,
-          definitions: $("instructions").value,
+          definitions: definitions(),
         });
         const types = spec.state.types.map((t) => t.name);
         if (!Array.isArray(items) || items.length > 12)
@@ -453,14 +796,16 @@ if (root) {
         status("Validated graph rendered locally in a sandboxed frame.");
       }
       outcome = "success";
+      return true;
     } catch (e) {
       $("extra-results").hidden = true;
       output = "";
       status(e.message, true);
+      return false;
     } finally {
-      complete(attempt, outcome);
+      if (attempt) complete(attempt, outcome);
     }
-  });
+  }
   $("extra-download").addEventListener("click", () => {
     if (output) {
       capture("utility_output_download_requested", {

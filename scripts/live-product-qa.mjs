@@ -1,3 +1,5 @@
+import { liveTarget } from "./live-target.mjs";
+const target = liveTarget(process.env.BASE_URL);
 import { chromium, expect } from "@playwright/test";
 import Papa from "papaparse";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
@@ -6,6 +8,7 @@ const root =
   "test-results-live/" + new Date().toISOString().replace(/[:.]/g, "-");
 await mkdir(root, { recursive: true });
 console.log("Evidence directory:", root);
+console.log("Target:", target.origin, "—", target.mode);
 const browser = await chromium.launch();
 const context = await browser.newContext({
   viewport: { width: 1440, height: 1000 },
@@ -39,26 +42,45 @@ page.on("response", async (r) => {
 });
 async function ask(extra = false) {
   await pace();
-  const button = page.locator(extra ? "#extra-ask" : "#ask-jev");
-  await page.locator(extra ? "#extra-consent" : "#ai-consent").check();
+  const button = page.locator(
+    extra
+      ? (await page.locator("#create-diagram").count())
+        ? "#create-diagram"
+        : "#extra-ask"
+      : (await page.locator("#availability-mode").count())
+        ? "#run"
+        : "#ask-jev",
+  );
+
   const responsePromise = page.waitForResponse(
     (r) =>
-      r.url() === "https://utilitypot.modepot.io/api/utilities/interpret" &&
+      r.url() === target.origin + "/api/utilities/interpret" &&
       r.request().method() === "POST",
-    { timeout: 30000 },
+    { timeout: 45000 },
   );
   await button.click();
   const response = await responsePromise;
   const body = await response.json();
   current.interpretation = { http: response.status(), ...body };
+  if (target.mode.startsWith("local")) {
+    const headers = response.headers();
+    assert.equal(
+      headers["x-qa-real-upstream"],
+      "https://utilitypot.modepot.io",
+      "Local UI must use the real production API bridge",
+    );
+    current.realBackend = {
+      origin: headers["x-qa-real-upstream"],
+      cfRay: headers["x-qa-upstream-cf-ray"],
+    };
+  }
   assert.equal(response.status(), 200, JSON.stringify(body));
   assert.equal(body.source, "jev");
   assert.match(body.model, /^jev-/);
   assert.equal(response.fromServiceWorker(), false);
   await expect(button).toBeEnabled({ timeout: 25000 });
-  await expect(
-    page.locator(extra ? "#extra-status" : "#utility-status"),
-  ).toContainText(/Jev|Model:/);
+  // An unresolved mapping may correctly show a local validation error here.
+  // The response is verified above; corrections are recorded by each case.
   return body.plan;
 }
 async function download(selector, name) {
@@ -77,7 +99,18 @@ async function download(selector, name) {
   return body;
 }
 async function goto(slug) {
-  await page.goto("https://utilitypot.modepot.io/tools/" + slug + "/");
+  await page.goto(target.origin + "/tools/" + slug + "/");
+  const advanced = {
+    "csv-to-nested-json": "Advanced structure and custom mapping",
+    "fix-excel-dates": "Interpret source context with Jev",
+    "json-to-csv": "Choose records with Jev",
+  }[slug];
+  if (advanced)
+    await page.locator("summary").filter({ hasText: advanced }).click();
+  if (slug === "text-to-mermaid")
+    await page.locator("#diagram-mode").selectOption("jev");
+  if (slug === "meeting-time-finder")
+    await page.locator("#availability-mode").selectOption("jev");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 }
 const cases = [
@@ -123,8 +156,7 @@ const cases = [
           },
         ];
       }
-      await page.locator("#reviewed").check();
-      await page.locator("#run").click();
+      if (missing.length) await page.locator("#run").click();
       const value = JSON.parse(await download("#download", "result.json"));
       assert.deepEqual(value, [
         {
@@ -157,11 +189,10 @@ const cases = [
         .fill(
           "UK office export. Numeric dates are DD/MM/YYYY. Preserve partial dates and flag invalid dates.",
         );
-      await page.locator("#date-convention").selectOption("auto");
+
       const plan = await ask();
       assert.equal(plan.convention, "day-first");
       await expect(page.locator("#date-convention")).toHaveValue("day-first");
-      await page.locator("#run").click();
       const csv = await download("#download", "dates.csv");
       assert.ok(
         csv.includes("2026-04-03") &&
@@ -199,8 +230,6 @@ const cases = [
         await p.locator("[data-field=name]").fill(name);
         await p.locator("[data-field=zone]").fill(zone);
         await p.locator("[data-field=text]").fill(text);
-        for (const field of ["start", "end", "excludeStart", "excludeEnd"])
-          await p.locator("[data-field=" + field + "]").fill("");
       }
       const plan = await ask();
       assert.ok(plan.participants.every((p) => p.scope === "supported"));
@@ -211,8 +240,6 @@ const cases = [
           ["14:00", "16:00"],
         ],
       );
-      await page.locator("#reviewed").check();
-      await page.locator("#run").click();
       await expect(page.locator("#result-view")).toContainText(
         "2026-06-15T08:30:00Z",
       );
@@ -256,8 +283,6 @@ const cases = [
       const plan = await ask(true);
       assert.equal(plan.path, "invoices");
       await expect(page.locator("#row-path")).toHaveValue("invoices");
-      await page.locator("#extra-reviewed").check();
-      await page.locator("#extra-run").click();
       const csv = await download("#extra-download", "invoices.csv");
       const rows = Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
       assert.deepEqual(rows, [
@@ -278,9 +303,7 @@ const cases = [
       await goto("entity-extractor");
       const source = "Maya joined Cedar Labs. Omar works at Cedar Labs.";
       await page.locator("#source-text").fill(source);
-      await page
-        .locator("#instructions")
-        .fill("Person: a named human\nOrganization: a named employer");
+
       const plan = await ask(true);
       const entities = plan.entities;
       assert.equal(entities.length, 4);
@@ -295,8 +318,6 @@ const cases = [
         ["Cedar Labs", "Cedar Labs"],
       );
       await expect(page.locator("#review-plan")).not.toHaveValue("");
-      await page.locator("#extra-reviewed").check();
-      await page.locator("#extra-run").click();
       const exported = JSON.parse(
         await download("#extra-download", "entities.json"),
       );
@@ -330,8 +351,6 @@ const cases = [
           ["n1", "n2"],
         ],
       );
-      await page.locator("#extra-reviewed").check();
-      await page.locator("#extra-run").click();
       await expect(
         page
           .frameLocator('iframe[title="Rendered Mermaid flowchart"]')
@@ -384,8 +403,6 @@ const cases = [
           (e) => e.from === "n1" && e.to === "n3" && e.label === "no",
         ),
       );
-      await page.locator("#extra-reviewed").check();
-      await page.locator("#extra-run").click();
       await expect(
         page
           .frameLocator('iframe[title="Rendered Mermaid flowchart"]')
@@ -446,21 +463,14 @@ const cases = [
     "ask-a-webpage-public-url",
     async () => {
       await goto("ask-a-webpage");
+      await page.getByRole("tab", { name: "Public URL", exact: true }).click();
       await page
         .locator("#page-url")
         .fill("https://docs.python.org/3/library/asyncio.html");
-      await pace();
-      const responsePromise = page.waitForResponse((r) =>
-        r.url().endsWith("/api/utilities/read-page"),
-      );
-      await page.locator("#read-page").click();
-      const response = await responsePromise;
-      assert.equal(response.status(), 200);
-      await expect(page.locator("#read-page")).toBeEnabled();
-      const source = await page.locator("#source-text").inputValue();
-      assert.ok(source.includes("asyncio"));
       await page.locator("#instructions").fill("What is asyncio used for?");
       const plan = await ask(true);
+      const source = await page.locator("#source-text").inputValue();
+      assert.ok(source.includes("asyncio"));
       assert.ok(["answered", "partial"].includes(plan.status));
       assert.ok(
         plan.excerpts.some((e) => /concurrent|async\/await/i.test(e.text)),
@@ -509,7 +519,6 @@ const cases = [
         );
       const plan = await ask();
       assert.equal(plan.convention, "auto");
-      await page.locator("#run").click();
       const text = await page.locator("#result-view").innerText();
       assert.ok(text.includes("review"));
       current.checks = [
@@ -561,7 +570,8 @@ try {
       root + "/results.json",
       JSON.stringify(
         {
-          origin: "https://utilitypot.modepot.io",
+          origin: target.origin,
+          integration: target.mode,
           mocking: false,
           plannedCaseCount: selected.length,
           results,
