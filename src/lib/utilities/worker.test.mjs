@@ -1,6 +1,200 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import worker, { handleRequest } from "../../../worker/index.js";
+import { readFile } from "node:fs/promises";
+
+test("entity requests condition bounded ends on validated starts in at most two calls", async () => {
+  const captured = JSON.parse(
+    await readFile(
+      new URL("./fixtures/entities-repeated-jev-1.13.0.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  let calls = 0,
+    questions = 0;
+  const chosenEnds = {
+    t0_m0_end: "w1",
+    t0_m1_end: "w6",
+    t0_m2_end: "w12",
+    t1_m0_end: "w4",
+    t1_m1_end: "w10",
+  };
+  const response = await handleRequest(
+    request({ tool: "entities", input: captured.input }),
+    env,
+    async (url, init) => {
+      assert.equal(url, "https://api.typesafe.ai/v1/systemone");
+      const body = JSON.parse(init.body);
+      calls++;
+      questions += Object.keys(body.questions).length;
+      assert.ok(
+        Object.keys(body.questions).every((k) =>
+          k.endsWith(calls === 1 ? "_start" : "_end"),
+        ),
+      );
+      if (calls === 2)
+        assert.ok(!Object.hasOwn(body.questions.t0_m1_end.criteria, "w16"));
+      const answers = Object.fromEntries(
+        Object.entries(body.questions).map(([key, q]) => {
+          const choice =
+            calls === 1
+              ? captured.provider.answers[key].choice
+              : chosenEnds[key];
+          assert.ok(Object.hasOwn(q.criteria, choice));
+          return [
+            key,
+            {
+              type: "choice",
+              choice,
+              confidence: 1,
+              probabilities: Object.fromEntries(
+                Object.keys(q.criteria).map((k) => [k, k === choice ? 1 : 0]),
+              ),
+            },
+          ];
+        }),
+      );
+      return Response.json({
+        model: "jev-test",
+        answers,
+        usage: { input_tokens: 1, output_tokens: 1 },
+      });
+    },
+  );
+  assert.equal(response.status, 200);
+  const out = await response.json();
+  assert.equal(calls, 2);
+  assert.ok(questions <= 24);
+  assert.equal(out.plan.entities.length, 5);
+  for (const entity of out.plan.entities)
+    assert.equal(
+      captured.input.text.slice(entity.start, entity.end),
+      entity.text,
+    );
+});
+test("no entity starts means no second provider call", async () => {
+  let calls = 0;
+  const response = await handleRequest(
+    request({
+      tool: "entities",
+      input: {
+        text: "Rain falls tomorrow.",
+        definitions: "Person: a named human",
+      },
+    }),
+    env,
+    async (url, init) => {
+      assert.equal(url, "https://api.typesafe.ai/v1/systemone");
+      calls++;
+      const { questions } = JSON.parse(init.body);
+      const answers = Object.fromEntries(
+        Object.entries(questions).map(([key, q]) => [
+          key,
+          {
+            type: "choice",
+            choice: "none",
+            confidence: 1,
+            probabilities: Object.fromEntries(
+              Object.keys(q.criteria).map((k) => [k, k === "none" ? 1 : 0]),
+            ),
+          },
+        ]),
+      );
+      return Response.json({
+        model: "jev-test",
+        answers,
+        usage: { input_tokens: 1, output_tokens: 1 },
+      });
+    },
+  );
+  assert.equal(response.status, 200);
+  assert.equal(calls, 1);
+  assert.deepEqual((await response.json()).plan.entities, []);
+});
+test("invalid ordered starts fail closed before spending a second call", async () => {
+  let calls = 0;
+  const response = await handleRequest(
+    request({
+      tool: "entities",
+      input: { text: "Mina met Noah.", definitions: "Person: a named human" },
+    }),
+    env,
+    async (url, init) => {
+      assert.equal(url, "https://api.typesafe.ai/v1/systemone");
+      calls++;
+      const { questions } = JSON.parse(init.body);
+      const answers = Object.fromEntries(
+        Object.entries(questions).map(([key, q]) => [
+          key,
+          {
+            type: "choice",
+            choice: "w0",
+            confidence: 1,
+            probabilities: Object.fromEntries(
+              Object.keys(q.criteria).map((k) => [k, k === "w0" ? 1 : 0]),
+            ),
+          },
+        ]),
+      );
+      return Response.json({
+        model: "jev-test",
+        answers,
+        usage: { input_tokens: 1, output_tokens: 1 },
+      });
+    },
+  );
+  assert.equal(response.status, 503);
+  assert.equal(calls, 1);
+});
+test("second-stage provider validation cannot be bypassed by a stale endpoint", async () => {
+  const input = {
+    text: "Mina Patel joined Orion Labs. Noah Chen works at Cedar Systems. Mina Patel will meet Noah Chen.",
+    definitions:
+      "Person: a named human\nOrganization: a named company or employer",
+  };
+  const captured = JSON.parse(
+    await readFile(
+      new URL("./fixtures/entities-repeated-jev-1.13.0.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  let calls = 0;
+  const response = await handleRequest(
+    request({ tool: "entities", input }),
+    env,
+    async (url, init) => {
+      assert.equal(url, "https://api.typesafe.ai/v1/systemone");
+      calls++;
+      const { questions } = JSON.parse(init.body);
+      const answers = Object.fromEntries(
+        Object.entries(questions).map(([key, q]) => {
+          const choice = captured.provider.answers[key].choice;
+          return [
+            key,
+            {
+              type: "choice",
+              choice,
+              confidence: 1,
+              probabilities: Object.fromEntries(
+                Object.keys(q.criteria).map((k) => [k, k === choice ? 1 : 0]),
+              ),
+            },
+          ];
+        }),
+      );
+      return Response.json({
+        model: "jev-test",
+        answers,
+        usage: { input_tokens: 1, output_tokens: 1 },
+        private: "must-not-leak",
+      });
+    },
+  );
+  assert.equal(response.status, 503);
+  assert.equal(calls, 2);
+  assert.ok(!(await response.text()).includes("must-not-leak"));
+});
+
 const request = (body, headers = {}) =>
   new Request("https://modepot.io/api/utilities/interpret", {
     method: "POST",
@@ -26,6 +220,7 @@ const env = {
 test("server supplies its own questions and never returns the provider credential", async () => {
   let calls = 0;
   const r = await handleRequest(request(input), env, async (url, init) => {
+    assert.equal(url, "https://api.typesafe.ai/v1/systemone");
     calls++;
     const b = JSON.parse(init.body);
     assert.equal(url, "https://api.typesafe.ai/v1/systemone");

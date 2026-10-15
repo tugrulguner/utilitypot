@@ -545,7 +545,7 @@ test("calendar, SVG, and result download intents are attributed exactly once", a
 }) => {
   const posts = await installSink(context, page);
   for (const [slug, specialized, action] of [
-    ["meeting-time-finder", "Download calendar event", "calendar_download"],
+    ["meeting-time-finder", "Add to calendar", "calendar_download"],
     ["text-to-mermaid", "Download SVG", "svg_download"],
   ]) {
     const before = decodedEvents(posts).filter(

@@ -2,43 +2,50 @@
   {
     "slug": "csv-to-nested-json",
     "title": "CSV to nested JSON",
-    "description": "Map CSV columns into nested objects and group related rows.",
-    "tool": "csv"
+    "description": "Group repeated CSV rows into nested JSON and choose which fields stay together.",
+    "tool": "csv",
+    "processing": "Local · AI optional"
   },
   {
     "slug": "fix-excel-dates",
     "title": "Fix mixed spreadsheet dates",
-    "description": "Normalize supported dates and flag ambiguity without inventing missing precision.",
-    "tool": "dates"
+    "description": "Clean up supported date text and keep unclear or invalid values visible.",
+    "tool": "dates",
+    "processing": "Local · AI optional"
   },
   {
     "slug": "meeting-time-finder",
     "title": "Find a meeting time",
-    "description": "Interpret availability and compute exact timezone-aware overlap.",
-    "tool": "meeting"
+    "description": "Compare availability across cities and download a calendar event.",
+    "tool": "meeting",
+    "processing": "Local · AI optional"
   },
   {
     "slug": "json-to-csv",
     "title": "JSON to CSV",
-    "description": "Choose a record array, flatten objects, and review nested-array handling.",
-    "tool": "jsonCsv"
+    "description": "Turn JSON records or one object into CSV for a spreadsheet.",
+    "tool": "jsonCsv",
+    "processing": "Local · AI optional"
   },
   {
     "slug": "entity-extractor",
     "title": "Custom entity extraction",
-    "description": "Define categories and extract reviewable mentions with exact source offsets.",
-    "tool": "entities"
+    "description": "Highlight people, companies or your own categories in short text.",
+    "tool": "entities",
+    "processing": "Uses AI"
   },
   {
     "slug": "text-to-mermaid",
     "title": "Text to Mermaid flowchart",
-    "description": "Review source-backed steps and branches, then render a safe flowchart locally.",
-    "tool": "diagram"
+    "description": "Turn up to eight listed steps into a flowchart you can edit and export.",
+    "tool": "diagram",
+    "processing": "Local · AI optional"
   },
   {
     "slug": "ask-a-webpage",
     "title": "Ask a webpage",
-    "description": "Read a public page or paste text and find exact source excerpts answering your question.",
-    "tool": "qa"
+    "description": "Find an exact passage in pasted text or a page from a supported documentation site.",
+    "tool": "qa",
+    "processing": "Uses AI"
   }
 ]

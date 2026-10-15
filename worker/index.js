@@ -204,36 +204,67 @@ export async function handleRequest(request, env, providerFetch = fetch) {
     }
   }
   try {
-    const r = await providerFetch("https://api.typesafe.ai/v1/systemone", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${env.TYPESAFE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "jev-latest",
-        state: spec.state,
-        questions: spec.questions,
-      }),
-      signal: AbortSignal.timeout(15000),
-    });
-    if (!r.ok) {
-      await r.body?.cancel();
-      return json(
-        { error: "Jev is unavailable. Try later or use manual controls." },
-        503,
-      );
+    let active = spec,
+      model = "",
+      plan;
+    let remainingQuestions = 24;
+    const mergedAnswers = {};
+    // Entity ends depend on selected starts; never ask unrelated endpoints
+    // independently or spend more than the original per-action question budget.
+    for (let stage = 0; stage < 2; stage++) {
+      const count = Object.keys(active.questions).length;
+      if (count === 0) {
+        plan = active.decode({});
+        break;
+      }
+      if (count > remainingQuestions)
+        throw new Error("Question budget exceeded");
+      remainingQuestions -= count;
+      const r = await providerFetch("https://api.typesafe.ai/v1/systemone", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${env.TYPESAFE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "jev-latest",
+          state: active.state,
+          questions: active.questions,
+        }),
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!r.ok) {
+        await r.body?.cancel();
+        return json(
+          { error: "Jev is unavailable. Try later or use manual controls." },
+          503,
+        );
+      }
+      const response = JSON.parse(await boundedText(r.body, 128000));
+      const answers = validateAnswers(active.questions, response);
+      if (model && model !== response.model)
+        throw new Error("Inconsistent models");
+      model = response.model;
+      for (const key of Object.keys(answers)) {
+        if (Object.hasOwn(mergedAnswers, key))
+          throw new Error("Duplicate question");
+        mergedAnswers[key] = answers[key];
+      }
+      if (stage === 0 && typeof active.followup === "function") {
+        active = active.followup(answers);
+        continue;
+      }
+      plan = active.decode(answers);
+      break;
     }
-    const response = JSON.parse(await boundedText(r.body, 128000));
-    const answers = validateAnswers(spec.questions, response);
-    const plan = spec.decode(answers);
+    if (!plan || !model) throw new Error("Incomplete interpretation");
     return json({
       source: "jev",
-      model: response.model,
+      model,
       plan,
       needsReview: true,
       confidence: Object.fromEntries(
-        Object.entries(answers).map(([k, a]) => [k, a.confidence]),
+        Object.entries(mergedAnswers).map(([k, a]) => [k, a.confidence]),
       ),
     });
   } catch {

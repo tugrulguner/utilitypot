@@ -105,8 +105,13 @@ const { tool } = Astro.props;
             <option value="join">Keep as JSON text in a cell</option>
             <option value="omit">Omit nested-array fields</option>
           </select>
+          <p id="nested-array-help" class="notice" aria-live="polite">
+            Choose records to inspect nested arrays before conversion.
+          </p>
           <p class="notice">
-            No row expansion. Omitting arrays removes those fields from the CSV.
+            Nested arrays: Stop makes no CSV; Keep as JSON text preserves
+            values; Omit explicitly removes those fields. Nothing is omitted
+            automatically.
           </p>
         </div>
         <details>
@@ -150,8 +155,9 @@ const { tool } = Astro.props;
           />
         </div>
         <p class="notice">
-          Extract sends your text and chosen categories to Jev/TypeSafe. Short
-          texts only: up to three matches per category; review the highlights.
+          Extract sends your text and chosen categories to Jev/TypeSafe. Limits:
+          up to 120 source tokens and three matches per category. Review
+          highlights; this is not exhaustive full-document extraction.
         </p>
       </>
     )}
@@ -275,8 +281,14 @@ const { tool } = Astro.props;
       <button id="import-plan">Import plan</button>
     </details>
   )}
-  <section id="extra-results" class="panel" hidden>
-    <h2>Result — review before sharing</h2>
+  <section
+    id="extra-results"
+    class="panel"
+    tabindex="-1"
+    aria-labelledby="extra-results-title"
+    hidden
+  >
+    <h2 id="extra-results-title">Result — review before sharing</h2>
     <div id="extra-visual" />
     <details>
       <summary>Export code view</summary>

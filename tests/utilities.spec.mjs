@@ -77,7 +77,7 @@ test("meeting windows compute local times and export a matching calendar instant
   );
   const download = page.waitForEvent("download");
   await page
-    .getByRole("button", { name: "Download calendar event", exact: true })
+    .getByRole("button", { name: "Add to calendar", exact: true })
     .click();
   const d = await download;
   expect(await fs.readFile(await d.path(), "utf8")).toContain(

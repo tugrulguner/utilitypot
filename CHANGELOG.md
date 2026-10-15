@@ -14,6 +14,11 @@
 
 ### Fixed
 
+- Extract repeated entity mentions with conditioned source boundaries instead of independent, overlapping endpoints.
+- Accept listed city names for meetings, show local-time comparisons and export the selected calendar slot.
+- Reveal off-screen completed answers, offer explicit single-object CSV conversion, explain nested-array policies and reject wholly empty date input.
+- Replace parser-level empty-input messages with actionable guidance and distinguish local tools from AI actions.
+
 - Branching diagrams ignore inapplicable false-branch judgments on non-decision steps instead of rejecting an otherwise valid reviewed graph.
 
 - Public-page extraction preserves inline text, prefers semantic main content and returns a disclosed character/paragraph-bounded context that the QA input accepts.

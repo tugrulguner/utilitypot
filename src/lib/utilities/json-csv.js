@@ -23,39 +23,69 @@ export function arrayPaths(data) {
     throw new Error("Use a document with at most 20 record arrays.");
   return out;
 }
-export function jsonToCsv(data, path, arrays = "omit") {
+function nestedArrayPaths(value) {
+  const out = [];
+  function walk(v, path, depth) {
+    if (depth > 6) return;
+    if (Array.isArray(v)) {
+      out.push(path);
+      v.forEach((x, i) => walk(x, `${path}[${i}]`, depth + 1));
+    } else if (v && typeof v === "object")
+      for (const [k, x] of Object.entries(v))
+        walk(x, path ? `${path}.${k}` : k, depth + 1);
+  }
+  walk(value, "", 0);
+  return out;
+}
+export function jsonToCsv(data, path, arrays = "reject") {
   if (
-    !arrayPaths(data).includes(path) ||
-    !["omit", "join", "reject"].includes(arrays)
+    !arrayPaths(data).includes(path) &&
+    !(
+      path === "$object" &&
+      data &&
+      typeof data === "object" &&
+      !Array.isArray(data)
+    )
   )
-    throw new Error("Choose a record array and nested-array policy.");
+    throw new Error("Choose a record array or the single object row.");
+  if (!["omit", "join", "reject"].includes(arrays))
+    throw new Error("Choose how to handle nested arrays.");
   const records =
-    path === "$" ? data : path.split(".").reduce((v, k) => v[k], data);
+    path === "$object"
+      ? [data]
+      : path === "$"
+        ? data
+        : path.split(".").reduce((v, k) => v[k], data);
   if (records.length > 10000) throw new Error("Use at most 10,000 records.");
   const rows = records.map((record) => {
     const out = {};
     function flatten(v, prefix, depth) {
-      if (depth > 6) throw new Error("Nesting exceeds six levels.");
+      if (depth > 6)
+        throw new Error(`Nesting at ${prefix || "record"} exceeds six levels.`);
       if (Array.isArray(v)) {
         if (arrays === "reject")
-          throw new Error("Nested arrays require an explicit policy.");
+          throw new Error(
+            `Nested array at ${prefix} needs an explicit policy: choose omit, join as JSON text, or reject.`,
+          );
         if (arrays === "join") out[prefix] = JSON.stringify(v);
         return;
       }
-      if (v && typeof v === "object") {
+      if (v && typeof v === "object")
         for (const [k, x] of Object.entries(v)) {
           if (bad.has(k) || k.includes("."))
-            throw new Error("Unsafe or ambiguous property path.");
+            throw new Error(
+              `Unsafe or ambiguous property at ${prefix ? `${prefix}.` : ""}${k}.`,
+            );
           flatten(x, prefix ? `${prefix}.${k}` : k, depth + 1);
         }
-      } else out[prefix] = v === null ? "" : String(v);
+      else out[prefix] = v === null ? "" : String(v);
     }
     flatten(record, "", 0);
     return out;
   });
   const headers = [...new Set(rows.flatMap(Object.keys))];
   if (!headers.length || headers.length > 100)
-    throw new Error("Use 1–100 output columns.");
+    throw new Error("Use 1–100 output fields with at least one value.");
   return Papa.unparse(
     { fields: headers, data: rows.map((r) => headers.map((h) => r[h] ?? "")) },
     { escapeFormulae: true },
@@ -70,13 +100,37 @@ export function createJsonCsvInterpretation(input) {
     input.instructions.length > 800
   )
     throw new Error("Use a small JSON sample and instructions.");
-  const data = JSON.parse(input.sample),
-    paths = arrayPaths(data);
-  if (!paths.length) throw new Error("The sample needs an array of objects.");
-  const criteria = Object.fromEntries(paths.map((p) => [p, p]));
+  let data;
+  try {
+    data = JSON.parse(input.sample);
+  } catch {
+    throw new Error("Enter valid JSON (check commas, quotes, and brackets). ");
+  }
+  const paths = arrayPaths(data);
+  const singleObject =
+    !paths.length && data && typeof data === "object" && !Array.isArray(data);
+  if (singleObject) paths.push("$object");
+  if (!paths.length)
+    throw new Error(
+      "Choose an object array with record rows; a single JSON object can be converted as one row.",
+    );
+  const criteria = Object.fromEntries(
+    paths.map((p) => [p, p === "$object" ? "Entire object as one row" : p]),
+  );
   criteria.none = "No clear row array; user must select.";
   return {
-    state: { sample: data, instructions: input.instructions },
+    state: {
+      sample: data,
+      instructions: input.instructions,
+      ...(singleObject
+        ? {
+            data,
+            path: "$object",
+            arrays: "reject",
+            nestedArrayPaths: nestedArrayPaths(data),
+          }
+        : {}),
+    },
     questions: {
       rows: {
         type: "choice",

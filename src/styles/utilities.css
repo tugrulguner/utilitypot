@@ -286,6 +286,25 @@
   }
 }
 
+.utility-app .meeting-comparison ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+.utility-app .meeting-comparison li {
+  display: grid;
+  gap: 0.3rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.85rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.utility-app .meeting-comparison span {
+  line-height: 1.5;
+}
+
 /* Keep the first useful action near the input, not below a setup tutorial. */
 .utility-page .utility-main:has(.utility-app) {
   padding-top: 1.25rem;

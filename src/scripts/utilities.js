@@ -3,6 +3,10 @@ import Papa from "papaparse";
 import { parseCsv, templatePaths, transformCsv } from "../lib/utilities/csv.js";
 import { normalizeDates } from "../lib/utilities/dates.js";
 import { findSlots, calendarEvent } from "../lib/utilities/meeting.js";
+import {
+  resolveMeetingZone,
+  presentMeetingSlot,
+} from "../lib/utilities/meeting-presentation.js";
 const root = document.querySelector("[data-utility]");
 if (root) {
   const tool = root.getAttribute("data-utility"),
@@ -56,6 +60,11 @@ if (root) {
     $("results").hidden = true;
   };
   root.addEventListener("input", (e) => {
+    if (e.target.id === "slot-choice") return;
+    if (e.target.dataset.field === "zone") {
+      e.target.setCustomValidity("");
+      e.target.removeAttribute("aria-invalid");
+    }
     invalidate();
     if (["csv-input", "json-example", "csv-intent"].includes(e.target.id)) {
       $("mapping-panel").hidden = true;
@@ -178,14 +187,26 @@ if (root) {
     $("mapping-panel").hidden = false;
   }
   function participants() {
-    return [...root.querySelectorAll(".participant")].map((p) =>
-      Object.fromEntries(
+    return [...root.querySelectorAll(".participant")].map((p, index) => {
+      const person = Object.fromEntries(
         [...p.querySelectorAll("[data-field]")].map((e) => [
           e.dataset.field,
           e.value,
         ]),
-      ),
-    );
+      );
+      const field = p.querySelector('[data-field="zone"]');
+      try {
+        person.zone = resolveMeetingZone(person.zone).zone;
+        field.setCustomValidity("");
+        field.removeAttribute("aria-invalid");
+      } catch (e) {
+        field.setCustomValidity(e.message);
+        field.setAttribute("aria-invalid", "true");
+        field.reportValidity();
+        throw new Error(`Participant ${index + 1}: ${e.message}`);
+      }
+      return person;
+    });
   }
   function setPeople(people) {
     [...root.querySelectorAll(".participant")].forEach((p, i) => {
@@ -553,16 +574,53 @@ if (root) {
           `Found ${slots.length} feasible slots. Times are computed locally, not by AI.`,
         );
         if (slots.length) {
+          const technical = document.createElement("details");
+          const summary = document.createElement("summary");
+          summary.textContent = "Technical times and all options";
+          technical.append(summary, ...$("result-view").childNodes);
           const label = document.createElement("label");
           label.htmlFor = "slot-choice";
-          label.textContent = "Choose a slot for calendar download";
+          label.textContent = "Choose a meeting time — local for each person";
           const select = document.createElement("select");
           select.id = "slot-choice";
           slots.forEach((s, i) =>
-            select.append(new Option(`${i + 1}. ${s.start}`, String(i))),
+            select.append(
+              new Option(
+                `${i + 1}. ${presentMeetingSlot(s)
+                  .map((p) => `${p.label}: ${p.start}`)
+                  .join(" · ")}`,
+                String(i),
+              ),
+            ),
           );
+          const comparison = document.createElement("section");
+          comparison.className = "meeting-comparison";
+          comparison.setAttribute("aria-live", "polite");
+          comparison.setAttribute("aria-label", "Selected meeting time");
+          const renderChoice = () => {
+            const title = document.createElement("h3");
+            title.textContent = `Selected meeting time · ${duration} minutes`;
+            const list = document.createElement("ul");
+            for (const person of presentMeetingSlot(
+              slots[Number(select.value)],
+            )) {
+              const row = document.createElement("li"),
+                who = document.createElement("strong"),
+                time = document.createElement("span");
+              who.textContent =
+                person.label === person.city
+                  ? person.city
+                  : `${person.label} · ${person.city}`;
+              time.textContent = `${person.start} – ${person.end}`;
+              row.append(who, time);
+              list.append(row);
+            }
+            comparison.replaceChildren(title, list);
+          };
+          select.addEventListener("change", renderChoice);
+          renderChoice();
           const b = document.createElement("button");
-          b.textContent = "Download calendar event";
+          b.textContent = "Add to calendar";
           b.addEventListener("click", () =>
             download(
               calendarEvent(slots[Number(select.value)], duration),
@@ -571,7 +629,13 @@ if (root) {
               "calendar_download",
             ),
           );
-          $("result-view").append(label, select, b);
+          $("result-view").replaceChildren(
+            label,
+            select,
+            comparison,
+            b,
+            technical,
+          );
         }
       }
       outcome = "success";

@@ -21,6 +21,10 @@ export function normalizeDates(text, convention = "auto") {
     !conventions.includes(convention)
   )
     throw new Error("Use at most 200 KB and a supported date convention.");
+  if (!text.trim())
+    throw new Error(
+      "Enter at least one date; blank rows are preserved within a non-empty list.",
+    );
   const lines = text.split(/\r?\n/);
   if (lines.length > 10000) throw new Error("Use at most 10,000 dates.");
   return lines.map((original, index) => {

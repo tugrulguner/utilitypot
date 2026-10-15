@@ -4,6 +4,9 @@ interface Props {
 }
 const { tool } = Astro.props;
 const zones = Intl.supportedValuesOf("timeZone");
+const city = (zone: string) => zone.split("/").at(-1)!.replaceAll("_", " ");
+const uniqueCity = (zone: string) =>
+  zones.filter((other) => city(other) === city(zone)).length === 1;
 ---
 
 <section
@@ -189,7 +192,9 @@ const zones = Intl.supportedValuesOf("timeZone");
         </div>
         <datalist id="zones">
           {zones.map((zone) => (
-            <option value={zone}>{zone.replaceAll("_", " ")}</option>
+            <option value={uniqueCity(zone) ? city(zone) : zone}>
+              {city(zone)} · {zone}
+            </option>
           ))}
         </datalist>
         <div class="actions">
