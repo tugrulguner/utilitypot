@@ -21,7 +21,7 @@ test("family overview, assets and creator remain discoverable", async ({
   await expect(page.locator(".creator-credit")).toBeVisible();
   await expect(page.locator(".product-hero img")).toHaveAttribute(
     "src",
-    "/utilitypot-lockup-v1.png",
+    "/utilitypot-lockup-v1.png?v=wordmark-2",
   );
   await expect(page.locator("link[rel=icon]")).toHaveAttribute(
     "href",
@@ -29,7 +29,7 @@ test("family overview, assets and creator remain discoverable", async ({
   );
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
-    "https://utilitypot.modepot.io/utilitypot-social-v1.png",
+    "https://utilitypot.modepot.io/utilitypot-social-v1.png?v=wordmark-2",
   );
   await expect(page.locator("#tools article")).toHaveCount(7);
 });
