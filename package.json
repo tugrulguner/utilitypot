@@ -14,7 +14,11 @@
     "preview": "astro preview",
     "test:browser": "playwright test",
     "test:worker": "playwright test --config=playwright.utilities.config.mjs",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "test:release": "node --test scripts/*.test.mjs",
+    "format:check": "prettier --check .",
+    "release:bundle": "node scripts/release.mjs bundle",
+    "test:release-artifact": "playwright test --config=playwright.artifact.config.mjs"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.3.0",
@@ -29,9 +33,11 @@
     "@astrojs/check": "^0.9.10",
     "@playwright/test": "^1.63.0",
     "@types/papaparse": "^5.5.2",
+    "jsonc-parser": "^3.3.1",
     "prettier": "^3.9.10",
     "prettier-plugin-astro": "^1.1.1",
     "typescript": "^6.0.3",
-    "wrangler": "^4.142.0"
+    "wrangler": "^4.142.0",
+    "yaml": "^2.9.1"
   }
 }
