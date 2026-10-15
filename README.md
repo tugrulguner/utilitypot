@@ -55,7 +55,7 @@ The `UTILITY_RATE_LIMIT` and `UTILITY_GLOBAL_RATE_LIMIT` bindings allow 6/client
 
 The intended Worker is `utilitypot-site`, independent of `modepot-site` and LifePot. `wrangler.jsonc` declares the intended custom domain. The separate deployment workflow runs full CI and deploys only from `main` using the `production` environment and durable Cloudflare credentials. Tagged releases validate version/changelog and publish verified website artifacts, not npm/PyPI packages. Neither a configured route nor automation source proves a live deployment. See [deployment and releases](docs/deployment-and-releases.md) for prerequisites, release preparation and end-to-end verification. Do not repoint the umbrella Worker.
 
-The compatibility date is supported by the bundled workerd runtime. No application input database, cookies, SDK tracking or session replay is introduced. See the user-visible `/privacy/` page for limits and third-party processing disclosures.
+The compatibility date is supported by the bundled workerd runtime. No application input database, cookies, or session replay is introduced. PostHog page and coarse action analytics use a pseudonymous browser identifier in local storage and respect persisted SDK opt-out; pageview URLs retain only public paths, referrers are origin-only, and query strings, fragments, campaign identifiers and persisted acquisition values are removed. Events never include form values, provider context/results, or output. Copy/download events record user action intent, not successful clipboard or file transfer. See the user-visible `/privacy/` page for limits and third-party processing disclosures.
 
 ## Scope and limitations
 

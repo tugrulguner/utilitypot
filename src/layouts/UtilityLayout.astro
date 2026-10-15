@@ -3,6 +3,7 @@ import "@fontsource-variable/manrope";
 import "@fontsource/ibm-plex-mono/400.css";
 import "../styles/global.css";
 import "../styles/utilities.css";
+import { posthogScript } from "../lib/analytics.js";
 interface Props {
   title: string;
   description: string;
@@ -47,6 +48,7 @@ const schema = {
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="alternate" type="text/plain" href="/llms.txt" />
     <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    <script is:inline set:html={posthogScript} />
   </head>
   <body class="utility-page">
     <a href="#main" class="skip-link">

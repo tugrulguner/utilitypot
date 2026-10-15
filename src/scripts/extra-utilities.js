@@ -9,6 +9,38 @@ if (root) {
     output = "",
     filename = "",
     mime = "text/plain";
+  const analyticsTool = {
+    jsonCsv: "json_to_csv",
+    entities: "entity_extractor",
+    diagram: "text_to_mermaid",
+    qa: "ask_a_webpage",
+  }[tool];
+  const capture = (event, properties = {}) => {
+    try {
+      globalThis.posthog?.capture(event, properties, { send_instantly: true });
+    } catch {
+      /* Analytics must never block the utility. */
+    }
+  };
+  const attemptId = () =>
+    globalThis.crypto?.randomUUID?.() ??
+    `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const begin = (action) => {
+    const id = attemptId();
+    capture("utility_action_started", {
+      tool: analyticsTool,
+      action,
+      attempt_id: id,
+    });
+    return { id, action };
+  };
+  const complete = (attempt, outcome) =>
+    capture("utility_action_completed", {
+      tool: analyticsTool,
+      action: attempt.action,
+      attempt_id: attempt.id,
+      outcome,
+    });
   const status = (s, error = false) => {
     $("extra-status").textContent = s;
     $("extra-status").classList.toggle("error", error);
@@ -165,6 +197,9 @@ if (root) {
     }
   });
   $("read-page")?.addEventListener("click", async () => {
+    const attempt = begin("read_page");
+    let outcome = "unexpected_failure",
+      responseStatus = 0;
     clear();
     const token = revision,
       button = $("read-page");
@@ -177,8 +212,12 @@ if (root) {
         body: JSON.stringify({ url: $("page-url").value }),
         signal: AbortSignal.timeout(12000),
       });
+      responseStatus = r.status;
       const data = await r.json();
-      if (token !== revision) return;
+      if (token !== revision) {
+        outcome = "cancelled";
+        return;
+      }
       if (!r.ok) throw new Error(data.error || "Could not read the page.");
       $("source-text").value = data.text;
       $("page-url").value = data.url;
@@ -187,9 +226,16 @@ if (root) {
           ? "Page read, truncated to 10,000 characters. Inspect it before asking Jev."
           : "Page read. Review the extracted text before asking Jev.",
       );
+      outcome = "success";
     } catch (e) {
+      outcome =
+        e.name === "TimeoutError" ||
+        (responseStatus >= 400 && responseStatus < 500)
+          ? "rejected"
+          : "unexpected_failure";
       if (token === revision) status(e.message, true);
     } finally {
+      complete(attempt, outcome);
       button.disabled = false;
     }
   });
@@ -199,6 +245,9 @@ if (root) {
       return;
     }
     clear();
+    const attempt = begin("ai_interpretation");
+    let outcome = "unexpected_failure",
+      responseStatus = 0;
     const token = revision,
       button = $("extra-ask");
     button.disabled = true;
@@ -231,8 +280,12 @@ if (root) {
         body: JSON.stringify({ tool, input }),
         signal: AbortSignal.timeout(20000),
       });
+      responseStatus = r.status;
       const data = await r.json();
-      if (token !== revision) return;
+      if (token !== revision) {
+        outcome = "cancelled";
+        return;
+      }
       if (!r.ok) throw new Error(data.error || "Jev is unavailable.");
       if (data.source !== "jev" || !data.plan)
         throw new Error("Unverified interpretation.");
@@ -265,7 +318,13 @@ if (root) {
         `Jev ${data.model}: ${tool === "qa" ? "evidence selected" : "proposal ready for review"}${weak ? "; uncertain selections require care" : ""}.`,
         weak,
       );
+      outcome = "success";
     } catch (e) {
+      outcome =
+        e.name === "TimeoutError" ||
+        (responseStatus >= 400 && responseStatus < 500)
+          ? "rejected"
+          : "unexpected_failure";
       if (token === revision)
         status(
           e.name === "TimeoutError"
@@ -274,13 +333,18 @@ if (root) {
           true,
         );
     } finally {
+      complete(attempt, outcome);
       button.disabled = false;
     }
   });
   $("extra-run")?.addEventListener("click", async () => {
+    const attempt = begin("manual_run");
+    let outcome = "rejected";
     try {
-      if (!$("extra-reviewed").checked)
+      if (!$("extra-reviewed").checked) {
+        outcome = "rejected";
         throw new Error("Review and confirm the proposal first.");
+      }
       const token = revision;
       if (tool === "jsonCsv") {
         const result = jsonToCsv(
@@ -288,6 +352,7 @@ if (root) {
           $("row-path").value,
           $("array-policy").value,
         );
+        outcome = "unexpected_failure";
         show(result, "utilitypot-data.csv", "text/csv");
         status(
           "CSV computed locally. Formula-like cells are escaped for spreadsheet safety.",
@@ -320,6 +385,7 @@ if (root) {
         for (const type of types)
           if (items.filter((e) => e.type === type).length > 3)
             throw new Error("At most three mentions per type.");
+        outcome = "unexpected_failure";
         show(
           JSON.stringify(items, null, 2),
           "utilitypot-entities.json",
@@ -346,6 +412,7 @@ if (root) {
       }
       if (tool === "diagram") {
         const code = mermaidSource(JSON.parse($("review-plan").value));
+        outcome = "unexpected_failure";
         const { default: mermaid } = await import("mermaid");
         mermaid.initialize({
           startOnLoad: false,
@@ -355,7 +422,10 @@ if (root) {
           flowchart: { htmlLabels: false },
         });
         const { svg } = await mermaid.render(`diagram-${Date.now()}`, code);
-        if (token !== revision) return;
+        if (token !== revision) {
+          outcome = "cancelled";
+          return;
+        }
         show(code, "utilitypot-flowchart.mmd", "text/plain");
         const frame = document.createElement("iframe");
         frame.title = "Rendered Mermaid flowchart";
@@ -366,6 +436,10 @@ if (root) {
         const b = document.createElement("button");
         b.textContent = "Download SVG";
         b.addEventListener("click", () => {
+          capture("utility_output_download_requested", {
+            tool: analyticsTool,
+            action: "svg_download",
+          });
           const url = URL.createObjectURL(
             new Blob([svg], { type: "image/svg+xml" }),
           );
@@ -378,17 +452,32 @@ if (root) {
         $("extra-visual").append(b);
         status("Validated graph rendered locally in a sandboxed frame.");
       }
+      outcome = "success";
     } catch (e) {
       $("extra-results").hidden = true;
       output = "";
       status(e.message, true);
+    } finally {
+      complete(attempt, outcome);
     }
   });
-  $("extra-download").addEventListener("click", download);
+  $("extra-download").addEventListener("click", () => {
+    if (output) {
+      capture("utility_output_download_requested", {
+        tool: analyticsTool,
+        action: "download_result",
+      });
+      download();
+    }
+  });
   $("extra-copy").addEventListener("click", async () => {
     try {
       if (output) {
         await navigator.clipboard.writeText(output);
+        capture("utility_output_copy_succeeded", {
+          tool: analyticsTool,
+          action: "copy_result",
+        });
         status("Copied.");
       }
     } catch {
