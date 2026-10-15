@@ -389,7 +389,7 @@
 .utility-app .notice {
   font-size: 0.85rem;
   line-height: 1.5;
-  margin: 0.65rem 0;
+  margin: 0.5rem 0;
 }
 .utility-app .actions {
   margin: 0.65rem 0 0;
@@ -451,5 +451,34 @@
   }
   .utility-app .panel {
     padding: 0.75rem;
+  }
+}
+
+/* Preserve full touch targets while prioritizing the default meeting action. */
+.utility-app[data-utility="meeting"] .participant {
+  padding: 0.75rem;
+}
+.utility-app[data-utility="meeting"] .participant h2 {
+  margin-bottom: 0.35rem;
+}
+.utility-app[data-utility="meeting"] .participant label {
+  margin: 0.45rem 0 0.3rem;
+}
+.utility-app .participant-name > summary {
+  min-height: 44px;
+  box-sizing: border-box;
+  padding-block: 0.65rem;
+}
+
+/* Keep sample guidance within the existing compact tool workspace. */
+.utility-app #example-outcome {
+  margin: 0.35rem 0;
+}
+[data-utility="meeting"] .participant details {
+  margin: 0;
+}
+@media (max-width: 700px) {
+  .utility-app :is(#csv-input, #dates-input, #source-text) {
+    height: 120px;
   }
 }

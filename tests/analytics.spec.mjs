@@ -115,7 +115,7 @@ test("real CDN SDK emits sanitized pageview and bounded manual action events", a
       timeout: 15000,
     })
     .toBeTruthy();
-  await page.getByRole("button", { name: "Load example" }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.getByRole("button", { name: "Fix dates" }).click();
   await page.getByRole("button", { name: "Download result" }).click();
   await expect
@@ -200,7 +200,7 @@ test("all seven tool handlers emit no initial example action and bounded complet
       .locator("details")
       .evaluateAll((es) => es.forEach((e) => (e.open = true)));
     await page.waitForFunction(() => window.posthog?.__loaded);
-    await page.getByRole("button", { name: "Load example" }).click();
+    await page.getByRole("button", { name: /^Load example:/ }).click();
     const beforeRun = decodedEvents(posts);
     expect(beforeRun.some((e) => e.event === "utility_action_started")).toBe(
       false,
@@ -303,7 +303,7 @@ test("manual validation and presentation failures classify distinctly across uti
     {
       slug: "fix-excel-dates",
       run: async (p) => {
-        await p.getByRole("button", { name: "Load example" }).click();
+        await p.getByRole("button", { name: /^Load example:/ }).click();
         await p.getByRole("button", { name: "Fix dates" }).click();
       },
       failPresentation: async (p) =>
@@ -317,7 +317,7 @@ test("manual validation and presentation failures classify distinctly across uti
     {
       slug: "entity-extractor",
       run: async (p) => {
-        await p.getByRole("button", { name: "Load example" }).click();
+        await p.getByRole("button", { name: /^Load example:/ }).click();
         if (!(await p.locator("#entity-review").evaluate((e) => e.open)))
           await p.locator("#entity-review > summary").click();
         await p.getByRole("button", { name: "Update preview" }).click();
@@ -390,7 +390,7 @@ test("invalid manual input is rejected and a valid retry succeeds with a distinc
       .locator("details")
       .evaluateAll((es) => es.forEach((e) => (e.open = true)));
     await page.waitForFunction(() => window.posthog?.__loaded);
-    await page.getByRole("button", { name: "Load example" }).click();
+    await page.getByRole("button", { name: /^Load example:/ }).click();
     const meeting = slug === "meeting-time-finder";
     if (meeting) await page.locator("#duration").fill("0");
     else {
@@ -411,7 +411,8 @@ test("invalid manual input is rejected and a valid retry succeeds with a distinc
           .map((e) => e.properties.outcome),
       )
       .toEqual(["rejected"]);
-    await page.getByRole("button", { name: "Load example" }).click();
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByRole("button", { name: /^Load example:/ }).click();
     await page.locator(meeting ? "#run" : "#extra-run").click();
     await expect
       .poll(() =>
@@ -468,7 +469,7 @@ test("edited inputs cancel stale AI completions without presenting success", asy
       .locator("details")
       .evaluateAll((es) => es.forEach((e) => (e.open = true)));
     await page.waitForFunction(() => window.posthog?.__loaded);
-    await page.getByRole("button", { name: "Load example" }).click();
+    await page.getByRole("button", { name: /^Load example:/ }).click();
     const dates = slug === "fix-excel-dates";
     const before = decodedEvents(posts).filter(
       (e) => e.event === "utility_action_completed",
@@ -520,7 +521,7 @@ test("a pending diagram render cannot report success after its source changes", 
   });
   await page.goto("/tools/text-to-mermaid/");
   await page.waitForFunction(() => window.posthog?.__loaded);
-  await page.getByRole("button", { name: "Load example" }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.locator("#graph-panel > summary").click();
   await page.locator("#extra-run").click();
   await pending;
@@ -556,7 +557,7 @@ test("calendar, SVG, and result download intents are attributed exactly once", a
       .locator("details")
       .evaluateAll((es) => es.forEach((e) => (e.open = true)));
     await page.waitForFunction(() => window.posthog?.__loaded);
-    await page.getByRole("button", { name: "Load example" }).click();
+    await page.getByRole("button", { name: /^Load example:/ }).click();
     const meeting = slug === "meeting-time-finder";
     await page.locator(meeting ? "#run" : "#extra-run").click();
     for (const name of [specialized, "Download result"]) {
@@ -600,7 +601,7 @@ test("copy success includes its bounded tool dimension", async ({
       value: { writeText: async () => {} },
     });
   });
-  await page.getByRole("button", { name: "Load example" }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.getByRole("button", { name: "Fix dates" }).click();
   await page.getByRole("button", { name: "Copy result", exact: true }).click();
   await expect
@@ -631,7 +632,7 @@ test("a throwing analytics capture cannot block a local operation or its present
         throw new Error("CAPTURE_THROW_SENTINEL");
       };
     });
-    await page.getByRole("button", { name: "Load example" }).click();
+    await page.getByRole("button", { name: /^Load example:/ }).click();
     await page
       .locator(slug === "fix-excel-dates" ? "#run" : "#extra-run")
       .click();
@@ -688,7 +689,7 @@ test("AI request completion distinguishes presented success, client rejection, a
       .locator("details")
       .evaluateAll((es) => es.forEach((e) => (e.open = true)));
     await page.waitForFunction(() => window.posthog?.__loaded);
-    await page.getByRole("button", { name: "Load example" }).click();
+    await page.getByRole("button", { name: /^Load example:/ }).click();
     await page.getByRole("button", { name: "Fix with Jev" }).click();
     await expect
       .poll(

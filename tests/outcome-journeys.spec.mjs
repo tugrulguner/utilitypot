@@ -39,9 +39,7 @@ for (const width of [1280, 390]) {
         });
       });
       await page.goto(`/tools/${slug}/`);
-      await page
-        .getByRole("button", { name: "Load example", exact: true })
-        .click();
+      await page.getByRole("button", { name: /^Load example:/ }).click();
       expect(calls).toBe(0);
       await page.getByRole("button", { name: action, exact: true }).click();
       await expect(page.locator(result)).toBeVisible();
@@ -139,7 +137,7 @@ test("entity correction computes an exact repeated mention and blocks invented t
   page,
 }) => {
   await page.goto("/tools/entity-extractor/");
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.locator("#entity-review > summary").click();
   await page.getByLabel("Mention 1", { exact: true }).fill("Lin");
   await page.getByLabel("Mention 1", { exact: true }).press("Tab");

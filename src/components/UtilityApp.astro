@@ -3,6 +3,20 @@ interface Props {
   tool: "csv" | "dates" | "meeting";
 }
 const { tool } = Astro.props;
+const examples = {
+  csv: [
+    "Load example: customers",
+    "Three rows → two customer groups: 001 has two items, 002 has one.",
+  ],
+  dates: [
+    "Load example: mixed dates",
+    "Try complete, unclear, invalid and month/year-only dates. Every original stays in the report.",
+  ],
+  meeting: [
+    "Load example: working hours",
+    "Sample London–Kolkata hours, not your availability. Find 30-minute overlaps.",
+  ],
+};
 const zones = Intl.supportedValuesOf("timeZone");
 const city = (zone: string) => zone.split("/").at(-1)!.replaceAll("_", " ");
 const uniqueCity = (zone: string) =>
@@ -16,8 +30,11 @@ const uniqueCity = (zone: string) =>
   <section class="panel">
     <div class="workspace-toolbar">
       <h2>Input</h2>
-      <button id="load-example">Load example</button>
+      <button id="load-example">{examples[tool][0]}</button>
     </div>
+    <p id="example-outcome" class="notice">
+      {examples[tool][1]}
+    </p>
     {tool === "csv" && (
       <>
         <label for="csv-input">CSV data</label>
@@ -29,13 +46,14 @@ const uniqueCity = (zone: string) =>
         />
         <label for="source-file">Or upload CSV (local only, up to 2 MB)</label>
         <input id="source-file" type="file" accept=".csv,text/csv" />
-        <label for="group-by">One parent per</label>
+        <label for="group-by">Group rows by</label>
         <select id="group-by">
           <option value="">Paste CSV to choose a field</option>
         </select>
         <p class="notice">
-          Every value stays a string. Other columns become child rows with their
-          original header names. Up to 20 columns and 10,000 rows.
+          Rows with the same value in this column form one group. Every value
+          stays a string. Other columns become child rows with their original
+          header names. Up to 20 columns and 10,000 rows.
         </p>
         <details>
           <summary>Advanced structure and custom mapping</summary>
@@ -83,7 +101,14 @@ const uniqueCity = (zone: string) =>
           dates remain visible.
         </p>
         <div id="convention-panel" hidden>
-          <label for="date-convention">How should numeric dates be read?</label>
+          <p id="date-convention-scope" class="notice">
+            Your choice applies to all numeric day/month/year dates in this
+            list. ISO dates and named months are unchanged. Mixed sources? Keep
+            Unknown and review them separately.
+          </p>
+          <label for="date-convention">
+            How should numeric dates in this list be read?
+          </label>
           <select id="date-convention">
             <option value="auto">Unknown — keep ambiguity visible</option>
             <option value="day-first">Day first: 03/04 means 3 April</option>
@@ -118,7 +143,7 @@ const uniqueCity = (zone: string) =>
             <input id="meeting-date" type="date" />
           </div>
           <div>
-            <label for="duration">Duration in minutes</label>
+            <label for="duration">Minutes</label>
             <input id="duration" type="number" min="15" max="240" value="30" />
           </div>
         </div>
@@ -138,10 +163,6 @@ const uniqueCity = (zone: string) =>
               <h2>Participant {i + 1}</h2>
               <div class="utility-grid">
                 <div>
-                  <label for={`p${i}-name`}>Name (optional)</label>
-                  <input id={`p${i}-name`} data-field="name" maxlength="60" />
-                </div>
-                <div>
                   <label for={`p${i}-zone`}>City / timezone {i + 1}</label>
                   <input
                     id={`p${i}-zone`}
@@ -151,6 +172,11 @@ const uniqueCity = (zone: string) =>
                     placeholder="Search a city, e.g. London"
                   />
                 </div>
+                <details class="participant-name">
+                  <summary>Name (optional)</summary>
+                  <label for={`p${i}-name`}>Name for participant {i + 1}</label>
+                  <input id={`p${i}-name`} data-field="name" maxlength="60" />
+                </details>
               </div>
               <div data-availability="jev" hidden>
                 <label for={`p${i}-text`}>Availability statement {i + 1}</label>
@@ -197,10 +223,6 @@ const uniqueCity = (zone: string) =>
             </option>
           ))}
         </datalist>
-        <div class="actions">
-          <button id="add-person">Add participant</button>
-          <button id="remove-person">Remove last</button>
-        </div>
         <p class="notice">
           For this date only. Overnight windows finish the next day.
         </p>
@@ -215,6 +237,12 @@ const uniqueCity = (zone: string) =>
             : "Find times"}
       </button>
     </div>
+    {tool === "meeting" && (
+      <div class="actions meeting-secondary-actions">
+        <button id="add-person">Add participant</button>
+        <button id="remove-person">Remove last</button>
+      </div>
+    )}
   </section>
   <p
     id="utility-status"

@@ -227,6 +227,8 @@ const cases = [
         [1, "India", "Asia/Kolkata", "Available from 2pm until 4pm."],
       ]) {
         const p = page.locator(".participant").nth(i);
+        if (!(await p.locator("[data-field=name]").isVisible()))
+          await p.locator(".participant-name > summary").click();
         await p.locator("[data-field=name]").fill(name);
         await p.locator("[data-field=zone]").fill(zone);
         await p.locator("[data-field=text]").fill(text);

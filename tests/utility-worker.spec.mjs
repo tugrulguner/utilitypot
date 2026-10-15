@@ -8,7 +8,7 @@ test("actual Worker serves utility assets and fails closed without a key", async
   await page
     .locator("details")
     .evaluateAll((es) => es.forEach((e) => (e.open = true)));
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.getByRole("button", { name: "Fix with Jev", exact: true }).click();
   await expect(page.locator("#utility-status")).toContainText(
     "AI is unavailable",

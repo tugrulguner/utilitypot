@@ -39,7 +39,7 @@ test("editing a URL during its fixture read cancels the whole answer pipeline", 
 
 test("JSON to CSV downloads actual nested values locally", async ({ page }) => {
   await page.goto("/tools/json-to-csv/");
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.getByRole("button", { name: "Convert" }).click();
   await expect(page.locator("#extra-output")).toContainText("customer.name");
   const promise = page.waitForEvent("download");
@@ -53,7 +53,7 @@ test("entity review validates exact offsets and highlights real source text", as
   page,
 }) => {
   await page.goto("/tools/entity-extractor/");
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.locator("#entity-review > summary").click();
   await page.getByRole("button", { name: "Update preview" }).click();
   await expect(page.locator("#extra-visual mark")).toHaveText([
@@ -73,7 +73,7 @@ test("reviewed Mermaid flowchart renders SVG and downloads valid Mermaid source"
   page,
 }) => {
   await page.goto("/tools/text-to-mermaid/");
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.locator("#graph-panel > summary").click();
   await page.getByRole("button", { name: "Update diagram" }).click();
   await expect(page.locator("#extra-status")).toContainText("sandboxed");
@@ -111,7 +111,7 @@ test("webpage questions show selected exact evidence and no-answer, using explic
     });
   });
   await page.goto("/tools/ask-a-webpage/");
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.getByRole("button", { name: "Find answer", exact: true }).click();
   await expect(page.locator("#extra-output")).toContainText(
     "does not store submitted text",

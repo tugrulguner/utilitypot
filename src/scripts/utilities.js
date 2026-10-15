@@ -1,3 +1,4 @@
+import { exampleReplacementGuard } from "../lib/utilities/example-replacement.js";
 import { groupCsv } from "../lib/utilities/outcome.js";
 import Papa from "papaparse";
 import { parseCsv, templatePaths, transformCsv } from "../lib/utilities/csv.js";
@@ -10,6 +11,7 @@ import {
 } from "../lib/utilities/meeting-presentation.js";
 const root = document.querySelector("[data-utility]");
 if (root) {
+  const allowExampleReplacement = exampleReplacementGuard(root);
   const tool = root.getAttribute("data-utility"),
     $ = (id) => root.querySelector(`#${id}`);
   let revision = 0,
@@ -217,7 +219,9 @@ if (root) {
     });
   }
   $("load-example").addEventListener("click", () => {
+    if (!allowExampleReplacement()) return;
     invalidate();
+    if ($("source-file")) $("source-file").value = "";
     if (tool === "csv") {
       $("csv-input").value =
         "Customer,Name,SKU,Qty\n001,Ada,A01,2\n001,Ada,A02,3\n002,Lin,B01,1";
@@ -246,7 +250,13 @@ if (root) {
       $("date-convention").value = "auto";
     }
     if (tool === "meeting") {
-      $("meeting-date").value = "2026-06-15";
+      const today = new Date();
+      $("meeting-date").value =
+        `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+      $("availability-mode").value = "local";
+      syncAvailability();
+      while (root.querySelectorAll(".participant").length < 2)
+        $("add-person").click();
       $("duration").value = "30";
       while (root.querySelectorAll(".participant").length > 2)
         root.querySelector(".participant:last-child").remove();
@@ -273,6 +283,7 @@ if (root) {
     }
     if (tool === "csv") {
       $("custom-schema").checked = false;
+      $("child-name").value = "rows";
       syncCsv();
       $("mapping-panel").hidden = true;
     }
@@ -301,6 +312,7 @@ if (root) {
     invalidate();
     const p = root.querySelector(".participant").cloneNode(true);
     p.dataset.index = String(n);
+    p.querySelectorAll("details").forEach((detail) => (detail.open = false));
     p.querySelector("h2").textContent = `Participant ${n + 1}`;
     for (const e of p.querySelectorAll("[data-field]")) {
       e.id = `p${n}-${e.dataset.field}`;
@@ -466,16 +478,22 @@ if (root) {
         for (const parent of result.slice(0, 100)) {
           const item = document.createElement("details");
           const title = document.createElement("summary");
+          const childCount = Object.values(parent)
+            .filter(Array.isArray)
+            .reduce((sum, list) => sum + list.length, 0);
+          item.open = tree.childElementCount === 0 && childCount <= 5;
           title.textContent =
-            Object.entries(parent)
+            "Group · " +
+            (Object.entries(parent)
               .filter(([, v]) => !Array.isArray(v))
               .map(([k, v]) => `${k}: ${v}`)
-              .join(" · ") || "Parent record";
+              .join(" · ") || "Parent record") +
+            ` · ${childCount} items`;
           item.append(title);
           for (const [key, value] of Object.entries(parent)) {
             if (Array.isArray(value)) {
               const caption = document.createElement("p");
-              caption.textContent = `${key}: ${value.length} child rows`;
+              caption.textContent = `${key}: ${value.length} items`;
               item.append(caption);
               const table = document.createElement("table");
               const headers = [...new Set(value.flatMap(Object.keys))];

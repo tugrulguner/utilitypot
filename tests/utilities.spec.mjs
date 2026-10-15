@@ -29,7 +29,7 @@ test("CSV example converts locally and downloads actual grouped JSON", async ({
   await page
     .locator("details")
     .evaluateAll((es) => es.forEach((e) => (e.open = true)));
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page
     .getByRole("button", { name: "Create nested JSON", exact: true })
     .click();
@@ -55,7 +55,7 @@ test("date cleanup retains unresolved rows and exports the report", async ({
   await page
     .locator("details")
     .evaluateAll((es) => es.forEach((e) => (e.open = true)));
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.getByRole("button", { name: "Fix dates", exact: true }).click();
   await expect(page.locator("#utility-status")).toContainText(
     "1 need review; 1 are invalid",
@@ -70,7 +70,8 @@ test("meeting windows compute local times and export a matching calendar instant
   page,
 }) => {
   await page.goto("/tools/meeting-time-finder/");
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
+  await page.locator("#meeting-date").fill("2026-06-15");
   await page.getByRole("button", { name: "Find times", exact: true }).click();
   await expect(page.locator("#result-view")).toContainText(
     "2026-06-15T08:30:00Z",
@@ -99,7 +100,7 @@ test("AI requires consent and sends only five CSV rows", async ({ page }) => {
   await page
     .locator("details")
     .evaluateAll((es) => es.forEach((e) => (e.open = true)));
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   expect(count).toBe(0);
   await page
     .locator("#csv-input")
@@ -131,7 +132,7 @@ test("fixture Jev proposal computes a reviewable preview in one action", async (
   await page
     .locator("details")
     .evaluateAll((es) => es.forEach((e) => (e.open = true)));
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.getByRole("button", { name: "Fix with Jev", exact: true }).click();
   await expect(page.locator("#date-convention")).toHaveValue("day-first");
   await expect(page.locator("#results")).toBeVisible();
@@ -162,7 +163,7 @@ test("editing source invalidates an in-flight interpretation", async ({
   await page
     .locator("details")
     .evaluateAll((es) => es.forEach((e) => (e.open = true)));
-  await page.getByRole("button", { name: "Load example", exact: true }).click();
+  await page.getByRole("button", { name: /^Load example:/ }).click();
   const sent = page.waitForRequest("**/api/utilities/interpret");
   await page.getByRole("button", { name: "Fix with Jev", exact: true }).click();
   await sent;
@@ -188,7 +189,7 @@ for (const [slug, title] of [
       page.getByRole("heading", { name: title, exact: true }),
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Load example", exact: true }),
+      page.getByRole("button", { name: /^Load example:/ }),
     ).toBeVisible();
     await expect(page.locator("#run")).toBeVisible();
   });

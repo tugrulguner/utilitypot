@@ -1,3 +1,4 @@
+import { exampleReplacementGuard } from "../lib/utilities/example-replacement.js";
 import Papa from "papaparse";
 import {
   recordChoices,
@@ -9,6 +10,7 @@ import { mermaidSource } from "../lib/utilities/diagram.js";
 import { createEntitiesInterpretation } from "../lib/utilities/entities.js";
 const root = document.querySelector("[data-extra-utility]");
 if (root) {
+  const allowExampleReplacement = exampleReplacementGuard(root);
   const tool = root.getAttribute("data-extra-utility"),
     $ = (id) => root.querySelector(`#${id}`);
   let revision = 0,
@@ -359,9 +361,10 @@ if (root) {
         throw new Error(
           "Add at least one step in the Steps field before creating a diagram.",
         );
-      $("review-plan").value = JSON.stringify(
-        sequentialGraph($("source-text").value),
-      );
+      if (!$("review-plan").value.trim())
+        $("review-plan").value = JSON.stringify(
+          sequentialGraph($("source-text").value),
+        );
       editGraph();
       runLocal();
     } catch (e) {
@@ -450,6 +453,8 @@ if (root) {
   }
   function showNestedPaths() {
     const path = $("row-path").value;
+    $("record-sample").textContent = "";
+    $("record-sample-panel").hidden = true;
     if (!path) {
       $("nested-array-help").textContent =
         "Choose records to inspect nested arrays before conversion.";
@@ -462,6 +467,11 @@ if (root) {
         : path === "$"
           ? data
           : path.split(".").reduce((v, k) => v[k], data);
+    $("record-sample-panel").hidden = !records?.length;
+    const recordText = JSON.stringify(records?.[0] ?? null, null, 2);
+    $("record-sample").textContent =
+      recordText.slice(0, 1000) +
+      (recordText.length > 1000 ? "… (truncated)" : "");
     const found = new Set();
     const walk = (value, prefix = "", depth = 0) => {
       if (depth > 6)
@@ -491,7 +501,9 @@ if (root) {
     return v;
   }
   $("extra-example").addEventListener("click", () => {
+    if (!allowExampleReplacement()) return;
     clear();
+    if ($("source-file")) $("source-file").value = "";
     if (tool === "jsonCsv") {
       $("source-text").value = JSON.stringify(
         {
@@ -509,6 +521,10 @@ if (root) {
       $("array-policy").value = "reject";
     }
     if (tool === "entities") {
+      $("people-category").checked = true;
+      $("companies-category").checked = true;
+      $("custom-category").checked = false;
+      syncModes();
       $("source-text").value = "Ada works at Acme Labs. Lin joined Acme Labs.";
       $("instructions").value = "";
       $("review-plan").value = JSON.stringify(
@@ -544,6 +560,10 @@ if (root) {
       );
     }
     if (tool === "qa") {
+      fetchedUrl = "";
+      $("source-coverage").textContent = "";
+      $("fetched-source").textContent = "";
+      $("source-inspection").hidden = true;
       $("source-text").value =
         "UtilityPot is a collection of focused utilities in the ModePot family.\n\nJev proposes typed interpretations. Deterministic code performs calculations and transformations.\n\nThe application does not store submitted text or require an account.";
       $("instructions").value = "Does the application store my submitted text?";

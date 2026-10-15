@@ -4,6 +4,8 @@
 
 ### Added
 
+- Descriptive examples and expected outcomes across all seven tools, safe selected JSON record samples, and compact meeting fields with optional names collapsed.
+
 - Outcome-first utility workflows, literal-header CSV grouping, uploads, readable entity/graph editing, one-action webpage questions and compact desktop/mobile forms.
 
 - UtilityPot family identity, centered README resources, overview, Light/Dark/Auto shell, compact navigation and versioned social assets.
@@ -13,6 +15,8 @@
 - Main-branch Cloudflare deployment and version/changelog-gated, checksummed website release artifacts.
 
 ### Fixed
+
+- Confirm sample replacement before changing any input or pending work; cancel preserves the current state. Accepted replacements invalidate stale responses and clear selected files. Meeting samples use the browser’s current local date, and approval samples retain their described branches.
 
 - Compose entity-start probability distributions jointly under strict source order, preserving absence decisions and rejecting impossible support. This fixes repeated-name 503s from duplicate independent start choices without extra provider calls.
 
