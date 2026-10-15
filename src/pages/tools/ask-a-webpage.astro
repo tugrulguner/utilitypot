@@ -1,0 +1,31 @@
+---
+import UtilityLayout from "../../layouts/UtilityLayout.astro";
+import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
+---
+
+<UtilityLayout
+  title="Ask a webpage"
+  description="Read a public page or paste text and find exact source excerpts answering your question."
+  slug="ask-a-webpage"
+>
+  <ExtraUtilityApp tool="qa" />
+  <section class="prose">
+    <h2>What this tool does</h2>
+    <p>
+      This tool returns exact supporting paragraphs, not a generated essay. Jev
+      checks answer presence separately from selecting a passage. Unsupported
+      questions return not answered; partial evidence is labeled. Pasted text
+      can come from any source. URL fetching is deliberately restricted to the
+      documentation hosts listed above, revalidates every redirect and does not
+      execute scripts. Paywalls, logins, JS-only content and sources outside
+      that allowlist require pasted text.
+    </p>
+    <h2>Privacy and uncertainty</h2>
+    <p>
+      Only explicit AI requests send bounded source context to Jev through our
+      protected server. There is no account or application input-history
+      database. AI classifications can be wrong; typed output is not proof of
+      truth. <a href="/privacy/">Read privacy and operating limits.</a>
+    </p>
+  </section>
+</UtilityLayout>

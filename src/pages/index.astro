@@ -1,0 +1,46 @@
+---
+import UtilityLayout from "../layouts/UtilityLayout.astro";
+import tools from "../data/tools.json";
+---
+
+<UtilityLayout
+  title="Useful tools. Inspectable results."
+  description="UtilityPot combines Jev interpretation with reviewable settings and exact transformations for data, text, diagrams and planning."
+  slug=""
+>
+  <p class="notice">
+    Free, no signup. Part of <a href="https://modepot.io/">ModePot</a>, created
+    by <a href="https://tugrul.modepot.io/">Tugrul Guner</a>.
+  </p>
+  <div class="tool-cards">
+    {tools.map(({ slug, title, description }) => (
+      <article class="panel">
+        <h2>{title}</h2>
+        <p class="notice">{description}</p>
+        <a
+          class="tool-link"
+          aria-label={`Open ${title}`}
+          href={`/tools/${slug}/`}
+        >
+          Open {title} →
+        </a>
+      </article>
+    ))}
+  </div>
+  <section class="prose">
+    <h2>Interpret. Review. Run.</h2>
+    <p>
+      Jev selects bounded interpretations and source evidence. You review the
+      proposed settings. Deterministic code transforms data, computes times,
+      validates source offsets or renders diagrams. Ordinary conversion and
+      calculation do not need an AI call.
+    </p>
+    <p>
+      AI-assisted extraction and questions require server-side Jev
+      configuration. Missing credentials or exhausted capacity never produce a
+      fabricated AI result. Manual converters, date cleanup, scheduling and
+      diagram rendering remain available. No account, stored input history or
+      tracking scripts.
+    </p>
+  </section>
+</UtilityLayout>

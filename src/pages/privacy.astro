@@ -1,0 +1,57 @@
+---
+import UtilityLayout from "../layouts/UtilityLayout.astro";
+---
+
+<UtilityLayout
+  title="Privacy & operating limits"
+  description="What UtilityPot sends to Jev, what stays in your browser, and how public-page fetching and inference are bounded."
+  slug=""
+  canonicalPath="/privacy/"
+>
+  <section class="prose">
+    <h2>Manual processing</h2>
+    <p>
+      Manual conversion, normalization, scheduling and diagram rendering run in
+      your browser. This application has no account database, saved input
+      history, session replay or analytics SDK. Downloads are initiated by you.
+      Hosting providers still process ordinary request metadata under their own
+      policies.
+    </p>
+    <h2>When you choose Ask Jev</h2>
+    <p>
+      After explicit consent, the context described beside that button is sent
+      to our Cloudflare Worker and TypeSafe. This can include sample values,
+      source text, definitions, availability or questions. Do not submit
+      confidential or personal information without authority. The application
+      does not persist these inputs or log provider bodies. TypeSafe processing
+      and retention are governed by its terms, not a claim that inference is
+      fully local.
+    </p>
+    <h2>Public-page reading</h2>
+    <p>
+      Read public page sends the URL to our server, which fetches only approved
+      HTTPS documentation hosts and checks every redirect. It forwards no
+      browser cookies, executes no scripts, accepts only HTML/plain text, and
+      caps redirects, bytes and elapsed time. Unsupported sites can be used by
+      pasting text. This is not an authenticated browser or paywall bypass.
+    </p>
+    <h2>Secrets and spending</h2>
+    <p>
+      TYPESAFE_API_KEY is a server-side Worker secret. The browser never
+      receives it. Requests are limited to 16 KB and a bounded set of
+      server-authored questions; inference has a 15-second timeout and no
+      automatic retries. Client and aggregate limits are 6 and 30 requests per
+      minute per Cloudflare location. These limits are eventually consistent and
+      are not a strict global billing cap. Provider-side spend limits are
+      required before public AI launch.
+    </p>
+    <h2>Output boundaries</h2>
+    <p>
+      Typed choices and confidence do not guarantee correctness. Review
+      proposals. Entity extraction is capped and may omit mentions. Source
+      excerpts are not independent fact verification. Missing credentials,
+      protection or valid output produce an explicit failure, not fake model
+      results.
+    </p>
+  </section>
+</UtilityLayout>

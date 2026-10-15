@@ -1,0 +1,29 @@
+---
+import UtilityLayout from "../../layouts/UtilityLayout.astro";
+import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
+---
+
+<UtilityLayout
+  title="JSON to CSV"
+  description="Choose a record array, flatten objects, and review nested-array handling."
+  slug="json-to-csv"
+>
+  <ExtraUtilityApp tool="jsonCsv" />
+  <section class="prose">
+    <h2>What this tool does</h2>
+    <p>
+      Select the record array before exporting. Nested objects become
+      dot-separated columns. Other arrays must be explicitly rejected, omitted,
+      or stored in one JSON-text cell. This version does not explode nested
+      arrays or join parent context automatically. Formula-like cells are
+      escaped before spreadsheet import.
+    </p>
+    <h2>Privacy and uncertainty</h2>
+    <p>
+      Only explicit AI requests send bounded source context to Jev through our
+      protected server. There is no account or application input-history
+      database. AI classifications can be wrong; typed output is not proof of
+      truth. <a href="/privacy/">Read privacy and operating limits.</a>
+    </p>
+  </section>
+</UtilityLayout>

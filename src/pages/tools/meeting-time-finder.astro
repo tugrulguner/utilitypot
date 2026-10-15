@@ -1,0 +1,45 @@
+---
+import UtilityLayout from "../../layouts/UtilityLayout.astro";
+import UtilityApp from "../../components/UtilityApp.astro";
+---
+
+<UtilityLayout
+  title="Find a meeting time"
+  description="Turn availability statements into editable windows and find exact meeting overlaps across time zones. No calendar access needed."
+  slug="meeting-time-finder"
+>
+  <UtilityApp tool="meeting" />
+  <section class="prose">
+    <h2>Find shared time, not just timezone offsets</h2>
+    <p>
+      Enter each participant’s timezone and available window for a specific
+      local date. The tool intersects the windows and respects one optional
+      excluded interval per participant. Jev can interpret explicit times in
+      short availability statements; review the populated fields before
+      computing.
+    </p>
+    <h2>Supported availability</h2>
+    <p>
+      Start with “from 9am until 5pm, but not between noon and 1pm.” Include
+      explicit start/end times or enter missing boundaries manually. Each
+      participant can have one allowed window and one blocked interval.
+      Different weekdays, recurring schedules and multiple allowed windows
+      require manual resolution; no holidays, live calendars or actual
+      attendance are inferred.
+    </p>
+    <h2>Daylight saving and local dates</h2>
+    <p>
+      Offsets are calculated for the exact selected date using IANA timezone
+      rules, including half-hour and quarter-hour zones. Ambiguous and
+      nonexistent local times at clock changes are rejected. An end earlier than
+      its start is interpreted as the next day; every participant’s starting
+      window uses the selected local date, which can rule out overlap across the
+      international date line.
+    </p>
+    <p>
+      Results are proposals. Downloading an event does not book a meeting,
+      contact anyone or establish their availability. Calendar files contain a
+      generic Meeting title; private availability statements are not included.
+    </p>
+  </section>
+</UtilityLayout>
