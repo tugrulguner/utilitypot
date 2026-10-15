@@ -41,6 +41,46 @@ test("repeated-mention ends are conditioned on confirmed starts and bounded befo
   );
 });
 
+test("captured duplicate start winners compose into distinct source-ordered mentions", async () => {
+  const captured = JSON.parse(
+    await readFile(
+      new URL(
+        "./fixtures/entities-duplicate-starts-jev-1.13.0.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  const spec = createEntitiesInterpretation(captured.input);
+  const followup = spec.followup(captured.provider.answers);
+  assert.deepEqual(
+    followup.state.confirmedMentions.map((m) => m.start.id),
+    ["w0", "w5", "w11", "w3", "w9"],
+  );
+  const plan = followup.decode(
+    Object.fromEntries(
+      Object.entries({
+        t0_m0_end: "w1",
+        t0_m1_end: "w6",
+        t0_m2_end: "w12",
+        t1_m0_end: "w4",
+        t1_m1_end: "w10",
+      }).map(([key, choice]) => [key, { choice }]),
+    ),
+  );
+  assert.deepEqual(
+    plan.entities.map((e) => e.text),
+    ["Mina Patel", "Noah Chen", "Mina Patel", "Orion Labs", "Cedar Systems"],
+  );
+  for (const e of plan.entities)
+    assert.equal(captured.input.text.slice(e.start, e.end), e.text);
+  assert.equal(
+    captured.provider.answers.t0_m1_start.choice,
+    "w11",
+    "Never rewrite the raw provider answers",
+  );
+});
+
 test("custom entities are copied from validated source spans with offsets", () => {
   const text = "Ada works at Acme Labs.";
   const spec = createEntitiesInterpretation({

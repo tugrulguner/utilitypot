@@ -14,6 +14,8 @@
 
 ### Fixed
 
+- Compose entity-start probability distributions jointly under strict source order, preserving absence decisions and rejecting impossible support. This fixes repeated-name 503s from duplicate independent start choices without extra provider calls.
+
 - Preserve CSV entered before the tool initializes, reset stale JSON recovery guidance, and match array-policy errors to visible choices.
 - Present readable mobile date records and compact meeting choices with date/DST disambiguation.
 

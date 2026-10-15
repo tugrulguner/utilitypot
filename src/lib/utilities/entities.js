@@ -8,6 +8,57 @@ export function entityTokens(text) {
     }),
   );
 }
+// Independent ordinal judgments can share an argmax. Compose their full
+// distributions under source order, conditioned on the same presence decisions.
+// Never create a mention, fill an absent slot, or choose a zero-mass token.
+function orderedStarts(answers, tokens, typeIndex) {
+  const slots = Array.from(
+    { length: 3 },
+    (_, n) => answers[`t${typeIndex}_m${n}_start`],
+  );
+  const indices = slots.map((a) =>
+    a?.choice === "none" ? -1 : tokens.findIndex((t) => t.id === a?.choice),
+  );
+  let count = 0,
+    absent = false,
+    ordered = true,
+    prior = -1;
+  for (let n = 0; n < slots.length; n++) {
+    if (slots[n]?.choice === "none") {
+      absent = true;
+      continue;
+    }
+    if (absent || indices[n] < 0)
+      throw new Error("Inconsistent entity starts.");
+    if (indices[n] <= prior) ordered = false;
+    prior = indices[n];
+    count++;
+  }
+  if (ordered) return slots.map((a) => a.choice);
+  const memo = new Map();
+  function best(n, previous) {
+    if (n === count) return { score: 0, choices: [] };
+    const key = n * (tokens.length + 1) + previous + 1;
+    if (memo.has(key)) return memo.get(key);
+    let winner = null;
+    for (let i = previous + 1; i <= tokens.length - (count - n); i++) {
+      const id = tokens[i].id;
+      const p =
+        slots[n].probabilities?.[id] ?? (slots[n].choice === id ? 1 : 0);
+      if (!(p > 0 && p <= 1)) continue;
+      const tail = best(n + 1, i);
+      if (!tail) continue;
+      const score = Math.log(p) + tail.score;
+      if (!winner || score > winner.score)
+        winner = { score, choices: [id, ...tail.choices] };
+    }
+    memo.set(key, winner);
+    return winner;
+  }
+  const result = best(0, -1);
+  if (!result) throw new Error("Inconsistent entity starts.");
+  return [...result.choices, ...slots.slice(count).map((a) => a.choice)];
+}
 export function createEntitiesInterpretation(input) {
   if (
     !input ||
@@ -55,7 +106,15 @@ export function createEntitiesInterpretation(input) {
   const spec = {
     state: { text: input.text, tokens, types },
     questions,
-    followup(starts) {
+    followup(rawStarts) {
+      const starts = { ...rawStarts };
+      types.forEach((_, i) =>
+        orderedStarts(rawStarts, tokens, i).forEach((choice, n) => {
+          const key = `t${i}_m${n}_start`;
+          if (choice !== starts[key].choice)
+            starts[key] = { ...starts[key], choice };
+        }),
+      );
       const mentions = [],
         absentEnds = {};
       types.forEach((type, i) => {

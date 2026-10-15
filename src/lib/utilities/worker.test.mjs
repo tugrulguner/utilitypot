@@ -72,6 +72,46 @@ test("entity requests condition bounded ends on validated starts in at most two 
       entity.text,
     );
 });
+test("captured duplicate-start probabilities pass through validated Worker composition", async () => {
+  const captured = JSON.parse(
+    await readFile(
+      new URL(
+        "./fixtures/entities-duplicate-starts-jev-1.13.0.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  let calls = 0,
+    questions = 0;
+  const response = await handleRequest(
+    request({ tool: "entities", input: captured.input }),
+    env,
+    async (url, init) => {
+      const body = JSON.parse(init.body);
+      questions += Object.keys(body.questions).length;
+      calls++;
+      if (calls === 1) return Response.json(captured.provider);
+      assert.equal(calls, 2);
+      assert.deepEqual(
+        body.state.confirmedMentions.map((m) => m.start.id),
+        ["w0", "w5", "w11", "w3", "w9"],
+      );
+      assert.ok(!Object.hasOwn(body.questions.t0_m1_end.criteria, "w11"));
+      return Response.json(captured.followupProvider);
+    },
+  );
+  assert.equal(response.status, 200);
+  assert.equal(calls, 2);
+  assert.ok(questions <= 24);
+  const out = await response.json();
+  assert.deepEqual(
+    out.plan.entities.map((e) => e.text),
+    ["Mina Patel", "Noah Chen", "Mina Patel", "Orion Labs", "Cedar Systems"],
+  );
+  for (const e of out.plan.entities)
+    assert.equal(captured.input.text.slice(e.start, e.end), e.text);
+});
 test("no entity starts means no second provider call", async () => {
   let calls = 0;
   const response = await handleRequest(

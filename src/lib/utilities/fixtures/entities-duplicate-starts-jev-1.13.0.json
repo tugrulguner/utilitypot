@@ -1,0 +1,249 @@
+{
+  "input": {
+    "text": "  Mina Patel joined Orion Labs. Noah Chen works at Cedar Systems. Mina Patel will meet Noah Chen.",
+    "definitions": "Person: a named human\nOrganization: a named company or employer"
+  },
+  "provider": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "t0_m0_start": {
+        "type": "choice",
+        "choice": "w0",
+        "confidence": 0.99,
+        "probabilities": {
+          "w0": 0.99,
+          "w1": 0.01,
+          "w2": 0,
+          "w3": 0,
+          "w4": 0,
+          "w5": 0,
+          "w6": 0,
+          "w7": 0,
+          "w8": 0,
+          "w9": 0,
+          "w10": 0,
+          "w11": 0,
+          "w12": 0,
+          "w13": 0,
+          "w14": 0,
+          "w15": 0,
+          "w16": 0,
+          "none": 0
+        }
+      },
+      "t0_m1_start": {
+        "type": "choice",
+        "choice": "w11",
+        "confidence": 0.48,
+        "probabilities": {
+          "w0": 0,
+          "w1": 0.01,
+          "w2": 0,
+          "w3": 0,
+          "w4": 0,
+          "w5": 0.48,
+          "w6": 0,
+          "w7": 0,
+          "w8": 0,
+          "w9": 0,
+          "w10": 0,
+          "w11": 0.51,
+          "w12": 0,
+          "w13": 0,
+          "w14": 0,
+          "w15": 0,
+          "w16": 0,
+          "none": 0
+        }
+      },
+      "t0_m2_start": {
+        "type": "choice",
+        "choice": "w11",
+        "confidence": 0.53,
+        "probabilities": {
+          "w0": 0.01,
+          "w1": 0,
+          "w2": 0,
+          "w3": 0,
+          "w4": 0,
+          "w5": 0.07,
+          "w6": 0,
+          "w7": 0,
+          "w8": 0,
+          "w9": 0,
+          "w10": 0,
+          "w11": 0.56,
+          "w12": 0,
+          "w13": 0,
+          "w14": 0,
+          "w15": 0.27,
+          "w16": 0,
+          "none": 0.08
+        }
+      },
+      "t1_m0_start": {
+        "type": "choice",
+        "choice": "w3",
+        "confidence": 1,
+        "probabilities": {
+          "w0": 0,
+          "w1": 0,
+          "w2": 0,
+          "w3": 1,
+          "w4": 0,
+          "w5": 0,
+          "w6": 0,
+          "w7": 0,
+          "w8": 0,
+          "w9": 0,
+          "w10": 0,
+          "w11": 0,
+          "w12": 0,
+          "w13": 0,
+          "w14": 0,
+          "w15": 0,
+          "w16": 0,
+          "none": 0
+        }
+      },
+      "t1_m1_start": {
+        "type": "choice",
+        "choice": "w9",
+        "confidence": 0.98,
+        "probabilities": {
+          "w0": 0,
+          "w1": 0,
+          "w2": 0,
+          "w3": 0,
+          "w4": 0,
+          "w5": 0,
+          "w6": 0,
+          "w7": 0,
+          "w8": 0,
+          "w9": 0.98,
+          "w10": 0,
+          "w11": 0,
+          "w12": 0,
+          "w13": 0,
+          "w14": 0,
+          "w15": 0,
+          "w16": 0,
+          "none": 0.02
+        }
+      },
+      "t1_m2_start": {
+        "type": "choice",
+        "choice": "none",
+        "confidence": 0.98,
+        "probabilities": {
+          "w0": 0,
+          "w1": 0,
+          "w2": 0,
+          "w3": 0.01,
+          "w4": 0,
+          "w5": 0,
+          "w6": 0,
+          "w7": 0,
+          "w8": 0,
+          "w9": 0.01,
+          "w10": 0,
+          "w11": 0,
+          "w12": 0,
+          "w13": 0,
+          "w14": 0,
+          "w15": 0,
+          "w16": 0,
+          "none": 0.98
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 3181,
+      "output_tokens": 1018
+    }
+  },
+  "observedFailure": {
+    "phase": "start_composition",
+    "message": "Inconsistent entity starts."
+  },
+  "followupProvider": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "t0_m0_end": {
+        "type": "choice",
+        "choice": "w1",
+        "confidence": 0.65,
+        "probabilities": {
+          "w0": 0.28,
+          "w1": 0.71,
+          "w2": 0,
+          "w3": 0,
+          "w4": 0,
+          "none": 0.01
+        }
+      },
+      "t0_m1_end": {
+        "type": "choice",
+        "choice": "w6",
+        "confidence": 0.78,
+        "probabilities": {
+          "w5": 0.18,
+          "w6": 0.81,
+          "w7": 0,
+          "w8": 0,
+          "w9": 0,
+          "w10": 0,
+          "none": 0.01
+        }
+      },
+      "t0_m2_end": {
+        "type": "choice",
+        "choice": "w12",
+        "confidence": 0.71,
+        "probabilities": {
+          "w11": 0.21,
+          "w12": 0.75,
+          "w13": 0,
+          "w14": 0,
+          "w15": 0,
+          "w16": 0,
+          "none": 0.04
+        }
+      },
+      "t1_m0_end": {
+        "type": "choice",
+        "choice": "w4",
+        "confidence": 0.93,
+        "probabilities": {
+          "w3": 0.04,
+          "w4": 0.94,
+          "w5": 0,
+          "w6": 0,
+          "w7": 0,
+          "w8": 0,
+          "none": 0.02
+        }
+      },
+      "t1_m1_end": {
+        "type": "choice",
+        "choice": "w10",
+        "confidence": 0.93,
+        "probabilities": {
+          "w9": 0.04,
+          "w10": 0.94,
+          "w11": 0,
+          "w12": 0,
+          "w13": 0,
+          "w14": 0,
+          "w15": 0,
+          "w16": 0,
+          "none": 0.02
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 2301,
+      "output_tokens": 397
+    }
+  }
+}
