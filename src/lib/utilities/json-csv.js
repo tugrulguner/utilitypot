@@ -65,7 +65,7 @@ export function jsonToCsv(data, path, arrays = "reject") {
       if (Array.isArray(v)) {
         if (arrays === "reject")
           throw new Error(
-            `Nested array at ${prefix} needs an explicit policy: choose omit, join as JSON text, or reject.`,
+            `Nested array at ${prefix} needs an explicit policy. Choose “Keep as JSON text in a cell” to preserve it, or “Omit nested-array fields” to remove it. “Stop if nested arrays exist” makes no CSV.`,
           );
         if (arrays === "join") out[prefix] = JSON.stringify(v);
         return;

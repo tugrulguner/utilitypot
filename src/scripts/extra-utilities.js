@@ -449,8 +449,13 @@ if (root) {
     if (!choices.length) throw Error("No supported array of objects found.");
   }
   function showNestedPaths() {
-    const data = jsonData();
     const path = $("row-path").value;
+    if (!path) {
+      $("nested-array-help").textContent =
+        "Choose records to inspect nested arrays before conversion.";
+      return;
+    }
+    const data = jsonData();
     const records =
       path === "$object"
         ? [data]
@@ -474,9 +479,7 @@ if (root) {
       ? `Nested arrays found in selected records (${path}): ${[...found].join(", ")}. Choose “Keep as JSON text” to preserve them, “Omit” to explicitly remove those fields, or “Stop” to make no CSV. Omission is never automatic.`
       : "No nested arrays found in these records.";
   }
-  $("row-path")?.addEventListener("change", () => {
-    if ($("row-path").value) showNestedPaths();
-  });
+  $("row-path")?.addEventListener("change", showNestedPaths);
   $("array-policy")?.addEventListener("change", showNestedPaths);
   function sample(v, depth = 0) {
     if (depth > 6) throw new Error("Use a shallower sample.");

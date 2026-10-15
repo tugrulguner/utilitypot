@@ -6,6 +6,7 @@ import { findSlots, calendarEvent } from "../lib/utilities/meeting.js";
 import {
   resolveMeetingZone,
   presentMeetingSlot,
+  compactMeetingSlot,
 } from "../lib/utilities/meeting-presentation.js";
 const root = document.querySelector("[data-utility]");
 if (root) {
@@ -549,10 +550,30 @@ if (root) {
           body.append(tr);
         }
         table.append(body);
+        const cards = document.createElement("div");
+        cards.className = "date-records";
+        const labels = {
+          original: "Original",
+          normalized: "Normalized",
+          status: "Status",
+          note: "Note",
+        };
+        for (const row of result.slice(0, 100)) {
+          const card = document.createElement("dl");
+          card.className = "date-record";
+          for (const [key, label] of Object.entries(labels)) {
+            const term = document.createElement("dt"),
+              value = document.createElement("dd");
+            term.textContent = label;
+            value.textContent = row[key] || "—";
+            card.append(term, value);
+          }
+          cards.append(card);
+        }
         const wrapper = document.createElement("div");
         wrapper.className = "table-scroll";
         wrapper.append(table);
-        $("result-view").replaceChildren(wrapper);
+        $("result-view").replaceChildren(wrapper, cards);
         status(
           `Processed ${result.length} rows locally. ${result.filter((r) => r.status === "review").length} need review; ${result.filter((r) => r.status === "invalid").length} are invalid. Preview shows at most 100 rows; download includes every row.`,
         );
@@ -580,19 +601,28 @@ if (root) {
           technical.append(summary, ...$("result-view").childNodes);
           const label = document.createElement("label");
           label.htmlFor = "slot-choice";
-          label.textContent = "Choose a meeting time — local for each person";
+          label.textContent = `Choose a meeting time · ${$("meeting-date").value} · local times (24-hour)`;
           const select = document.createElement("select");
           select.id = "slot-choice";
-          slots.forEach((s, i) =>
-            select.append(
-              new Option(
-                `${i + 1}. ${presentMeetingSlot(s)
-                  .map((p) => `${p.label}: ${p.start}`)
-                  .join(" · ")}`,
-                String(i),
-              ),
-            ),
+          const choices = slots.map((s) =>
+            compactMeetingSlot(s, $("meeting-date").value),
           );
+          slots.forEach((s, i) => {
+            // Repeated DST wall times must remain distinguishable choices.
+            const duplicate =
+              choices.indexOf(choices[i]) !== choices.lastIndexOf(choices[i]);
+            const utc = duplicate
+              ? new Intl.DateTimeFormat(undefined, {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hourCycle: "h23",
+                  timeZone: "UTC",
+                }).format(new Date(s.start)) + " UTC · "
+              : "";
+            select.append(
+              new Option(`${i + 1}. ${utc}${choices[i]}`, String(i)),
+            );
+          });
           const comparison = document.createElement("section");
           comparison.className = "meeting-comparison";
           comparison.setAttribute("aria-live", "polite");
@@ -668,4 +698,6 @@ if (root) {
       status("Clipboard is unavailable. Use Download result instead.", true);
     }
   });
+  // Preserve text entered or restored before the module attached its listeners.
+  if (tool === "csv" && $("csv-input").value.trim()) syncCsv();
 }

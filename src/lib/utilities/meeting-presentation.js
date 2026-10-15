@@ -34,6 +34,29 @@ export function resolveMeetingZone(input) {
     `Unknown city or timezone “${value}”; choose a listed city or IANA timezone.`,
   );
 }
+export function compactMeetingSlot(slot, baseDate, locale) {
+  return slot.local
+    .map((person) => {
+      const resolved = resolveMeetingZone(person.zone),
+        instant = new Date(person.start.split("[")[0]);
+      const time = new Intl.DateTimeFormat(locale, {
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+        timeZone: resolved.zone,
+      }).format(instant);
+      const day =
+        person.start.slice(0, 10) === baseDate
+          ? ""
+          : new Intl.DateTimeFormat(locale, {
+              month: "short",
+              day: "numeric",
+              timeZone: resolved.zone,
+            }).format(instant) + " ";
+      return `${resolved.label} ${day}${time}`;
+    })
+    .join(" · ");
+}
 export function presentMeetingSlot(slot, locale) {
   return slot.local.map((person) => {
     const resolved = resolveMeetingZone(person.zone);

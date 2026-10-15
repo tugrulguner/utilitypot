@@ -14,6 +14,9 @@
 
 ### Fixed
 
+- Preserve CSV entered before the tool initializes, reset stale JSON recovery guidance, and match array-policy errors to visible choices.
+- Present readable mobile date records and compact meeting choices with date/DST disambiguation.
+
 - Extract repeated entity mentions with conditioned source boundaries instead of independent, overlapping endpoints.
 - Accept listed city names for meetings, show local-time comparisons and export the selected calendar slot.
 - Reveal off-screen completed answers, offer explicit single-object CSV conversion, explain nested-array policies and reject wholly empty date input.
