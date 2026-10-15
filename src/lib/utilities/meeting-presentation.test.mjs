@@ -10,6 +10,8 @@ test("resolves familiar city names and explicit IANA IDs", () => {
     label: "London",
   });
   assert.equal(resolveMeetingZone("New York").zone, "America/New_York");
+  assert.equal(resolveMeetingZone("UTC").zone, "Etc/UTC");
+  assert.equal(resolveMeetingZone("Asia/Kolkata").zone, "Asia/Kolkata");
   assert.equal(resolveMeetingZone("Europe/Paris").zone, "Europe/Paris");
 });
 test("rejects ambiguous and unknown city names", () => {

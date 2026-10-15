@@ -1,5 +1,35 @@
 import { test, expect } from "@playwright/test";
 
+test("local failure fixture: rejected entity boundaries offer manual recovery without accepting spans", async ({
+  page,
+}) => {
+  await page.route("**/api/utilities/interpret", (route) =>
+    route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({
+        error:
+          "AI interpretation could not be verified. Use manual controls or try later.",
+      }),
+    }),
+  );
+  await page.goto("/tools/entity-extractor/");
+  await page.locator("#source-text").fill("Mina met Noah.");
+  await page.locator("#extra-ask").click();
+  await expect(page.locator("#extra-status")).toContainText(
+    "No AI matches were accepted",
+  );
+  await expect(page.locator("#extra-status")).toContainText(
+    "Add mention manually",
+  );
+  await expect(page.locator("#add-mention")).toBeVisible();
+  await expect(page.locator("#extra-results")).toBeHidden();
+  await page.locator("#add-mention").click();
+  await page.getByLabel("Mention 1", { exact: true }).fill("Noah");
+  await page.locator("#extra-run").click();
+  await expect(page.locator("#extra-visual mark")).toHaveText("Noah");
+});
+
 test("single JSON object offers an explicit one-row conversion", async ({
   page,
 }) => {

@@ -9,13 +9,19 @@ for (const zone of zones) {
 }
 export function resolveMeetingZone(input) {
   const value = String(input ?? "").trim();
-  if (value.includes("/")) {
-    try {
-      new Intl.DateTimeFormat("en", { timeZone: value }).format();
-      return { zone: value, label: city(value) };
-    } catch {
-      /* Resolve only supported IANA IDs or listed cities. */
-    }
+  try {
+    const canonical = new Intl.DateTimeFormat("en", {
+      timeZone: value,
+    }).resolvedOptions().timeZone;
+    // Keep explicit area/city IDs; expand supported aliases for the scheduler.
+    const zone = value.includes("/")
+      ? value
+      : canonical === "UTC"
+        ? "Etc/UTC"
+        : canonical;
+    if (zone.includes("/")) return { zone, label: city(zone) };
+  } catch {
+    /* Resolve only supported IANA IDs or listed cities. */
   }
   const matches = alias.get(value.toLocaleLowerCase("en")) || [];
   if (matches.length > 1)

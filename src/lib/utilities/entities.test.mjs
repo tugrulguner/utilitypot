@@ -24,6 +24,10 @@ test("repeated-mention ends are conditioned on confirmed starts and bounded befo
     t1_m0_end: { choice: "w4" },
     t1_m1_end: { choice: "w10" },
   };
+  assert.throws(
+    () => followup.decode({ ...ends, t0_m1_end: { choice: "none" } }),
+    /Inconsistent entity boundaries/,
+  );
   const plan = followup.decode(ends);
   assert.deepEqual(
     plan.entities.map((e) => e.text),

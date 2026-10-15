@@ -728,6 +728,7 @@ if (root) {
           ? "rejected"
           : "unexpected_failure";
       if (token === revision) {
+        if (tool === "entities") $("entity-review").open = true;
         if (tool === "diagram") {
           $("graph-panel").hidden = false;
           $("graph-panel").open = true;
@@ -738,7 +739,9 @@ if (root) {
             : e.message +
                 (tool === "diagram"
                   ? " No AI graph was accepted. Start a private sequential diagram below, then edit types and destinations."
-                  : ""),
+                  : tool === "entities"
+                    ? " No AI matches were accepted. Shorten the text and try again, or use Add mention manually below to select exact source text and its occurrence."
+                    : ""),
           true,
         );
       }
