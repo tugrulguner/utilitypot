@@ -1,0 +1,84 @@
+---
+import "@fontsource-variable/manrope";
+import "@fontsource/ibm-plex-mono/400.css";
+import "../styles/global.css";
+import "../styles/utilities.css";
+interface Props {
+  title: string;
+  description: string;
+  slug: string;
+  canonicalPath?: string;
+}
+const { title, description, slug } = Astro.props;
+const canonical = `https://utilitypot.modepot.io${Astro.props.canonicalPath ?? "/" + (slug ? "tools/" + slug + "/" : "")}`;
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: title,
+  description,
+  url: canonical,
+  applicationCategory: "UtilitiesApplication",
+  operatingSystem: "Web browser",
+  isAccessibleForFree: true,
+  creator: {
+    "@type": "Person",
+    name: "Tugrul Guner",
+    url: "https://tugrul.modepot.io/",
+  },
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title} | UtilityPot</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" />
+    <meta property="og:title" content={`${title} | UtilityPot`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta
+      property="og:image"
+      content="https://utilitypot.modepot.io/social.svg"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="alternate" type="text/plain" href="/llms.txt" />
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </head>
+  <body class="utility-page">
+    <a href="#main" class="skip-link">
+      Skip to tool
+    </a>
+    <header class="utility-header">
+      <a class="brand" href="/">
+        <img src="/modepot-mark.svg" alt="" width="32" height="32" />
+        utility<strong>pot</strong>
+      </a>
+      <nav aria-label="Main">
+        <a href="https://modepot.io/">ModePot</a>
+        <a href="https://github.com/tugrulguner/utilitypot">GitHub</a>
+        <a href="https://discord.gg/u3AANZr6RG">Community</a>
+        <a href="https://tugrul.modepot.io/">About Tugrul</a>
+      </nav>
+    </header>
+    <main id="main" class="utility-main">
+      <p class="coordinate">UTILITYPOT / PART OF MODEPOT</p>
+      <h1>{title}</h1>
+      <p class="utility-intro">{description}</p>
+      <slot />
+    </main>
+    <footer class="utility-footer">
+      <p>
+        Small tools. Inspectable results.{" "}
+        <a href="https://modepot.io/">Explore the ModePot family →</a>
+      </p>
+      <p>
+        Created by <a href="https://tugrul.modepot.io/">Tugrul Guner</a> ·{" "}
+        <a href="/">Free tools</a> · <a href="/privacy/">Privacy & limits</a>
+      </p>
+    </footer>
+  </body>
+</html>

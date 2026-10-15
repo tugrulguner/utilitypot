@@ -1,0 +1,44 @@
+[
+  {
+    "slug": "csv-to-nested-json",
+    "title": "CSV to nested JSON",
+    "description": "Map CSV columns into nested objects and group related rows.",
+    "tool": "csv"
+  },
+  {
+    "slug": "fix-excel-dates",
+    "title": "Fix mixed spreadsheet dates",
+    "description": "Normalize supported dates and flag ambiguity without inventing missing precision.",
+    "tool": "dates"
+  },
+  {
+    "slug": "meeting-time-finder",
+    "title": "Find a meeting time",
+    "description": "Interpret availability and compute exact timezone-aware overlap.",
+    "tool": "meeting"
+  },
+  {
+    "slug": "json-to-csv",
+    "title": "JSON to CSV",
+    "description": "Choose a record array, flatten objects, and review nested-array handling.",
+    "tool": "jsonCsv"
+  },
+  {
+    "slug": "entity-extractor",
+    "title": "Custom entity extraction",
+    "description": "Define categories and extract reviewable mentions with exact source offsets.",
+    "tool": "entities"
+  },
+  {
+    "slug": "text-to-mermaid",
+    "title": "Text to Mermaid flowchart",
+    "description": "Review source-backed steps and branches, then render a safe flowchart locally.",
+    "tool": "diagram"
+  },
+  {
+    "slug": "ask-a-webpage",
+    "title": "Ask a webpage",
+    "description": "Read a public page or paste text and find exact source excerpts answering your question.",
+    "tool": "qa"
+  }
+]

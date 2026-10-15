@@ -1,0 +1,37 @@
+---
+import UtilityLayout from "../../layouts/UtilityLayout.astro";
+import UtilityApp from "../../components/UtilityApp.astro";
+---
+
+<UtilityLayout
+  title="CSV to nested JSON"
+  description="Map CSV columns into nested JSON, group repeated rows, and review every mapping before converting locally."
+  slug="csv-to-nested-json"
+>
+  <UtilityApp tool="csv" />
+  <section class="prose">
+    <h2>Group CSV rows without writing a transformation script</h2>
+    <p>
+      A flat converter creates one JSON object per row. This tool also supports
+      grouping a parent record and collecting child records into one array.
+      Paste one representative parent object as the desired shape; each leaf
+      becomes an editable source-column mapping.
+    </p>
+    <h2>Example: one customer, several items</h2>
+    <p>
+      Repeated Customer values such as 001 become one parent. Map SKU to
+      items[].sku and Qty to items[].quantity. Every child row is retained,
+      including duplicates. Conflicting parent values and blank grouping keys
+      are rejected rather than silently dropped.
+    </p>
+    <h2>Scope and limits</h2>
+    <p>
+      Up to 20 columns, 10,000 rows, nested objects and one child-array path.
+      All values remain strings: quantities are not coerced, and leading-zero
+      identifiers remain intact. Constants, arbitrary scripts, multiple child
+      arrays, automatic deduplication and general schema inference are not
+      supported. Jev proposes a mapping from your example and instructions; you
+      remain responsible for reviewing it.
+    </p>
+  </section>
+</UtilityLayout>

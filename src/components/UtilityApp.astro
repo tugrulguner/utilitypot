@@ -1,0 +1,295 @@
+---
+interface Props {
+  tool: "csv" | "dates" | "meeting";
+}
+const { tool } = Astro.props;
+const zones = [
+  "Europe/London",
+  "America/New_York",
+  "Europe/Istanbul",
+  "Asia/Kolkata",
+  "America/Los_Angeles",
+  "Asia/Tokyo",
+  "Australia/Sydney",
+  "Europe/Berlin",
+  "America/Toronto",
+  "Asia/Singapore",
+  "Etc/UTC",
+];
+---
+
+<section
+  data-utility={tool}
+  class="utility-app ph-no-capture ph-no-autocapture"
+>
+  <div class="actions">
+    <button id="load-example">Load example</button>
+  </div>
+  {tool === "csv" && (
+    <>
+      <div class="utility-grid">
+        <div class="panel">
+          <label for="csv-input">CSV data</label>
+          <textarea
+            id="csv-input"
+            rows="9"
+            maxlength="2000000"
+            spellcheck="false"
+            placeholder="Customer,Name,SKU,Qty"
+          />
+          <p class="notice">
+            Up to 20 columns and 10,000 rows. Values remain strings, including
+            identifiers and quantities.
+          </p>
+        </div>
+        <div class="panel">
+          <label for="json-example">
+            Desired JSON example (one parent object)
+          </label>
+          <textarea
+            id="json-example"
+            rows="6"
+            maxlength="4000"
+            spellcheck="false"
+            placeholder={'{"id":"001","items":[{"sku":"A01"}]}'}
+          />
+          <label for="csv-intent">Describe the grouping and mapping</label>
+          <input
+            id="csv-intent"
+            maxlength="800"
+            placeholder="One customer per ID; collect orders into items."
+          />
+        </div>
+      </div>
+      <div class="actions">
+        <button id="prepare">Prepare manual mapping</button>
+      </div>
+      <div id="mapping-panel" class="panel" hidden>
+        <h2>Review the mapping</h2>
+        <label for="group-by">Group parent records by</label>
+        <select id="group-by" />
+        <div id="mapping-fields" />
+        <label class="check">
+          <input id="reviewed" type="checkbox" />I reviewed the source columns,
+          grouping and output paths.
+        </label>
+        <div class="actions">
+          <button id="run" class="primary">
+            Convert locally
+          </button>
+        </div>
+      </div>
+    </>
+  )}
+  {tool === "dates" && (
+    <>
+      <div class="utility-grid">
+        <div class="panel">
+          <label for="dates-input">Dates (one per line)</label>
+          <textarea
+            id="dates-input"
+            rows="9"
+            maxlength="200000"
+            spellcheck="false"
+            placeholder="25/03/2026&#10;03/04/2026&#10;2026-02"
+          />
+          <p class="notice">
+            Paste text from the original source when possible. Already-swapped
+            dates cannot always be recovered.
+          </p>
+        </div>
+        <div class="panel">
+          <label for="date-context">Source context for Jev (optional)</label>
+          <textarea
+            id="date-context"
+            rows="4"
+            maxlength="1000"
+            placeholder="This is a UK export in day-first order; standardize the column for an API."
+          />
+          <label for="date-convention">Source numeric date convention</label>
+          <select id="date-convention">
+            <option value="auto">
+              Unspecified — leave ambiguous dates for review
+            </option>
+            <option value="day-first">Day first (DD/MM/YYYY)</option>
+            <option value="month-first">Month first (MM/DD/YYYY)</option>
+          </select>
+          <p class="notice">
+            Jev interprets source context only. You confirm the convention; code
+            validates calendar dates. Output is ISO order; missing precision is
+            preserved.
+          </p>
+          <div class="actions">
+            <button id="run" class="primary">
+              Normalize locally
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  )}
+  {tool === "meeting" && (
+    <>
+      <div class="panel">
+        <div class="utility-grid">
+          <div>
+            <label for="meeting-date">
+              Exact local date for each participant
+            </label>
+            <input id="meeting-date" type="date" />
+          </div>
+          <div>
+            <label for="duration">Meeting duration (minutes)</label>
+            <input
+              id="duration"
+              type="number"
+              min="15"
+              max="240"
+              step="1"
+              value="30"
+            />
+          </div>
+        </div>
+        <p class="notice">
+          One-off meeting only. Each window uses the selected date in that
+          participant’s zone. Overnight windows can end the following day.
+          Suggestions use a 15-minute UTC grid.
+        </p>
+      </div>
+      <div id="participants" class="utility-grid">
+        {[0, 1].map((i) => (
+          <div class="panel participant" data-index={i}>
+            <h2>Participant {i + 1}</h2>
+            <label for={`p${i}-name`}>Label {i + 1}</label>
+            <input
+              id={`p${i}-name`}
+              data-field="name"
+              maxlength="60"
+              value={i === 0 ? "London" : "New York"}
+            />
+            <label for={`p${i}-zone`}>IANA timezone {i + 1}</label>
+            <input
+              id={`p${i}-zone`}
+              data-field="zone"
+              list="zones"
+              value={i === 0 ? "Europe/London" : "America/New_York"}
+              maxlength="80"
+            />
+            <label for={`p${i}-text`}>
+              Availability statement {i + 1} (optional, for Jev)
+            </label>
+            <textarea
+              id={`p${i}-text`}
+              data-field="text"
+              rows="2"
+              maxlength="500"
+              placeholder="From 9am until 5pm, but not between noon and 1pm."
+            />
+            <div class="utility-grid">
+              <div>
+                <label for={`p${i}-start`}>Available from {i + 1}</label>
+                <input
+                  id={`p${i}-start`}
+                  data-field="start"
+                  type="time"
+                  value="09:00"
+                />
+              </div>
+              <div>
+                <label for={`p${i}-end`}>Available until {i + 1}</label>
+                <input
+                  id={`p${i}-end`}
+                  data-field="end"
+                  type="time"
+                  value="17:00"
+                />
+              </div>
+              <div>
+                <label for={`p${i}-excludeStart`}>
+                  Exclude from {i + 1} (optional)
+                </label>
+                <input
+                  id={`p${i}-excludeStart`}
+                  data-field="excludeStart"
+                  type="time"
+                />
+              </div>
+              <div>
+                <label for={`p${i}-excludeEnd`}>
+                  Exclude until {i + 1} (optional)
+                </label>
+                <input
+                  id={`p${i}-excludeEnd`}
+                  data-field="excludeEnd"
+                  type="time"
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <datalist id="zones">
+        {zones.map((zone) => (
+          <option value={zone} />
+        ))}
+      </datalist>
+      <div class="actions">
+        <button id="add-person">Add participant</button>
+        <button id="remove-person">Remove last participant</button>
+      </div>
+      <label class="check">
+        <input id="reviewed" type="checkbox" />I reviewed every date, timezone,
+        available window and excluded interval.
+      </label>
+      <div class="actions">
+        <button id="run" class="primary">
+          Find overlapping times
+        </button>
+      </div>
+    </>
+  )}
+  <div class="panel">
+    <h2>Optional AI interpretation</h2>
+    <p class="notice">
+      Manual processing stays in your browser. Ask Jev sends the following to
+      our server and TypeSafe:{" "}
+      {tool === "csv"
+        ? "headers, up to five sample rows, the desired JSON example and your instructions."
+        : tool === "dates"
+          ? "up to 20 sample dates and your source-context text."
+          : "the selected date, duration, participant labels, zones and availability text."}{" "}
+      Use non-sensitive samples. We do not add accounts, save your inputs, or
+      send form contents to analytics.
+    </p>
+    <label class="check">
+      <input id="ai-consent" type="checkbox" />I agree to send this limited
+      context to Jev for a proposed interpretation.
+    </label>
+    <div class="actions">
+      <button id="ask-jev">Ask Jev</button>
+    </div>
+    <p class="notice">
+      AI proposals can be wrong. Review editable settings before processing. If
+      Jev is unavailable, the manual tool still works.
+    </p>
+  </div>
+  <p
+    id="utility-status"
+    class="utility-status"
+    role="status"
+    aria-live="polite"
+  >
+    Load an example or paste your own data to begin.
+  </p>
+  <section id="results" class="panel" hidden>
+    <h2>Result</h2>
+    <div id="result-view" />
+    <div class="actions">
+      <button id="download">Download result</button>
+      <button id="copy">Copy result</button>
+    </div>
+  </section>
+</section>
+<script>
+  import "../scripts/utilities.js";
+</script>

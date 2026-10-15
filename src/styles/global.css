@@ -1,0 +1,77 @@
+:root {
+  --ink: #f4f0e7;
+  --muted: #b3bacb;
+  --night: #070a12;
+  --night-soft: #0b101b;
+  --line: rgba(244, 240, 231, 0.18);
+  --gold: #f2b84b;
+  --cyan: #66d9ff;
+  --display: "Manrope Variable", "Avenir Next", sans-serif;
+  --mono: "IBM Plex Mono", monospace;
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  background: var(--night);
+}
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--night);
+  font-family: var(--display);
+  font-synthesis: none;
+}
+a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+a:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+}
+.brand {
+  display: inline-flex;
+  gap: 0.65rem;
+  align-items: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  text-decoration: none;
+}
+.brand img {
+  width: 2rem;
+  height: 2rem;
+}
+.brand strong {
+  color: var(--gold);
+}
+nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  color: #c1c4cd;
+  font-family: var(--mono);
+}
+nav a {
+  text-decoration: none;
+}
+.coordinate {
+  color: var(--gold);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+}
+.skip-link {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.8rem;
+  background: var(--ink);
+  color: var(--night);
+  transform: translateY(-200%);
+}
+.skip-link:focus {
+  transform: none;
+}

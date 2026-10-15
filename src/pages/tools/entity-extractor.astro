@@ -1,0 +1,30 @@
+---
+import UtilityLayout from "../../layouts/UtilityLayout.astro";
+import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
+---
+
+<UtilityLayout
+  title="Custom entity extraction"
+  description="Define categories and extract reviewable mentions with exact source offsets."
+  slug="entity-extractor"
+>
+  <ExtraUtilityApp tool="entities" />
+  <section class="prose">
+    <h2>What this tool does</h2>
+    <p>
+      Define up to four categories, with at most three selected mentions per
+      category, in up to 120 source tokens. This is bounded custom entity
+      extraction, not exhaustive multilingual NER. Jev selects source token
+      boundaries; the application validates exact text and offsets. Missing,
+      inconsistent or unsupported spans are rejected. Review every label before
+      using exported data.
+    </p>
+    <h2>Privacy and uncertainty</h2>
+    <p>
+      Only explicit AI requests send bounded source context to Jev through our
+      protected server. There is no account or application input-history
+      database. AI classifications can be wrong; typed output is not proof of
+      truth. <a href="/privacy/">Read privacy and operating limits.</a>
+    </p>
+  </section>
+</UtilityLayout>

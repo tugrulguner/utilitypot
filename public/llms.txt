@@ -1,0 +1,21 @@
+# UtilityPot
+
+> Focused utilities in the ModePot family. Jev interprets bounded context; people review; deterministic code executes.
+
+Canonical intended origin: https://utilitypot.modepot.io/
+Source: https://github.com/tugrulguner/utilitypot
+Family: https://modepot.io/
+Creator: https://tugrul.modepot.io/
+License: MIT
+
+## Tools
+- [CSV to nested JSON](https://utilitypot.modepot.io/tools/csv-to-nested-json/): Map CSV columns into nested objects and group related rows.
+- [Fix mixed spreadsheet dates](https://utilitypot.modepot.io/tools/fix-excel-dates/): Normalize supported dates and flag ambiguity without inventing missing precision.
+- [Find a meeting time](https://utilitypot.modepot.io/tools/meeting-time-finder/): Interpret availability and compute exact timezone-aware overlap.
+- [JSON to CSV](https://utilitypot.modepot.io/tools/json-to-csv/): Choose a record array, flatten objects, and review nested-array handling.
+- [Custom entity extraction](https://utilitypot.modepot.io/tools/entity-extractor/): Define categories and extract reviewable mentions with exact source offsets.
+- [Text to Mermaid flowchart](https://utilitypot.modepot.io/tools/text-to-mermaid/): Review source-backed steps and branches, then render a safe flowchart locally.
+- [Ask a webpage](https://utilitypot.modepot.io/tools/ask-a-webpage/): Read a public page or paste text and find exact source excerpts answering your question.
+
+## Boundaries
+Server-side Jev only; credentials never belong in frontend bundles. Manual computation does not call Jev. AI requests require consent and bounded context. No accounts, stored input histories or analytics SDK. Entity extraction: at most 120 tokens, four categories and three mentions per category. Mermaid: reviewed flowcharts, up to eight source steps. Webpage answers are exact excerpts, not generated explanations; URL reading has an approved-host allowlist and pasted-text fallback. No independent truth guarantee. AI launch needs a server secret, rate-limit bindings and provider-side spend caps. See /privacy/.
