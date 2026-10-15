@@ -3,11 +3,13 @@ import "@fontsource-variable/manrope";
 import "@fontsource/ibm-plex-mono/400.css";
 import "../styles/global.css";
 import "../styles/utilities.css";
+import "../styles/family.css";
 interface Props {
   title: string;
   description: string;
   slug: string;
   canonicalPath?: string;
+  overview?: boolean;
 }
 const { title, description, slug } = Astro.props;
 const canonical = `https://utilitypot.modepot.io${Astro.props.canonicalPath ?? "/" + (slug ? "tools/" + slug + "/" : "")}`;
@@ -20,6 +22,9 @@ const schema = {
   applicationCategory: "UtilitiesApplication",
   operatingSystem: "Web browser",
   isAccessibleForFree: true,
+  license: "https://opensource.org/license/mit",
+  codeRepository: "https://github.com/tugrulguner/utilitypot",
+  isPartOf: { "@type": "WebSite", name: "ModePot", url: "https://modepot.io/" },
   creator: {
     "@type": "Person",
     name: "Tugrul Guner",
@@ -36,17 +41,57 @@ const schema = {
     <title>{title} | UtilityPot</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" href="/favicon.svg" />
+    <link rel="icon" href="/utilitypot-mark-v1.svg" />
+    <script is:inline>
+      (() => {
+        let preference = "auto";
+        try {
+          preference = localStorage.getItem("utilitypot-theme") || "auto";
+        } catch {}
+        if (!["auto", "light", "dark"].includes(preference))
+          preference = "auto";
+        document.documentElement.dataset.theme =
+          preference === "auto"
+            ? matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light"
+            : preference;
+      })();
+    </script>
     <meta property="og:title" content={`${title} | UtilityPot`} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta
       property="og:image"
-      content="https://utilitypot.modepot.io/social.svg"
+      content="https://utilitypot.modepot.io/utilitypot-social-v1.png"
     />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:image"
+      content="https://utilitypot.modepot.io/utilitypot-social-v1.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <link rel="alternate" type="text/plain" href="/llms.txt" />
-    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@graph": [
+          schema,
+          {
+            "@type": "WebSite",
+            name: "UtilityPot",
+            url: "https://utilitypot.modepot.io/",
+            isPartOf: {
+              "@type": "WebSite",
+              name: "ModePot",
+              url: "https://modepot.io/",
+            },
+          },
+        ],
+      })}
+    />
   </head>
   <body class="utility-page">
     <a href="#main" class="skip-link">
@@ -54,20 +99,47 @@ const schema = {
     </a>
     <header class="utility-header">
       <a class="brand" href="/">
-        <img src="/modepot-mark.svg" alt="" width="32" height="32" />
-        utility<strong>pot</strong>
+        <img src="/utilitypot-mark-v1.svg" alt="" width="32" height="32" />
+        <span>
+          utility<strong>pot</strong>
+        </span>
       </a>
-      <nav aria-label="Main">
+      <nav class="family-nav" aria-label="Main">
         <a href="https://modepot.io/">ModePot</a>
         <a href="https://github.com/tugrulguner/utilitypot">GitHub</a>
         <a href="https://discord.gg/u3AANZr6RG">Community</a>
         <a href="https://tugrul.modepot.io/">About Tugrul</a>
       </nav>
+      <select id="color-theme" aria-label="Color theme">
+        <option value="auto">Auto</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+      <button
+        id="family-menu-toggle"
+        type="button"
+        aria-controls="family-menu"
+        aria-expanded="false"
+      >
+        Menu
+      </button>
+      <nav id="family-menu" aria-label="Compact navigation" hidden>
+        <a href="https://modepot.io/">ModePot</a>
+        <a href="https://github.com/tugrulguner/utilitypot">GitHub</a>
+        <a href="https://discord.gg/u3AANZr6RG">Community</a>
+        <a href="https://tugrul.modepot.io/">About Tugrul</a>
+        <a href="/#tools">Browse tools</a>
+        <a href="/privacy/">Privacy &amp; limits</a>
+      </nav>
     </header>
     <main id="main" class="utility-main">
-      <p class="coordinate">UTILITYPOT / PART OF MODEPOT</p>
-      <h1>{title}</h1>
-      <p class="utility-intro">{description}</p>
+      {!Astro.props.overview && (
+        <>
+          <p class="coordinate">UTILITYPOT / PART OF MODEPOT</p>
+          <h1>{title}</h1>
+          <p class="utility-intro">{description}</p>
+        </>
+      )}
       <slot />
     </main>
     <footer class="utility-footer">
@@ -79,6 +151,12 @@ const schema = {
         Created by <a href="https://tugrul.modepot.io/">Tugrul Guner</a> ·{" "}
         <a href="/">Free tools</a> · <a href="/privacy/">Privacy & limits</a>
       </p>
+      <p class="next-link">
+        <a href="/#tools">Next — Browse tools →</a>
+      </p>
     </footer>
+    <script>
+      import "../scripts/family-shell.js";
+    </script>
   </body>
 </html>
