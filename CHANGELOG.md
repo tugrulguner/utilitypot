@@ -4,6 +4,8 @@
 
 ### Added
 
+- General public hostname page reading with bare-hostname HTTPS defaults, bounded DNS and redirect validation, strictly-public Cloudflare routing, UTF-8/size/time limits and distinct safe failure messages.
+
 - Descriptive examples and expected outcomes across all seven tools, safe selected JSON record samples, and compact meeting fields with optional names collapsed.
 
 - Outcome-first utility workflows, literal-header CSV grouping, uploads, readable entity/graph editing, one-action webpage questions and compact desktop/mobile forms.
@@ -11,10 +13,13 @@
 - UtilityPot family identity, centered README resources, overview, Light/Dark/Auto shell, compact navigation and versioned social assets.
 
 - Seven reviewed Jev-assisted utilities: nested CSV/JSON conversions, spreadsheet dates, meeting times, custom entities, Mermaid flowcharts and source-backed webpage questions.
-- Protected server-side inference and approved-host public reading, with manual local alternatives.
+- Protected server-side inference and public-page reading, with manual local alternatives.
 - Main-branch Cloudflare deployment and version/changelog-gated, checksummed website release artifacts.
 
 ### Fixed
+
+- Present complete exact source spans in conditioned entity-end choices instead of isolated tokens, preserving source bounds, review and the two-stage question budget.
+- Parse real HTML charset declarations instead of raw tag-like text, and use the hosted Worker’s supported manual redirect mode for DNS requests without following resolver redirects.
 
 - Confirm sample replacement before changing any input or pending work; cancel preserves the current state. Accepted replacements invalidate stale responses and clear selected files. Meeting samples use the browser’s current local date, and approval samples retain their described branches.
 

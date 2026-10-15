@@ -22,7 +22,7 @@
 - Meeting time finder: reviewed one-off windows, exclusions, timezone-aware overlap and calendar export.
 - Custom entity extraction: up to four definitions, three mentions per type and 120 source tokens. Exact offsets are validated; not exhaustive NER.
 - Text to Mermaid: up to eight listed steps, reviewable graph, local flowchart rendering and Mermaid/SVG downloads. Not arbitrary code generation.
-- Ask a webpage: exact supporting paragraphs with separate answer-presence judgment. Public URL reading is limited to documented approved hosts; other sources can be pasted. Not generated essays or independent fact verification.
+- Ask a webpage: exact supporting paragraphs with separate answer-presence judgment. Read public HTTP/HTTPS pages by hostname, or paste text. Access-blocked, JavaScript-only, large or unsupported pages require pasted text. Not generated essays or independent fact verification.
 
 ## Simple workflows
 
@@ -78,11 +78,11 @@ The compatibility date is supported by the bundled workerd runtime. No applicati
 
 Typed output does not guarantee semantic correctness. Names/categories, mappings, graph edges and source evidence require review. Cloudflare hosts request metadata; TypeSafe processes explicitly submitted AI context under its own terms. The application does not persist input histories or log raw provider bodies.
 
-Mermaid is loaded only when rendering is requested; its renderer is a substantial optional download. Diagram output is generated from a validated graph, strict rendering is enabled, and the preview is placed in a sandboxed frame. URL reading uses an exact host allowlist, rechecks redirects, caps bytes/time and never executes source scripts.
+Mermaid is loaded only when rendering is requested; its renderer is a substantial optional download. Diagram output is generated from a validated graph, strict rendering is enabled, and the preview is placed in a sandboxed frame. URL reading supports public hostnames, rechecks URL/DNS safety on redirects, caps bytes/time and never executes source scripts. Hosted Cloudflare strictly-public fetch is the transport boundary; DNS preflight is supplementary, not connection pinning. See [public reader security and limits](docs/public-page-reader.md).
 
 ## Contributing
 
-Keep operations bounded and reviewable. Add tests before changing behavior, run all verification commands, and retain the distinction between fixture success and live-provider evidence. New remote-fetch hosts, budgets, storage or tracking require an explicit security/privacy review.
+Keep operations bounded and reviewable. Add tests before changing behavior, run all verification commands, and retain the distinction between fixture success and live-provider evidence. Changes to remote-fetch security policy, budgets, storage or tracking require an explicit security/privacy review.
 
 ## License
 

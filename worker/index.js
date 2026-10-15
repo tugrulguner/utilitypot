@@ -7,6 +7,7 @@ import { createDiagramInterpretation } from "../src/lib/utilities/diagram.js";
 import {
   createQaInterpretation,
   readPublicPage,
+  PageReadError,
 } from "../src/lib/utilities/webpage.js";
 const builders = {
   csv: createCsvInterpretation,
@@ -193,14 +194,21 @@ export async function handleRequest(request, env, providerFetch = fetch) {
   if (readPage) {
     try {
       return json(await readPublicPage(pageUrl, providerFetch));
-    } catch {
-      return json(
+    } catch (error) {
+      const safe =
+        error instanceof PageReadError
+          ? error
+          : new PageReadError("fetch_unavailable");
+      const status =
         {
-          error:
-            "Page unavailable or outside the approved public documentation hosts. Paste page text instead.",
-        },
-        400,
-      );
+          timeout: 504,
+          dns_unavailable: 502,
+          fetch_unavailable: 502,
+          upstream_auth: 401,
+          upstream_forbidden: 403,
+          upstream_rate_limited: 429,
+        }[safe.code] || 400;
+      return json({ error: safe.message, code: safe.code }, status);
     }
   }
   try {

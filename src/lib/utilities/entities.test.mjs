@@ -2,6 +2,52 @@ import test from "node:test";
 import { readFile } from "node:fs/promises";
 import assert from "node:assert/strict";
 import { createEntitiesInterpretation, entityTokens } from "./entities.js";
+test("endpoint choices show complete exact source spans instead of isolated surname tokens", () => {
+  const input = {
+    text: "Alex Rivera joined Pine Studio. Morgan Lee met Alex Rivera.",
+    definitions:
+      "Person: a named human\nOrganization: a named company or employer",
+  };
+  const spec = createEntitiesInterpretation(input),
+    tokens = spec.state.tokens;
+  const starts = Object.fromEntries(
+    Object.keys(spec.questions).map((k) => [k, { choice: "none" }]),
+  );
+  const people = tokens.filter((t) => ["Alex", "Morgan"].includes(t.text));
+  people.forEach((t, i) => (starts[`t0_m${i}_start`] = { choice: t.id }));
+  starts.t1_m0_start = { choice: tokens.find((t) => t.text === "Pine").id };
+  const next = spec.followup(starts),
+    ends = {};
+  for (const [i, start] of people.entries()) {
+    const end = tokens[tokens.indexOf(start) + 1];
+    assert.deepEqual(next.questions[`t0_m${i}_end`].criteria[end.id], {
+      text: input.text.slice(start.start, end.end),
+      endToken: end.id,
+    });
+    assert.equal(
+      next.questions[`t0_m${i}_end`].criteria[start.id].text,
+      start.text,
+    );
+    ends[`t0_m${i}_end`] = { choice: end.id };
+  }
+  const studio = tokens.find((t) => t.text === "Studio");
+  ends.t1_m0_end = { choice: studio.id };
+  assert.equal(
+    next.questions.t1_m0_end.criteria[studio.id].text,
+    "Pine Studio",
+  );
+  assert.equal(
+    Object.keys(spec.questions).length + Object.keys(next.questions).length,
+    10,
+  );
+  const plan = next.decode(ends);
+  assert.deepEqual(
+    plan.entities.map((e) => e.text),
+    ["Alex Rivera", "Morgan Lee", "Alex Rivera", "Pine Studio"],
+  );
+  for (const e of plan.entities)
+    assert.equal(input.text.slice(e.start, e.end), e.text);
+});
 test("repeated-mention ends are conditioned on confirmed starts and bounded before the next mention", async () => {
   const captured = JSON.parse(
     await readFile(

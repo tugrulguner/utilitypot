@@ -596,7 +596,7 @@ if (root) {
   async function readPage(token) {
     const attempt = begin("read_page");
     try {
-      status("Reading the approved public page…");
+      status("Reading the public page…");
       const r = await fetch("/api/utilities/read-page", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

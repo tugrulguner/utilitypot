@@ -167,3 +167,39 @@ test("all seven utility pages are readable at desktop and mobile widths without 
   }
   expect(errors).toEqual([]);
 });
+
+test("bare ModePot URL submits a page read; fetch failure is distinct and never submits AI", async ({
+  page,
+}) => {
+  let inference = 0,
+    reads = 0;
+  await page.route("**/api/utilities/read-page", async (route) => {
+    reads++;
+    expect(route.request().postDataJSON()).toEqual({ url: "modepot.io/about" });
+    await route.fulfill({
+      status: 502,
+      json: {
+        code: "fetch_unavailable",
+        error:
+          "The public page could not be fetched. Try again or paste page text.",
+      },
+    });
+  });
+  await page.route("**/api/utilities/interpret", async (route) => {
+    inference++;
+    await route.fulfill({ status: 503, json: { error: "Must not be called" } });
+  });
+  await page.goto("/tools/ask-a-webpage/");
+  await page.getByRole("tab", { name: "Public URL", exact: true }).click();
+  await expect(page.getByLabel("Public page URL")).toBeVisible();
+  await expect(page.locator("#url-panel")).toContainText("Public HTTP/HTTPS");
+  await page.locator("#page-url").fill("modepot.io/about");
+  await page.locator("#instructions").fill("What is ModePot?");
+  await page.locator("#extra-ask").click();
+  await expect(page.locator("#extra-status")).toContainText(
+    "could not be fetched",
+  );
+  expect(reads).toBe(1);
+  expect(inference).toBe(0);
+  await expect(page.locator("#source-inspection")).toBeHidden();
+});

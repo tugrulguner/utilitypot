@@ -60,18 +60,19 @@ const examples = {
           </button>
         </div>
         <div id="url-panel" role="tabpanel" aria-labelledby="url-tab" hidden>
-          <label for="page-url">Public documentation URL</label>
+          <label for="page-url">Public page URL</label>
           <input
             id="page-url"
-            type="url"
+            type="text"
+            inputmode="url"
             maxlength="2000"
-            placeholder="https://docs.python.org/3/library/asyncio.html"
+            placeholder="modepot.io or https://example.org/page"
           />
           <p class="notice">
-            Approved hosts: docs.python.org, developer.mozilla.org,
-            docs.typesafe.ai, mermaid.js.org, developers.cloudflare.com,
-            www.rfc-editor.org and en.wikipedia.org. Other sources can be
-            pasted.
+            Public HTTP/HTTPS pages by hostname. Bare hostnames use HTTPS.
+            Logins, blocked sites, JavaScript-only pages, PDFs and large pages
+            may need pasted text. UTF-8 HTML/plain text only; 250 KB and 8
+            seconds.
           </p>
         </div>
       </>

@@ -49,3 +49,7 @@ node scripts/release.mjs checksums release
 ```
 
 After publication, independently read back the tag/commit, release visibility, assets and SHA-256 hashes. Announce the verified release through the project's GitHub Discussion and prepare an X draft linking it; do not post to X without separate approval. Source/automation changes do not themselves authorize a tag, release or deployment.
+
+## Public reader transport requirement
+
+The public reader uses this existing Worker with native fetch and the explicit `global_fetch_strictly_public` compatibility flag. Preserve this flag in source and release artifacts; it prevents own-zone private-origin shortcuts. General public hostname reading is active, with supplementary bounded Cloudflare DoH checks and no hostname allowlist. This relies on hosted Cloudflare's public Internet egress boundary, not DNS pinning or arbitrary Node-server safety. See [security controls, platform dependency and limits](public-page-reader.md). Owner-run live acceptance should cover ModePot and an unrelated public URL after an authorized preview/deployment; local fixtures cannot certify hosted egress.
