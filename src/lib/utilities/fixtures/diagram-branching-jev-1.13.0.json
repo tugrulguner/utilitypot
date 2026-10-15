@@ -1,0 +1,141 @@
+{
+  "model": "jev-1.13.0",
+  "answers": {
+    "type0": {
+      "type": "choice",
+      "choice": "process",
+      "confidence": 0.46,
+      "probabilities": {
+        "process": 0.64,
+        "decision": 0,
+        "terminal": 0.36
+      }
+    },
+    "next0": {
+      "type": "choice",
+      "choice": "n1",
+      "confidence": 0.9,
+      "probabilities": {
+        "n0": 0,
+        "n1": 0.92,
+        "n2": 0.07,
+        "n3": 0,
+        "none": 0.01
+      }
+    },
+    "else0": {
+      "type": "choice",
+      "choice": "none",
+      "confidence": 0.87,
+      "probabilities": {
+        "n0": 0,
+        "n1": 0.06,
+        "n2": 0,
+        "n3": 0.04,
+        "none": 0.9
+      }
+    },
+    "type1": {
+      "type": "choice",
+      "choice": "decision",
+      "confidence": 1,
+      "probabilities": {
+        "process": 0,
+        "decision": 1,
+        "terminal": 0
+      }
+    },
+    "next1": {
+      "type": "choice",
+      "choice": "n2",
+      "confidence": 0.99,
+      "probabilities": {
+        "n0": 0,
+        "n1": 0,
+        "n2": 0.99,
+        "n3": 0,
+        "none": 0.01
+      }
+    },
+    "else1": {
+      "type": "choice",
+      "choice": "n3",
+      "confidence": 1,
+      "probabilities": {
+        "n0": 0,
+        "n1": 0,
+        "n2": 0,
+        "n3": 1,
+        "none": 0
+      }
+    },
+    "type2": {
+      "type": "choice",
+      "choice": "terminal",
+      "confidence": 0.28,
+      "probabilities": {
+        "process": 0.48,
+        "decision": 0,
+        "terminal": 0.52
+      }
+    },
+    "next2": {
+      "type": "choice",
+      "choice": "none",
+      "confidence": 1,
+      "probabilities": {
+        "n0": 0,
+        "n1": 0,
+        "n2": 0,
+        "n3": 0,
+        "none": 1
+      }
+    },
+    "else2": {
+      "type": "choice",
+      "choice": "n3",
+      "confidence": 0.95,
+      "probabilities": {
+        "n0": 0,
+        "n1": 0.03,
+        "n2": 0,
+        "n3": 0.96,
+        "none": 0.01
+      }
+    },
+    "type3": {
+      "type": "choice",
+      "choice": "terminal",
+      "confidence": 0.69,
+      "probabilities": {
+        "process": 0.21,
+        "decision": 0,
+        "terminal": 0.79
+      }
+    },
+    "next3": {
+      "type": "choice",
+      "choice": "none",
+      "confidence": 1,
+      "probabilities": {
+        "n0": 0,
+        "n1": 0,
+        "n2": 0,
+        "n3": 0,
+        "none": 1
+      }
+    },
+    "else3": {
+      "type": "choice",
+      "choice": "n2",
+      "confidence": 0.76,
+      "probabilities": {
+        "n0": 0,
+        "n1": 0.05,
+        "n2": 0.81,
+        "n3": 0,
+        "none": 0.14
+      }
+    }
+  }
+}
