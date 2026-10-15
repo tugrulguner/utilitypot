@@ -35,8 +35,9 @@ async function download(button) {
   return readFile(await file.path(), "utf8");
 }
 async function ask() {
-  const pending = page.waitForResponse((r) =>
-    r.url().endsWith("/api/utilities/interpret"),
+  const pending = page.waitForResponse(
+    (r) => r.url().endsWith("/api/utilities/interpret"),
+    { timeout: 45000 },
   );
   await page.locator("#extra-ask").click();
   const response = await pending;
