@@ -50,6 +50,22 @@ test("DST gaps and repeated local times require explicit resolution", () => {
     /daylight/,
   );
 });
+test("AI refuses multiple allowed windows rather than bridging an unavailable gap", () => {
+  for (const text of [
+    "available from 9am to 5pm, or 7pm to 9pm",
+    "9am to noon and 2pm to 5pm, except 10am to 11am",
+  ])
+    assert.throws(
+      () =>
+        createMeetingInterpretation({
+          date: "2026-06-15",
+          duration: 30,
+          participants: [{ name: "A", zone: "Etc/UTC", text }],
+        }),
+      /multiple.*window|manually/i,
+    );
+});
+
 test("AI interprets bounded source time candidates rather than inventing times", () => {
   const spec = createMeetingInterpretation({
     date: "2026-06-15",
@@ -65,8 +81,6 @@ test("AI interprets bounded source time candidates rather than inventing times",
   assert.deepEqual(Object.keys(spec.questions.p0_start.criteria), [
     "09:00",
     "12:00",
-    "10:00",
-    "11:00",
     "none",
   ]);
   const answers = Object.fromEntries(
@@ -85,5 +99,10 @@ test("AI interprets bounded source time candidates rather than inventing times",
       },
     ]),
   );
+  assert.deepEqual(Object.keys(spec.questions.p0_excludeEnd.criteria), [
+    "10:00",
+    "11:00",
+    "none",
+  ]);
   assert.equal(spec.decode(answers).participants[0].excludeEnd, "11:00");
 });

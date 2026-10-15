@@ -166,6 +166,24 @@ export function createMeetingInterpretation(input) {
       throw new Error(
         "Include explicit times such as 9am and 5pm, or enter the windows manually.",
       );
+    // Do not collapse disjoint source intervals into their outer bounds. The
+    // supported shape is one positive window followed by at most one exclusion.
+    // Other forms need manual windows rather than a semantic guess about scope.
+    const segments = p.text.split(
+      /\b(?:except|excluding|not|unavailable|busy)\b/i,
+    );
+    const allowedTimes = timeCandidates(segments[0]);
+    const excludedTimes =
+      segments.length === 2 ? timeCandidates(segments[1]) : [];
+    if (
+      segments.length > 2 ||
+      allowedTimes.length > 2 ||
+      excludedTimes.length > 2 ||
+      (segments.length === 2 && (!allowedTimes.length || !excludedTimes.length))
+    )
+      throw new Error(
+        "Multiple or unsupported availability windows: enter windows and exclusions manually.",
+      );
     candidates.push(times);
     state.participants.push({
       name: p.name,
@@ -173,8 +191,10 @@ export function createMeetingInterpretation(input) {
       text: p.text,
       candidates: times,
     });
-    const criteria = Object.fromEntries(times.map((t) => [t, null]));
-    criteria.none = "Not explicitly stated or ambiguous; ask the user.";
+    const options = (values) => ({
+      ...Object.fromEntries(values.map((t) => [t, null])),
+      none: "Not explicitly stated or ambiguous; ask the user.",
+    });
     for (const [part, role] of Object.entries({
       start: "earliest permitted start (after/from), not an excluded time",
       end: "end of the permitted window (before/until), not an excluded time",
@@ -186,7 +206,9 @@ export function createMeetingInterpretation(input) {
       questions[`p${i}_${part}`] = {
         type: "choice",
         instructions: `For participant ${i + 1} only, select the ${role}. Do not invent working hours or fill omitted boundaries.`,
-        criteria,
+        criteria: options(
+          part.startsWith("exclude") ? excludedTimes : allowedTimes,
+        ),
       };
     questions[`p${i}_scope`] = {
       type: "choice",
