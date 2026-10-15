@@ -44,6 +44,8 @@ For optional local inference, create a gitignored `.dev.vars` containing `TYPESA
 
 ## Verification
 
+For product acceptance, run `npm run test:live` against the actual public webpage. This makes real, potentially billable Jev calls and records screenshots, responses and downloaded artifacts without network mocks. See [the live product QA report](docs/live-product-qa.md) for coverage, explicit manual corrections and currently outstanding production failures. Fixture-based regression tests are not a passing live-product gate.
+
 ```sh
 npm test
 npm run check

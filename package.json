@@ -18,7 +18,8 @@
     "test:release": "node --test scripts/*.test.mjs",
     "format:check": "prettier --check .",
     "release:bundle": "node scripts/release.mjs bundle",
-    "test:release-artifact": "playwright test --config=playwright.artifact.config.mjs"
+    "test:release-artifact": "playwright test --config=playwright.artifact.config.mjs",
+    "test:live": "node scripts/live-product-qa.mjs"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.3.0",
