@@ -1,0 +1,1413 @@
+{
+  "total": 25,
+  "oldRejections": 13,
+  "newPassed": 25,
+  "results": [
+    {
+      "attempt": 1,
+      "viewport": "desktop",
+      "leadingSpaces": 0,
+      "previousError": null,
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w5",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 0,
+          "end": 10
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 30,
+          "end": 39
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 64,
+          "end": 74
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 18,
+          "end": 28
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 49,
+          "end": 62
+        }
+      ]
+    },
+    {
+      "attempt": 2,
+      "viewport": "mobile",
+      "leadingSpaces": 1,
+      "previousError": "Inconsistent entity starts.",
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w11",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 1,
+          "end": 11
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 31,
+          "end": 40
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 65,
+          "end": 75
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 19,
+          "end": 29
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 50,
+          "end": 63
+        }
+      ]
+    },
+    {
+      "attempt": 3,
+      "viewport": "desktop",
+      "leadingSpaces": 2,
+      "previousError": null,
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w5",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 2,
+          "end": 12
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 32,
+          "end": 41
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 66,
+          "end": 76
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 20,
+          "end": 30
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 51,
+          "end": 64
+        }
+      ]
+    },
+    {
+      "attempt": 4,
+      "viewport": "mobile",
+      "leadingSpaces": 3,
+      "previousError": null,
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w5",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 3,
+          "end": 13
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 33,
+          "end": 42
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 67,
+          "end": 77
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 21,
+          "end": 31
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 52,
+          "end": 65
+        }
+      ]
+    },
+    {
+      "attempt": 5,
+      "viewport": "desktop",
+      "leadingSpaces": 4,
+      "previousError": null,
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w5",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 4,
+          "end": 14
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 34,
+          "end": 43
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 68,
+          "end": 78
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 22,
+          "end": 32
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 53,
+          "end": 66
+        }
+      ]
+    },
+    {
+      "attempt": 6,
+      "viewport": "mobile",
+      "leadingSpaces": 5,
+      "previousError": null,
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w5",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 5,
+          "end": 15
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 35,
+          "end": 44
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 69,
+          "end": 79
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 23,
+          "end": 33
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 54,
+          "end": 67
+        }
+      ]
+    },
+    {
+      "attempt": 7,
+      "viewport": "desktop",
+      "leadingSpaces": 6,
+      "previousError": null,
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w5",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 6,
+          "end": 16
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 36,
+          "end": 45
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 70,
+          "end": 80
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 24,
+          "end": 34
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 55,
+          "end": 68
+        }
+      ]
+    },
+    {
+      "attempt": 8,
+      "viewport": "mobile",
+      "leadingSpaces": 7,
+      "previousError": "Inconsistent entity starts.",
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w11",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 7,
+          "end": 17
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 37,
+          "end": 46
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 71,
+          "end": 81
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 25,
+          "end": 35
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 56,
+          "end": 69
+        }
+      ]
+    },
+    {
+      "attempt": 9,
+      "viewport": "desktop",
+      "leadingSpaces": 8,
+      "previousError": "Inconsistent entity starts.",
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w11",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 8,
+          "end": 18
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 38,
+          "end": 47
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 72,
+          "end": 82
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 26,
+          "end": 36
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 57,
+          "end": 70
+        }
+      ]
+    },
+    {
+      "attempt": 10,
+      "viewport": "mobile",
+      "leadingSpaces": 9,
+      "previousError": "Inconsistent entity starts.",
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w11",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 9,
+          "end": 19
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 39,
+          "end": 48
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 73,
+          "end": 83
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 27,
+          "end": 37
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 58,
+          "end": 71
+        }
+      ]
+    },
+    {
+      "attempt": 11,
+      "viewport": "desktop",
+      "leadingSpaces": 10,
+      "previousError": "Inconsistent entity starts.",
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w11",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 10,
+          "end": 20
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 40,
+          "end": 49
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 74,
+          "end": 84
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 28,
+          "end": 38
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 59,
+          "end": 72
+        }
+      ]
+    },
+    {
+      "attempt": 12,
+      "viewport": "mobile",
+      "leadingSpaces": 11,
+      "previousError": null,
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w5",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 11,
+          "end": 21
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 41,
+          "end": 50
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 75,
+          "end": 85
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 29,
+          "end": 39
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 60,
+          "end": 73
+        }
+      ]
+    },
+    {
+      "attempt": 13,
+      "viewport": "desktop",
+      "leadingSpaces": 12,
+      "previousError": null,
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w5",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 12,
+          "end": 22
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 42,
+          "end": 51
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 76,
+          "end": 86
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 30,
+          "end": 40
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 61,
+          "end": 74
+        }
+      ]
+    },
+    {
+      "attempt": 14,
+      "viewport": "mobile",
+      "leadingSpaces": 13,
+      "previousError": null,
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w5",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 13,
+          "end": 23
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 43,
+          "end": 52
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 77,
+          "end": 87
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 31,
+          "end": 41
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 62,
+          "end": 75
+        }
+      ]
+    },
+    {
+      "attempt": 15,
+      "viewport": "desktop",
+      "leadingSpaces": 14,
+      "previousError": null,
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w5",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 14,
+          "end": 24
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 44,
+          "end": 53
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 78,
+          "end": 88
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 32,
+          "end": 42
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 63,
+          "end": 76
+        }
+      ]
+    },
+    {
+      "attempt": 16,
+      "viewport": "mobile",
+      "leadingSpaces": 15,
+      "previousError": "Inconsistent entity starts.",
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w11",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 15,
+          "end": 25
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 45,
+          "end": 54
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 79,
+          "end": 89
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 33,
+          "end": 43
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 64,
+          "end": 77
+        }
+      ]
+    },
+    {
+      "attempt": 17,
+      "viewport": "desktop",
+      "leadingSpaces": 16,
+      "previousError": "Inconsistent entity starts.",
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w11",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 16,
+          "end": 26
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 46,
+          "end": 55
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 80,
+          "end": 90
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 34,
+          "end": 44
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 65,
+          "end": 78
+        }
+      ]
+    },
+    {
+      "attempt": 18,
+      "viewport": "mobile",
+      "leadingSpaces": 17,
+      "previousError": "Inconsistent entity starts.",
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w11",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 17,
+          "end": 27
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 47,
+          "end": 56
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 81,
+          "end": 91
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 35,
+          "end": 45
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 66,
+          "end": 79
+        }
+      ]
+    },
+    {
+      "attempt": 19,
+      "viewport": "desktop",
+      "leadingSpaces": 18,
+      "previousError": "Inconsistent entity starts.",
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w11",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 18,
+          "end": 28
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 48,
+          "end": 57
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 82,
+          "end": 92
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 36,
+          "end": 46
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 67,
+          "end": 80
+        }
+      ]
+    },
+    {
+      "attempt": 20,
+      "viewport": "mobile",
+      "leadingSpaces": 19,
+      "previousError": "Inconsistent entity starts.",
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w11",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 19,
+          "end": 29
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 49,
+          "end": 58
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 83,
+          "end": 93
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 37,
+          "end": 47
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 68,
+          "end": 81
+        }
+      ]
+    },
+    {
+      "attempt": 21,
+      "viewport": "desktop",
+      "leadingSpaces": 20,
+      "previousError": null,
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w5",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 20,
+          "end": 30
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 50,
+          "end": 59
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 84,
+          "end": 94
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 38,
+          "end": 48
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 69,
+          "end": 82
+        }
+      ]
+    },
+    {
+      "attempt": 22,
+      "viewport": "mobile",
+      "leadingSpaces": 21,
+      "previousError": "Inconsistent entity starts.",
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w11",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 21,
+          "end": 31
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 51,
+          "end": 60
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 85,
+          "end": 95
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 39,
+          "end": 49
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 70,
+          "end": 83
+        }
+      ]
+    },
+    {
+      "attempt": 23,
+      "viewport": "desktop",
+      "leadingSpaces": 22,
+      "previousError": null,
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w5",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 22,
+          "end": 32
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 52,
+          "end": 61
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 86,
+          "end": 96
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 40,
+          "end": 50
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 71,
+          "end": 84
+        }
+      ]
+    },
+    {
+      "attempt": 24,
+      "viewport": "mobile",
+      "leadingSpaces": 23,
+      "previousError": "Inconsistent entity starts.",
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w11",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 23,
+          "end": 33
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 53,
+          "end": 62
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 87,
+          "end": 97
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 41,
+          "end": 51
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 72,
+          "end": 85
+        }
+      ]
+    },
+    {
+      "attempt": 25,
+      "viewport": "desktop",
+      "leadingSpaces": 24,
+      "previousError": "Inconsistent entity starts.",
+      "http": 200,
+      "rawStarts": {
+        "t0_m0_start": "w0",
+        "t0_m1_start": "w11",
+        "t0_m2_start": "w11",
+        "t1_m0_start": "w3",
+        "t1_m1_start": "w9",
+        "t1_m2_start": "none"
+      },
+      "composedStarts": ["w0", "w5", "w11", "w3", "w9"],
+      "providerHTTP": [200, 200],
+      "model": "jev-1.13.0",
+      "exactSourceSpans": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 24,
+          "end": 34
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 54,
+          "end": 63
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 88,
+          "end": 98
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 42,
+          "end": 52
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 73,
+          "end": 86
+        }
+      ]
+    }
+  ],
+  "runtimeSourceCommit": "f9b6329488db7fbc57c6e5a8200b5f21f5e89190",
+  "diagnosticVersion": "07a8eee4-56aa-42c7-8944-87190d06ad3c",
+  "ordinaryVersion": "7432e80b-c5aa-42eb-a9c7-9fd42cd69456",
+  "productionUnchanged": true,
+  "previewAccessRestoredDisabled": true,
+  "limits": "Two calls, 24 questions, strict provider/schema/source/end/overlap validation unchanged",
+  "historicalCaveat": "The initial uninstrumented 503 cannot be individually attributed retrospectively. This subsequent matching application failure was captured, replayed against old/new code and fixed.",
+  "ordinaryFinalCases": [
+    {
+      "id": "csv-to-nested-json",
+      "status": "passed-with-manual-correction",
+      "manualCorrections": [
+        {
+          "path": "name",
+          "from": "",
+          "to": "CustomerName",
+          "reason": "Real user review of an unresolved Jev mapping"
+        }
+      ]
+    },
+    {
+      "id": "fix-excel-dates",
+      "status": "passed"
+    },
+    {
+      "id": "meeting-time-finder",
+      "status": "passed"
+    },
+    {
+      "id": "json-to-csv",
+      "status": "passed"
+    },
+    {
+      "id": "entity-extractor",
+      "status": "passed"
+    },
+    {
+      "id": "text-to-mermaid-linear",
+      "status": "passed"
+    },
+    {
+      "id": "text-to-mermaid",
+      "status": "passed"
+    },
+    {
+      "id": "ask-a-webpage-pasted",
+      "status": "passed"
+    },
+    {
+      "id": "ask-a-webpage-public-url",
+      "status": "passed"
+    },
+    {
+      "id": "ask-a-webpage-absent-answer",
+      "status": "passed"
+    },
+    {
+      "id": "date-ambiguity",
+      "status": "passed"
+    },
+    {
+      "id": "meeting-cities-selected-calendar",
+      "status": "passed",
+      "readable": "Selected meeting time \u00b7 30 minutes\nLondon\nNov 3, 2026, 2:15 PM \u2013 Nov 3, 2026, 2:45 PM\nNew York\nNov 3, 2026, 9:15 AM \u2013 Nov 3, 2026, 9:45 AM",
+      "calendarSelectedSlot": 1
+    },
+    {
+      "id": "single-object-nested-array-recovery",
+      "status": "passed",
+      "csv": "id,name,tags\r\n001,Ada,\"[\"\"alpha\"\"]\""
+    },
+    {
+      "id": "empty-date-recovery",
+      "status": "passed",
+      "message": "Enter at least one date; blank rows are preserved within a non-empty list."
+    },
+    {
+      "id": "entities-original-repeated",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "entities": [
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 0,
+          "end": 10
+        },
+        {
+          "type": "Person",
+          "text": "Noah Chen",
+          "start": 30,
+          "end": 39
+        },
+        {
+          "type": "Person",
+          "text": "Mina Patel",
+          "start": 64,
+          "end": 74
+        },
+        {
+          "type": "Organization",
+          "text": "Orion Labs",
+          "start": 18,
+          "end": 28
+        },
+        {
+          "type": "Organization",
+          "text": "Cedar Systems",
+          "start": 49,
+          "end": 62
+        }
+      ]
+    },
+    {
+      "id": "entities-fresh-names",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "entities": [
+        {
+          "type": "Person",
+          "text": "Ada Lovelace",
+          "start": 0,
+          "end": 12
+        },
+        {
+          "type": "Person",
+          "text": "Alan Turing",
+          "start": 17,
+          "end": 28
+        },
+        {
+          "type": "Organization",
+          "text": "Mosaic Labs",
+          "start": 32,
+          "end": 43
+        }
+      ]
+    },
+    {
+      "id": "entities-none",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "entities": []
+    },
+    {
+      "id": "real-mobile-answer-visible",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "view": {
+        "top": 296.09375,
+        "bottom": 620.75,
+        "viewport": 844,
+        "focused": true
+      }
+    }
+  ]
+}

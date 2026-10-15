@@ -48,7 +48,7 @@ The mobile text-width regression failed before the fix and passes now. Independe
 
 ![Actual post-fix mobile meeting result with both local times and calendar controls](./assets/qa/meeting-mobile.png)
 
-## Verification after fixes
+## Verification after UX fixes, before the later entity-ordering correction
 
 - All four focused browser regressions passed after observed failures. They are retained in `tests/user-readiness.spec.mjs`.
 - Full local gates: **68 unit/security, six release/contract and 77 browser tests**, actual Worker execution and extracted-release execution; check/build/format and zero dependency vulnerabilities.
@@ -57,6 +57,6 @@ The mobile text-width regression failed before the fix and passes now. Independe
 - Final real-browser/real-Jev acceptance covered all seven tools: **18 scenarios, 17 automatic passes and one explicitly recorded CSV mapping correction; zero failed scenarios**. Source-backed Q&A, public reading, original/fresh/absent entities and mobile answer focus were verified in this separate live run.
 - Instrumented browser diagnostics performed **32 successful entity actions**, including 24 with the original repeated-name paragraph and eight varied inputs. Exact browser payloads and provider boundaries were captured only for the fixed synthetic paragraph. These were real calls, not fixture successes.
 
-See [final machine-readable evidence](./product-review-final-evidence.json) and [qualification history](./product-review-verification.md). The earlier single entity HTTP 503 remains unexplained: passing subsequent trials does not establish its cause or guarantee elimination. It remains an explicit reliability risk rather than being erased by the rerun.
+See [final machine-readable evidence](./product-review-final-evidence.json) and [qualification history](./product-review-verification.md). At that UX qualification checkpoint, the single entity HTTP503 remained unexplained and was correctly retained. Subsequent fresh-input diagnostics captured duplicate ordinal start choices; a source-order composition fix now has a failing-before/passing-after regression and old/new differential replay. See the [later root-cause and final qualification report](./entity-start-ordering.md), which supersedes that blocker status without deleting the initial failed record.
 
 The final live runs restored preview settings to disabled and verified production deployment metadata was unchanged. These tests do not constitute a production deployment, merge approval or a guarantee of model correctness on every possible input.

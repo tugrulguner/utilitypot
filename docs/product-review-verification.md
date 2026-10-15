@@ -2,11 +2,13 @@
 
 ## Delivery state
 
-The latest UX fixes are committed and pushed. Current source `5f6544a87620aef75ed0a61d32787c4d1d28a104`, uploaded as non-production Worker `d01269c1-3dd1-45da-bdb2-fc7b96a5dc4b`, passed all 18 final live scenarios: 17 automatically and one with an explicitly recorded CSV mapping correction. Current local gates passed 68 unit/security, 6 release/contract and 77 browser tests, Worker execution, extracted-release execution, check/build/format and dependency audit.
+The UX fixes and entity ordering correction are committed and pushed. Latest runtime source `f9b6329488db7fbc57c6e5a8200b5f21f5e89190`, uploaded as ordinary non-production Worker `7432e80b-c5aa-42eb-a9c7-9fd42cd69456`, passed all 18 final live scenarios: 17 automatically and one explicitly recorded CSV mapping correction. Current local gates passed 73 unit/security, six release/contract and 77 browser tests, Worker execution, extracted-release execution, check/build/format and dependency audit.
 
-The earlier intermittent repeated-name extraction HTTP 503 remains unexplained and is preserved below; do not describe later successful requests as establishing its cause or elimination. PR #9 remains draft pending disposition of that reliability risk. No production traffic was moved. Preview access was restored to disabled and production deployment metadata was unchanged.
+A subsequent fresh-input diagnostic reproduced the repeated-name503 and captured its mechanism: independent ordinal questions returned duplicate starts. The captured regression failed before the fix; constrained positive-probability source-order composition fixed it without weakening validation or adding calls. In 25 live traces, old source rejects 13 exact captured start responses while fixed source produces 25 correct source-backed plans. See [cause, fix and qualification](./entity-start-ordering.md). This closes the reproduced code blocker, rather than treating retries as a fix. The original uninstrumented request cannot be attributed retrospectively to one exact exception; its failed record remains below.
 
-See [fresh-user UX testing](./user-experience-testing.md) and [final machine-readable evidence](./product-review-final-evidence.json). The older failed-candidate evidence below is historical, not the latest run.
+No production traffic was moved. Preview access was restored to disabled and production deployment metadata was unchanged. Merge readiness also requires passing final-head CI and no outstanding review blockers; merging remains the owner's decision.
+
+See [fresh-user UX testing](./user-experience-testing.md) and [current machine-readable evidence](./entity-ordering-evidence.json). The [pre-ordering UX candidate evidence](./product-review-final-evidence.json) and older failed-candidate evidence below are historical, not the latest run.
 
 ## Implemented changes
 
@@ -49,7 +51,7 @@ The standard 11-scenario suite exercised every utility through the browser and r
 
 The seven targeted checks produced **six passes and one failure**. Meeting city selection/calendar export, one-row nested-array recovery, empty dates, fresh unique entities, no entities, and mobile source-backed answering passed. The original repeated-name paragraph returned HTTP 503 once with the sanitized verification error. Earlier candidates had passed that paragraph; those earlier passes do not override this result.
 
-Eight subsequent paced real-provider diagnostic attempts against fixed-fixture version `5674b012-3fe9-4592-983c-cc2686ce9100` all returned HTTP 200 with two stages and the five expected spans. Captured responses were independently replayed through the actual provider-response validator and entity decoder. **The intermittent browser failure was not reproduced or explained by these captures.** Do not label it fixed because a retry passed.
+Eight subsequent paced real-provider diagnostic attempts against fixed-fixture version `5674b012-3fe9-4592-983c-cc2686ce9100` all returned HTTP 200 with two stages and the five expected spans. Captured responses were independently replayed through the actual provider-response validator and entity decoder. **At that point, the intermittent browser failure had not been reproduced or explained by those eight captures.** Later passing retries alone did not clear it; the subsequent captured root cause, regression and differential replay are documented above.
 
 Temporary preview enablement initially produced Cloudflare placeholder-page and static-asset 404s. The non-production wrapper records these and applies bounded navigation/readiness retries before any action. It never retries an inference failure and never substitutes responses. API requests and asset responses remain real. Browser instrumentation also observed sandboxed Mermaid iframe `navigator.serviceWorker` access errors during the standard run; graph rendering and both exports passed. The targeted suite recorded no page errors.
 
