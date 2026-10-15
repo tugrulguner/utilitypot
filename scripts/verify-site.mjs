@@ -29,6 +29,55 @@ for (const path of [
   ))
     JSON.parse(m[1]);
 }
+async function htmlFiles(dir) {
+  const result = [];
+  for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+    const path = dir + "/" + entry.name;
+    if (entry.isDirectory()) result.push(...(await htmlFiles(path)));
+    else if (path.endsWith(".html")) result.push(path);
+  }
+  return result;
+}
+const generated = await htmlFiles("dist");
+for (const file of generated) {
+  if (file === "dist/tools/index.html") continue; // Explicit compatibility redirect.
+  const html = await fs.readFile(file, "utf8");
+  for (const token of [
+    "/utilitypot-mark-v1.svg",
+    "https://utilitypot.modepot.io/utilitypot-social-v1.png",
+    "Color theme",
+    "family-menu",
+    "https://modepot.io/",
+  ])
+    if (!html.includes(token))
+      throw Error(file + ": missing family contract " + token);
+  if (
+    html.includes("https://modepot.com") ||
+    html.includes('content="https://utilitypot.modepot.io/social.svg"')
+  )
+    throw Error("Stale family/identity destination: " + file);
+  const blocks = [
+    ...html.matchAll(
+      /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g,
+    ),
+  ].map((m) => JSON.parse(m[1]));
+  const hasType = (value, type) =>
+    !!value &&
+    typeof value === "object" &&
+    (value["@type"] === type ||
+      Object.values(value).some((child) =>
+        Array.isArray(child)
+          ? child.some((v) => hasType(v, type))
+          : hasType(child, type),
+      ));
+  if (!blocks.some((v) => hasType(v, "WebSite")))
+    throw Error(file + ": missing emitted WebSite schema");
+}
+console.log(
+  "Verified family identity and metadata on",
+  generated.length,
+  "generated HTML files, including the 404 shell.",
+);
 console.log(
   "Verified",
   tools.length,

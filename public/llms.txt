@@ -2,7 +2,7 @@
 
 > Focused utilities in the ModePot family. Jev interprets bounded context; people review; deterministic code executes.
 
-Canonical intended origin: https://utilitypot.modepot.io/
+Canonical live origin: https://utilitypot.modepot.io/
 Source: https://github.com/tugrulguner/utilitypot
 Family: https://modepot.io/
 Creator: https://tugrul.modepot.io/
