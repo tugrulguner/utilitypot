@@ -91,7 +91,17 @@ export function createEntitiesInterpretation(input) {
   )
     throw new Error("Define 1–4 distinct entity types.");
   const criteria = Object.fromEntries(
-    tokens.map((t) => [t.id, `${t.id}: ${t.text}`]),
+    tokens.map((token, i) => [
+      token.id,
+      {
+        token: token.text,
+        sourceOffset: token.start,
+        followingSource: input.text.slice(
+          token.start,
+          tokens[Math.min(i + 4, tokens.length - 1)].end,
+        ),
+      },
+    ]),
   );
   criteria.none = "There is no such occurrence.";
   const questions = {};

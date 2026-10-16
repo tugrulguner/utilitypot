@@ -1,6 +1,42 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { jsonToCsv, createJsonCsvInterpretation } from "./json-csv.js";
+test("raw JSON refuses numeric values that native parsing would round", () => {
+  for (const sample of [
+    '[{"transactionId":9007199254740993}]',
+    "[1e-4000]",
+    "[1e309]",
+    "[0.1234567890123456789]",
+  ]) {
+    assert.throws(
+      () => createJsonCsvInterpretation({ sample, instructions: "" }),
+      /quote identifiers or high-precision values/i,
+    );
+  }
+  assert.equal(
+    createJsonCsvInterpretation({
+      sample: '[{"id":"9007199254740993","x":0.10,"y":1e2}]',
+      instructions: "",
+    }).state.sample[0].id,
+    "9007199254740993",
+  );
+  assert.throws(
+    () => createJsonCsvInterpretation({ sample: '[{"x":]', instructions: "" }),
+    /valid JSON/,
+  );
+});
+
+test("zero with an exponent is not mistaken for nonzero underflow", () => {
+  for (const token of ["0e12", "-0.000e-999999", "0.10", "1.2300e2"]) {
+    assert.doesNotThrow(() =>
+      createJsonCsvInterpretation({
+        sample: `[{"value":${token}}]`,
+        instructions: "",
+      }),
+    );
+  }
+});
+
 test("single-object AI selection remains a complete server-owned interpretation", () => {
   const spec = createJsonCsvInterpretation({
     sample: '{"id":"001","name":"Ada"}',

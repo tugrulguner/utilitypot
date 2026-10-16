@@ -1,0 +1,475 @@
+{
+  "candidateVersion": "6a0ca1d4-d802-40d2-8d81-ef0630bf6bce",
+  "runtimeSource": "8477068cbecdbdb42a465f4e6898f5a5b1679811",
+  "qualifiedSource": "d70e8b5b84e43f37159527d7c97a1f587fffe06a",
+  "origin": "https://6a0ca1d4-utilitypot-site.tugrul-gunr.workers.dev",
+  "scope": "Single complete final hosted-candidate run; real visible controls, provider responses, source spans and actual downloads; no request mocks or automatic inference retries",
+  "totalScenarios": 23,
+  "passed": 23,
+  "failed": [],
+  "scenarioGroups": {
+    "legacy-regression": 13,
+    "safety-or-entity-control": 3,
+    "captured-fresh-task-replay": 7
+  },
+  "realJevBrowserActions": 20,
+  "models": ["jev-1.13.0"],
+  "consoleAndPageErrors": [],
+  "setupAssetAttempts": 1,
+  "setupNavigationFailures": [],
+  "desktopKeyboard": {
+    "passed": 7,
+    "total": 7,
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "apiCalls": 0,
+    "scope": "Native Tab navigation to source and primary action, not human usability or full accessibility certification"
+  },
+  "localVerification": {
+    "unit": 113,
+    "release": 6,
+    "browser": 132,
+    "actualWorker": 1,
+    "extractedReleaseWorker": 1,
+    "checkBuildFormatAuditDryRun": "passed"
+  },
+  "providerExperiments": [
+    {
+      "variant": "baseline",
+      "total": 3,
+      "exactMatches": 1,
+      "cases": [
+        {
+          "fixture": "repeated",
+          "exact": false
+        },
+        {
+          "fixture": "distinct",
+          "exact": false
+        },
+        {
+          "fixture": "absent",
+          "exact": true
+        }
+      ]
+    },
+    {
+      "variant": "explicit-occurrences",
+      "total": 3,
+      "exactMatches": 2,
+      "cases": [
+        {
+          "fixture": "repeated",
+          "exact": false
+        },
+        {
+          "fixture": "distinct",
+          "exact": true
+        },
+        {
+          "fixture": "absent",
+          "exact": true
+        }
+      ]
+    },
+    {
+      "variant": "contextual-candidates",
+      "total": 3,
+      "exactMatches": 3,
+      "cases": [
+        {
+          "fixture": "repeated",
+          "exact": true
+        },
+        {
+          "fixture": "distinct",
+          "exact": true
+        },
+        {
+          "fixture": "absent",
+          "exact": true
+        }
+      ]
+    }
+  ],
+  "previewFlagsBefore": {
+    "enabled": false,
+    "previews_enabled": false
+  },
+  "previewFlagsAfter": {
+    "enabled": false,
+    "previews_enabled": false
+  },
+  "productionDeploymentBefore": "2adadd23-9f47-46e2-8966-61889b060999",
+  "productionDeploymentAfter": "2adadd23-9f47-46e2-8966-61889b060999",
+  "productionUnchanged": true,
+  "cases": [
+    {
+      "id": "csv-fresh-custom",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:11:33.485Z",
+      "completedAt": "2026-10-16T03:11:35.393Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "csv-modepot-data.json",
+          "bytes": 384,
+          "sha256": "7e2514173c4536277301fc4d404c7e3f9ae39e4fc9936d443b82afd2b036e725"
+        }
+      ],
+      "group": "legacy-regression"
+    },
+    {
+      "id": "dates-partial-and-context",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:11:35.394Z",
+      "completedAt": "2026-10-16T03:11:49.134Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "dates-modepot-dates.csv",
+          "bytes": 530,
+          "sha256": "727e33204b3d39cb0c25c8bdb1e40ec2e2f40c56d34a0ea52046fb3d1b56800b"
+        }
+      ],
+      "group": "legacy-regression"
+    },
+    {
+      "id": "meeting-boston-first-use",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:11:49.135Z",
+      "completedAt": "2026-10-16T03:12:02.768Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "meeting-modepot-meeting.ics",
+          "bytes": 261,
+          "sha256": "771771ddf6f94d35e07fbe2a6346b57334110802ed188eb1f41012ee7bccefd8"
+        }
+      ],
+      "group": "legacy-regression"
+    },
+    {
+      "id": "json-explicit-preserve-first",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:12:02.768Z",
+      "completedAt": "2026-10-16T03:12:16.700Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "json-utilitypot-data.csv",
+          "bytes": 133,
+          "sha256": "e750f83018f6fe32797d007d75a9afe38dc8471981f2869f45d8e498ab932d6e"
+        }
+      ],
+      "group": "legacy-regression"
+    },
+    {
+      "id": "entities-fresh-unicode",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:12:16.701Z",
+      "completedAt": "2026-10-16T03:12:31.092Z",
+      "entityTypesAndTextVerified": true,
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "entities-utilitypot-entities.json",
+          "bytes": 465,
+          "sha256": "35ebe7da4f9af2186d40b7329c7ab1918ee2902aeb122436509984fcdfeb62af"
+        }
+      ],
+      "group": "legacy-regression"
+    },
+    {
+      "id": "diagram-return-roles-and-branches",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:12:31.093Z",
+      "completedAt": "2026-10-16T03:12:44.815Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "svg",
+          "file": "diagram-svg-utilitypot-flowchart.svg",
+          "bytes": 153481,
+          "sha256": "1ba0013ed251e8cca60c73f2ec33762db703e468daef62cdd8200c1cc9d86796"
+        },
+        {
+          "kind": "mermaid",
+          "file": "diagram-mermaid-utilitypot-flowchart.mmd",
+          "bytes": 301,
+          "sha256": "ea4f189dc87a2bede6a3cac4c55be9e65076182755355d9355c80ade50dc985f"
+        }
+      ],
+      "group": "legacy-regression"
+    },
+    {
+      "id": "reader-source-provenance-export",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:12:44.816Z",
+      "completedAt": "2026-10-16T03:12:58.759Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "reader-utilitypot-evidence.json",
+          "bytes": 6873,
+          "sha256": "174d00e01e7ee1870b203dcbd92b6eba4ff0add8e2d9ca4dd2ca67ebf8e48dd8"
+        }
+      ],
+      "group": "legacy-regression"
+    },
+    {
+      "id": "json-explicit-omit-control",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:12:58.759Z",
+      "completedAt": "2026-10-16T03:13:11.851Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "omit-control-utilitypot-data.csv",
+          "bytes": 23,
+          "sha256": "aa1e40e23cb22de83e2f22e61374a7f2bd0672c59d8956d781c29c09dc34e854"
+        }
+      ],
+      "group": "legacy-regression"
+    },
+    {
+      "id": "json-unspecified-policy-stop-control",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:13:11.852Z",
+      "completedAt": "2026-10-16T03:13:25.104Z",
+      "model": "jev-1.13.0",
+      "group": "legacy-regression"
+    },
+    {
+      "id": "diagram-start-end-control",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:13:25.105Z",
+      "completedAt": "2026-10-16T03:13:39.074Z",
+      "model": "jev-1.13.0",
+      "group": "legacy-regression"
+    },
+    {
+      "id": "reader-pasted-provenance-control",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:13:39.074Z",
+      "completedAt": "2026-10-16T03:13:52.266Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "pasted-provenance-utilitypot-evidence.json",
+          "bytes": 495,
+          "sha256": "f17358ddfce6ba9c165402e947e908bde1d4a4309536514a843ee5da16d1bc31"
+        }
+      ],
+      "group": "legacy-regression"
+    },
+    {
+      "id": "missing-fields-no-requests",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:13:52.267Z",
+      "completedAt": "2026-10-16T03:13:54.928Z",
+      "group": "legacy-regression"
+    },
+    {
+      "id": "discovery-copy",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:13:54.929Z",
+      "completedAt": "2026-10-16T03:13:55.203Z",
+      "group": "legacy-regression"
+    },
+    {
+      "id": "readiness-number-integrity",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:13:55.204Z",
+      "completedAt": "2026-10-16T03:13:57.155Z",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "readiness-safe-identifiers-utilitypot-data.csv",
+          "bytes": 84,
+          "sha256": "4ec34a08f9146cfdb1ff3971d406cea77c0b4145a305cb1c79be3c7abd0bd8dc"
+        }
+      ],
+      "group": "safety-or-entity-control"
+    },
+    {
+      "id": "readiness-expense-records",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:13:57.155Z",
+      "completedAt": "2026-10-16T03:14:06.902Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "readiness-expenses-utilitypot-data.csv",
+          "bytes": 170,
+          "sha256": "416f52fd47200910100d7b5651b275edd64a9061207ac5a71c968c1983636016"
+        }
+      ],
+      "group": "captured-fresh-task-replay"
+    },
+    {
+      "id": "readiness-volunteer-custom-schema",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:14:06.902Z",
+      "completedAt": "2026-10-16T03:14:19.729Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "readiness-volunteers-modepot-data.json",
+          "bytes": 391,
+          "sha256": "ad9fccdefd44df7e27ba297ff9613904fb0a8ebac3e3dbf224b6bed2a0b64769"
+        }
+      ],
+      "group": "captured-fresh-task-replay"
+    },
+    {
+      "id": "readiness-irish-dates",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:14:19.730Z",
+      "completedAt": "2026-10-16T03:14:33.298Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "readiness-irish-dates-modepot-dates.csv",
+          "bytes": 709,
+          "sha256": "2cb59597e1828c7c1730706cb0b5d798fe7a59e89d6db47504b1f3b6f64b975a"
+        }
+      ],
+      "group": "captured-fresh-task-replay"
+    },
+    {
+      "id": "readiness-entities-repeated",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:14:33.298Z",
+      "completedAt": "2026-10-16T03:14:47.348Z",
+      "entityTypesAndTextVerified": true,
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "readiness-entities-repeated-utilitypot-entities.json",
+          "bytes": 458,
+          "sha256": "b0cd59cb63e37e2401ca9911798ef6c31e365447a114a340401c3abb6e56437a"
+        }
+      ],
+      "group": "captured-fresh-task-replay"
+    },
+    {
+      "id": "readiness-entities-distinct",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:14:47.349Z",
+      "completedAt": "2026-10-16T03:15:01.097Z",
+      "entityTypesAndTextVerified": true,
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "readiness-entities-distinct-utilitypot-entities.json",
+          "bytes": 366,
+          "sha256": "c85b69b4266be66af282e7043601bf23caadd9afc4adf8e67d160688fe3347df"
+        }
+      ],
+      "group": "safety-or-entity-control"
+    },
+    {
+      "id": "readiness-entities-absent",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:15:01.097Z",
+      "completedAt": "2026-10-16T03:15:14.408Z",
+      "entityTypesAndTextVerified": true,
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "readiness-entities-absent-utilitypot-entities.json",
+          "bytes": 2,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      ],
+      "group": "safety-or-entity-control"
+    },
+    {
+      "id": "readiness-eight-step-onboarding",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:15:14.409Z",
+      "completedAt": "2026-10-16T03:15:28.647Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "svg",
+          "file": "readiness-onboarding-svg-utilitypot-flowchart.svg",
+          "bytes": 155361,
+          "sha256": "bdf5b201b313e52c90683480d514a88a25edf65399e162bd099d56415716995b"
+        },
+        {
+          "kind": "mermaid",
+          "file": "readiness-onboarding-mermaid-utilitypot-flowchart.mmd",
+          "bytes": 352,
+          "sha256": "edbe708cdca5981b6b41456e27024380bfb61c1ce62e80760f5fd2290a066e12"
+        }
+      ],
+      "group": "captured-fresh-task-replay"
+    },
+    {
+      "id": "readiness-rfc-public-reader",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:15:28.648Z",
+      "completedAt": "2026-10-16T03:15:41.895Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "readiness-rfc-evidence-utilitypot-evidence.json",
+          "bytes": 7833,
+          "sha256": "2acb60a8dd81231bcbdf6afc5c844c7598982becf047b958199a9371896d0ffb"
+        }
+      ],
+      "group": "captured-fresh-task-replay"
+    },
+    {
+      "id": "readiness-three-city-meeting",
+      "status": "passed",
+      "startedAt": "2026-10-16T03:15:41.896Z",
+      "completedAt": "2026-10-16T03:15:55.049Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "readiness-three-city-calendar-modepot-meeting.ics",
+          "bytes": 261,
+          "sha256": "630f0da2d7c96cc4c065401ae796085de50878747513e8071fae28b025ce0cc1"
+        }
+      ],
+      "group": "captured-fresh-task-replay"
+    }
+  ],
+  "retainedFailures": [
+    "Public numeric identifier rounding in downloaded CSV",
+    "Public first-use startup timeout; deeper edge/cache cause not established",
+    "Real third-person omissions and disconnected onboarding graph",
+    "Rejected explicit-occurrence wording experiment: restored a person but lost a company",
+    "First contextual diagnostic transport returned non-JSON HTML; status/provider execution unconfirmed",
+    "Initial local full-gate chains stopped on formatter output; fixed and full final chain passed",
+    "Initial noJS and numeric-error-message regressions failed, then passed after fixes"
+  ],
+  "limits": [
+    "Candidate qualification, not production deployment",
+    "Synthetic ordinary tasks and controlled regressions, not recruited-human research or universal semantic accuracy",
+    "Original parser object API cannot reconstruct already-rounded numbers",
+    "AI results still require review; extraction remains bounded and non-exhaustive",
+    "Provider account billing/alert configuration was outside scope and not changed; no financial-cap certification"
+  ]
+}

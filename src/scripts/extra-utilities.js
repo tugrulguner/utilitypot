@@ -5,7 +5,10 @@ import {
   sequentialGraph,
   sourceMention,
 } from "../lib/utilities/outcome.js";
-import { jsonToCsv } from "../lib/utilities/json-csv.js";
+import {
+  jsonToCsv,
+  validateJsonNumberPrecision,
+} from "../lib/utilities/json-csv.js";
 import { mermaidSource, graphRoleIssues } from "../lib/utilities/diagram.js";
 import { createEntitiesInterpretation } from "../lib/utilities/entities.js";
 const root = document.querySelector("[data-extra-utility]");
@@ -417,6 +420,7 @@ if (root) {
     const s = $("source-text").value;
     if (s.length > 2000000) throw new Error("JSON exceeds 2 MB.");
     if (!s.trim()) throw new Error("Enter a JSON document before converting.");
+    validateJsonNumberPrecision(s);
     try {
       return JSON.parse(s);
     } catch {
@@ -986,8 +990,26 @@ if (root) {
         const frame = document.createElement("iframe");
         frame.title = "Rendered Mermaid flowchart";
         frame.setAttribute("sandbox", "");
-        frame.srcdoc = `<!doctype html><html><body style="margin:0;background:#0b101b;color:white">${svg}</body></html>`;
-        frame.style.cssText = "width:100%;height:480px;border:0";
+        frame.srcdoc = `<!doctype html><html><head><style>svg{display:block}</style></head><body style="margin:0;background:#0b101b;color:white">${svg}</body></html>`;
+        frame.style.cssText = "display:block;width:100%;height:480px;border:0";
+        const viewBox = new DOMParser()
+          .parseFromString(svg, "image/svg+xml")
+          .documentElement.getAttribute("viewBox")
+          ?.trim()
+          .split(/[\s,]+/)
+          .map(Number);
+        if (
+          viewBox?.length === 4 &&
+          viewBox.every(Number.isFinite) &&
+          viewBox[2] > 0 &&
+          viewBox[3] > 0
+        ) {
+          // Preserve readable native SVG size on desktop, shrink responsively
+          // on mobile, and let the page scroll through the entire diagram.
+          frame.style.maxWidth = `${viewBox[2]}px`;
+          frame.style.aspectRatio = `${viewBox[2]} / ${viewBox[3]}`;
+          frame.style.height = "auto";
+        }
         $("extra-visual").append(frame);
         const b = document.createElement("button");
         b.textContent = "Download SVG";
@@ -1053,4 +1075,13 @@ if (root) {
       status("Clipboard unavailable; use download.", true);
     }
   });
+  if (tool === "jsonCsv" && $("source-text").value.trim()) {
+    try {
+      paths();
+      status("Source loaded. Review the record array before converting.");
+    } catch (error) {
+      status(error.message, true);
+    }
+  }
+  window.dispatchEvent(new Event("utilitypot:ready"));
 }

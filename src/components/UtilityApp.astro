@@ -27,7 +27,9 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
   <section class="panel">
     <div class="workspace-toolbar">
       <h2>Input</h2>
-      <button id="load-example">{examples[tool][0]}</button>
+      <button disabled data-startup-was-enabled="true" id="load-example">
+        {examples[tool][0]}
+      </button>
     </div>
     <p id="example-outcome" class="notice">
       {examples[tool][1]}
@@ -70,13 +72,17 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
           />
           <label for="csv-intent">Mapping instructions</label>
           <input id="csv-intent" maxlength="800" />
-          <button id="prepare">Prepare manual mapping</button>
+          <button disabled data-startup-was-enabled="true" id="prepare">
+            Prepare manual mapping
+          </button>
           <p class="notice">
             Create with Jev sends headers, five sample rows, this schema and
             instructions to Jev/TypeSafe. Review proposed mappings; unknown
             fields stop conversion.
           </p>
-          <button id="ask-jev">Create with Jev</button>
+          <button disabled data-startup-was-enabled="true" id="ask-jev">
+            Create with Jev
+          </button>
         </details>
         <div id="mapping-panel" hidden>
           <h3>Editable column mapping</h3>
@@ -129,7 +135,9 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
             The proposed convention stays editable; unresolved dates are never
             guessed.
           </p>
-          <button id="ask-jev">Fix with Jev</button>
+          <button disabled data-startup-was-enabled="true" id="ask-jev">
+            Fix with Jev
+          </button>
         </details>
       </>
     )}
@@ -228,7 +236,7 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
       </>
     )}
     <div class="actions">
-      <button id="run" class="primary">
+      <button disabled data-startup-was-enabled="true" id="run" class="primary">
         {tool === "csv"
           ? "Create nested JSON"
           : tool === "dates"
@@ -239,8 +247,12 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
     {tool === "meeting" && (
       <>
         <div class="actions meeting-secondary-actions">
-          <button id="add-person">Add participant</button>
-          <button id="remove-person">Remove last</button>
+          <button disabled data-startup-was-enabled="true" id="add-person">
+            Add participant
+          </button>
+          <button disabled data-startup-was-enabled="true" id="remove-person">
+            Remove last
+          </button>
         </div>
         <details>
           <summary>Supported cities and timezones</summary>
@@ -274,11 +286,65 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
     <h2>Result</h2>
     <div id="result-view" />
     <div class="actions">
-      <button id="download">Download result</button>
-      <button id="copy">Copy result</button>
+      <button disabled data-startup-was-enabled="true" id="download">
+        Download result
+      </button>
+      <button disabled data-startup-was-enabled="true" id="copy">
+        Copy result
+      </button>
     </div>
   </section>
 </section>
+<p id="utility-startup" class="notice" role="status" aria-live="polite">
+  JavaScript is required to run tool actions. Your source stays in this browser.
+</p>
+<noscript>
+  <p class="notice error">
+    Enable JavaScript, then reload to use this tool. You can still copy any
+    source text before reloading.
+  </p>
+</noscript>
+<script is:inline>
+  (() => {
+    const notice = document.getElementById("utility-startup");
+    notice.textContent =
+      "Loading tool controls. You can paste or type source now; your text stays in this browser.";
+    let ready = false;
+    document.querySelectorAll(".utility-app button").forEach((button) => {
+      if (!button.disabled) {
+        button.dataset.startupWasEnabled = "true";
+        button.disabled = true;
+      }
+    });
+    window.addEventListener(
+      "utilitypot:ready",
+      () => {
+        ready = true;
+        notice.hidden = true;
+        document
+          .querySelectorAll(
+            '.utility-app button[data-startup-was-enabled="true"]',
+          )
+          .forEach((button) => {
+            button.disabled = false;
+            delete button.dataset.startupWasEnabled;
+          });
+      },
+      { once: true },
+    );
+    const failed = () => {
+      if (ready) return;
+      notice.textContent =
+        "Tool controls did not finish loading. Your text is still here and can be copied. Check your connection, then reload this page to try again.";
+      notice.classList.add("error");
+    };
+    window.addEventListener("error", (event) => {
+      if (event.filename?.includes(".js")) failed();
+    });
+    window.addEventListener("unhandledrejection", failed);
+    setTimeout(failed, 12000);
+  })();
+</script>
 <script>
   import "../scripts/utilities.js";
 </script>
