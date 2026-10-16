@@ -829,15 +829,13 @@ try {
       .getByText("Advanced structure and custom mapping", { exact: true })
       .click();
     await page.locator("#custom-schema").check();
-    await page
-      .locator("#json-example")
-      .fill(
-        JSON.stringify({
-          groupId: "W-09",
-          coordinator: "Nia Osei",
-          duties: [{ activity: "Stage, lights", hours: "2" }],
-        }),
-      );
+    await page.locator("#json-example").fill(
+      JSON.stringify({
+        groupId: "W-09",
+        coordinator: "Nia Osei",
+        duties: [{ activity: "Stage, lights", hours: "2" }],
+      }),
+    );
     await page
       .locator("#csv-intent")
       .fill(
