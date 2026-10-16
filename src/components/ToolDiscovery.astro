@@ -1,5 +1,6 @@
 ---
 import { guides, projects } from "../data/discovery.js";
+import PartnerSpotlight from "./PartnerSpotlight.astro";
 import tools from "../data/tools.json";
 interface Props {
   slug: keyof typeof guides;
@@ -10,40 +11,60 @@ const project = projects[guide.project as keyof typeof projects];
 ---
 
 <aside
-  class="tool-discovery"
-  data-project-showcase
+  class="discovery-rail"
   data-discovery-surface="showcase"
-  aria-label="Explore a related ModePot project"
+  aria-label="Explore ModePot and partners"
 >
-  <h2>From the ModePot workshop</h2>
-  <p>
-    {guide.reason}{" "}
+  <section class="family-card" aria-label="ModePot and its creator">
     <a
-      class="ph-no-autocapture"
+      class="discovery-brand ph-no-autocapture"
+      href="https://modepot.io/"
+      data-discovery-destination="modepot"
+      aria-label="ModePot open-source family"
+    >
+      <img src="/modepot-mark.svg" width="36" height="36" alt="" />
+      <span>
+        mode<strong>pot</strong>
+      </span>
+    </a>
+    <p>Tools and projects by Tugrul Guner.</p>
+    <nav class="discovery-actions" aria-label="ModePot and creator links">
+      <a
+        class="discovery-cta ph-no-autocapture"
+        href="https://modepot.io/"
+        data-discovery-destination="modepot"
+      >
+        Explore ModePot
+      </a>
+      <a
+        class="discovery-cta ph-no-autocapture"
+        href="https://tugrul.modepot.io/"
+        data-discovery-destination="creator"
+      >
+        About Tugrul
+      </a>
+    </nav>
+  </section>
+  <section
+    class="tool-discovery"
+    data-project-showcase
+    aria-label="Explore a related ModePot project"
+  >
+    <h2>From the ModePot workshop</h2>
+    <p>{guide.reason}</p>
+    <div class="project-identity">
+      <strong>{project.name}</strong>
+      <p>{project.description}</p>
+    </div>
+    <a
+      class="project-cta ph-no-autocapture"
       href={project.href}
       data-discovery-destination={guide.project}
     >
-      {project.name}
-    </a>{" "}
-    — {project.description}
-  </p>
-  <p>
-    <a
-      class="ph-no-autocapture"
-      href="https://modepot.io/"
-      data-discovery-destination="modepot"
-    >
-      Explore the family
-    </a>{" "}
-    ·{" "}
-    <a
-      class="ph-no-autocapture"
-      href="https://tugrul.modepot.io/"
-      data-discovery-destination="creator"
-    >
-      Meet Tugrul, the creator
+      Explore {project.name} →
     </a>
-  </p>
+  </section>
+  <PartnerSpotlight />
 </aside>
 <section class="prose tool-guide" aria-label="How to use this tool">
   <h2>Try it, review it, reuse it</h2>

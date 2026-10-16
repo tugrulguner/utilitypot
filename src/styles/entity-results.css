@@ -1,0 +1,79 @@
+.entity-workspace {
+  display: grid;
+  grid-template-columns: minmax(14rem, min(28%, 20rem)) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+  margin-block: 1rem;
+}
+.entity-workspace.is-empty {
+  grid-template-columns: minmax(0, 1fr);
+}
+.entity-index {
+  display: block;
+  font-family: var(--display);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  scroll-margin-block: 1rem;
+}
+.entity-index h3 {
+  margin: 0.25rem 0 0.75rem;
+}
+.entity-index-item {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+.entity-index-item button {
+  justify-self: start;
+}
+.entity-source-panel {
+  min-width: 0;
+}
+.entity-source-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  background: var(--night-soft);
+  border-bottom: 1px solid var(--line);
+}
+.entity-source-toolbar h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.entity-document {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.75;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+}
+.entity-document mark {
+  scroll-margin-block: 6rem;
+}
+.entity-document mark.is-current,
+.entity-document mark:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+.entity-index button:focus-visible,
+.entity-index:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+@media (max-width: 700px) {
+  .entity-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

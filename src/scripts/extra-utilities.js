@@ -1,3 +1,4 @@
+import "../styles/entity-results.css";
 import { resultDiscovery } from "../lib/discovery.js";
 import {
   interpretationReview,
@@ -80,6 +81,7 @@ if (root) {
     revision++;
     output = "";
     $("extra-results").hidden = true;
+    if (tool === "entities") $("extra-visual").replaceChildren();
   }
   root.addEventListener("input", (e) => {
     clear();
@@ -996,21 +998,133 @@ if (root) {
           "utilitypot-entities.json",
           "application/json",
         );
-        const highlighted = document.createElement("p");
-        let cursor = 0;
-        for (const e of [...items].sort((a, b) => a.start - b.start)) {
-          if (e.start < cursor) continue;
-          highlighted.append(
-            document.createTextNode(source.slice(cursor, e.start)),
+        const workspace = document.createElement("section");
+        workspace.className = "entity-workspace";
+        workspace.setAttribute("aria-label", "Entity results and source text");
+        const index = document.createElement("nav");
+        index.className = "entity-index";
+        index.setAttribute("aria-label", "Found entities and occurrences");
+        index.tabIndex = -1;
+        index.hidden = !items.length;
+        workspace.classList.toggle("is-empty", !items.length);
+        const limit = document.createElement("p");
+        limit.className = "notice";
+        limit.textContent =
+          "Up to 3 mentions per category; additional matches may be omitted.";
+        index.append(limit);
+        const documentView = document.createElement("div");
+        documentView.className = "entity-document";
+        documentView.setAttribute(
+          "aria-label",
+          "Full source with highlighted matches",
+        );
+        const marks = new Map();
+        const ordered = [...items].sort((a, b) => a.start - b.start);
+        ordered.forEach((_, n) => marks.set(n, []));
+        // Split only at validated source offsets. Shared/overlapping categories
+        // point to the same text segments without duplicating or dropping text.
+        const boundaries = [
+          ...new Set([
+            0,
+            source.length,
+            ...ordered.flatMap((e) => [e.start, e.end]),
+          ]),
+        ].sort((a, b) => a - b);
+        for (let i = 1; i < boundaries.length; i++) {
+          const start = boundaries[i - 1],
+            end = boundaries[i];
+          const active = ordered.flatMap((e, n) =>
+            e.start <= start && e.end >= end ? [n] : [],
           );
+          const text = source.slice(start, end);
+          if (!active.length) {
+            documentView.append(document.createTextNode(text));
+            continue;
+          }
           const mark = document.createElement("mark");
-          mark.textContent = e.text;
-          mark.title = e.type;
-          highlighted.append(mark);
-          cursor = e.end;
+          mark.textContent = text;
+          mark.tabIndex = -1;
+          mark.title = active.map((n) => ordered[n].type).join(", ");
+          mark.dataset.entityOccurrence = active.join(" ");
+          documentView.append(mark);
+          active.forEach((n) => marks.get(n).push(mark));
         }
-        highlighted.append(document.createTextNode(source.slice(cursor)));
-        $("extra-visual").append(highlighted);
+        const groups = new Map();
+        ordered.forEach((e, n) => {
+          if (!groups.has(e.type)) groups.set(e.type, new Map());
+          const entities = groups.get(e.type);
+          if (!entities.has(e.text)) entities.set(e.text, []);
+          entities.get(e.text).push(n);
+        });
+        for (const [category, entities] of groups) {
+          const group = document.createElement("section");
+          const heading = document.createElement("h3");
+          heading.textContent = `${category} (${[...entities.values()].reduce((sum, ns) => sum + ns.length, 0)})`;
+          group.append(heading);
+          for (const [name, occurrences] of entities) {
+            const item = document.createElement("div");
+            item.className = "entity-index-item";
+            const label = document.createElement("strong");
+            label.textContent = `${name} (${occurrences.length})`;
+            item.append(label);
+            occurrences.forEach((n, occurrence) => {
+              const button = document.createElement("button");
+              button.type = "button";
+              button.textContent = `Occurrence ${occurrence + 1}`;
+              button.setAttribute(
+                "aria-label",
+                `${category} ${name}, occurrence ${occurrence + 1}`,
+              );
+              button.addEventListener("click", () => {
+                for (const nodes of marks.values())
+                  for (const mark of nodes) mark.classList.remove("is-current");
+                const selected = marks.get(n);
+                for (const mark of selected) mark.classList.add("is-current");
+                const first = selected[0];
+                first.setAttribute(
+                  "aria-label",
+                  `${category}: ${name}, occurrence ${occurrence + 1}`,
+                );
+                first.focus({ preventScroll: true });
+                first.scrollIntoView({
+                  block: "center",
+                  behavior: matchMedia("(prefers-reduced-motion: reduce)")
+                    .matches
+                    ? "auto"
+                    : "smooth",
+                });
+              });
+              item.append(button);
+            });
+            group.append(item);
+          }
+          index.append(group);
+        }
+        const sourcePanel = document.createElement("section");
+        sourcePanel.className = "entity-source-panel";
+        const toolbar = document.createElement("div");
+        toolbar.className = "entity-source-toolbar";
+        const sourceHeading = document.createElement("h3");
+        sourceHeading.textContent = "Source in context";
+        toolbar.append(sourceHeading);
+        if (items.length) {
+          const back = document.createElement("button");
+          back.type = "button";
+          back.textContent = "Back to matches";
+          back.addEventListener("click", () => {
+            index.focus({ preventScroll: true });
+            index.scrollIntoView({
+              block: "start",
+              behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+                ? "auto"
+                : "smooth",
+            });
+          });
+          toolbar.append(back);
+        }
+        sourcePanel.append(toolbar, documentView);
+        workspace.append(index, sourcePanel);
+        $("extra-visual").append(workspace);
         const categoryCount = new Set(items.map((e) => e.type)).size;
         status(
           items.length
