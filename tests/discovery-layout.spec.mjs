@@ -38,19 +38,8 @@ for (const width of [1280, 1050]) {
       "href",
       "https://summonpot.modepot.io/",
     );
-    await expect(page.locator(".partner-card")).toHaveCount(1);
-    await expect(page.locator(".partner-card")).toContainText(
-      "Making math fun and thinking a habit.",
-    );
-    await expect(page.locator(".partner-card")).toContainText("ages 5 to 10");
-    await expect(page.locator(".partner-card a")).toHaveAttribute(
-      "href",
-      "https://circlesandcookies.com/",
-    );
-    await expect(page.locator(".partner-card a")).toHaveAttribute(
-      "rel",
-      "sponsored noopener",
-    );
+    await expect(page.locator(".partner-card")).toHaveCount(0);
+    await expect(page.locator('a[href*="circlesandcookies"]')).toHaveCount(0);
     for (const link of await page
       .locator(".discovery-rail [data-discovery-destination]")
       .all())
@@ -67,7 +56,7 @@ for (const theme of ["light", "dark"]) {
     await page.goto("/tools/entity-extractor/");
     await page.locator("#color-theme").selectOption(theme);
     const contrasts = await page
-      .locator(".discovery-cta,.project-cta,.partner-cta")
+      .locator(".discovery-cta,.project-cta")
       .evaluateAll((links) => {
         const luminance = (s) => {
           const c = s
@@ -87,7 +76,7 @@ for (const theme of ["light", "dark"]) {
           return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
         });
       });
-    expect(contrasts).toHaveLength(4);
+    expect(contrasts).toHaveLength(3);
     for (const ratio of contrasts) expect(ratio).toBeGreaterThanOrEqual(4.5);
   });
 }

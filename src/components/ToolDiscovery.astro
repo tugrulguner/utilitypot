@@ -1,6 +1,5 @@
 ---
 import { guides, projects } from "../data/discovery.js";
-import PartnerSpotlight from "./PartnerSpotlight.astro";
 import tools from "../data/tools.json";
 interface Props {
   slug: keyof typeof guides;
@@ -13,7 +12,7 @@ const project = projects[guide.project as keyof typeof projects];
 <aside
   class="discovery-rail"
   data-discovery-surface="showcase"
-  aria-label="Explore ModePot and partners"
+  aria-label="Explore ModePot projects"
 >
   <section class="family-card" aria-label="ModePot and its creator">
     <a
@@ -64,7 +63,6 @@ const project = projects[guide.project as keyof typeof projects];
       Explore {project.name} →
     </a>
   </section>
-  <PartnerSpotlight />
 </aside>
 <section class="prose tool-guide" aria-label="How to use this tool">
   <h2>Try it, review it, reuse it</h2>
