@@ -1,0 +1,30 @@
+---
+interface Props {
+  surface: "intro" | "result";
+}
+const { surface } = Astro.props;
+---
+
+<p
+  class="family-discovery"
+  data-discovery-surface={surface}
+  data-result-discovery={surface === "result" ? "" : undefined}
+  hidden={surface === "result"}
+>
+  {surface === "intro" ? "Part of " : "Keep exploring: "}
+  <a
+    class="ph-no-autocapture"
+    href="https://modepot.io/"
+    data-discovery-destination="modepot"
+  >
+    {surface === "intro" ? "ModePot" : "Explore ModePot projects"}
+  </a>
+  {surface === "intro" ? " · Created by " : " · "}
+  <a
+    class="ph-no-autocapture"
+    href="https://tugrul.modepot.io/"
+    data-discovery-destination="creator"
+  >
+    {surface === "intro" ? "Tugrul Guner" : "About Tugrul Guner"}
+  </a>
+</p>

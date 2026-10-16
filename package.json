@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "astro dev",
     "check": "astro check",
-    "build": "astro build && node scripts/verify-site.mjs",
+    "build": "astro build && node scripts/verify-site.mjs && node scripts/verify-discovery-site.mjs",
     "test": "node --test src/lib/*.test.mjs src/lib/utilities/*.test.mjs",
     "preview": "astro preview",
     "test:browser": "playwright test",

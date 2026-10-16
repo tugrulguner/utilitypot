@@ -1,4 +1,6 @@
 ---
+import ToolDiscovery from "../../components/ToolDiscovery.astro";
+import { guides } from "../../data/discovery.js";
 import UtilityLayout from "../../layouts/UtilityLayout.astro";
 import UtilityApp from "../../components/UtilityApp.astro";
 ---
@@ -6,9 +8,12 @@ import UtilityApp from "../../components/UtilityApp.astro";
 <UtilityLayout
   title="CSV to nested JSON"
   description="Group repeated rows into nested JSON. Paste a CSV and choose a grouping column."
+  seoDescription={guides["csv-to-nested-json"].description}
+  searchTitle={guides["csv-to-nested-json"].title}
   slug="csv-to-nested-json"
 >
   <UtilityApp tool="csv" />
+  <ToolDiscovery slug="csv-to-nested-json" />
   <details class="prose tool-help">
     <summary>How this tool works &amp; limits</summary>
     <h2>Group CSV rows without writing a transformation script</h2>

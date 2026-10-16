@@ -1,4 +1,6 @@
 ---
+import ToolDiscovery from "../../components/ToolDiscovery.astro";
+import { guides } from "../../data/discovery.js";
 import UtilityLayout from "../../layouts/UtilityLayout.astro";
 import UtilityApp from "../../components/UtilityApp.astro";
 ---
@@ -6,9 +8,12 @@ import UtilityApp from "../../components/UtilityApp.astro";
 <UtilityLayout
   title="Find a meeting time"
   description="Find a time that works across time zones. No calendar connection needed."
+  seoDescription={guides["meeting-time-finder"].description}
+  searchTitle={guides["meeting-time-finder"].title}
   slug="meeting-time-finder"
 >
   <UtilityApp tool="meeting" />
+  <ToolDiscovery slug="meeting-time-finder" />
   <details class="prose tool-help">
     <summary>How this tool works &amp; limits</summary>
     <h2>Find shared time, not just timezone offsets</h2>

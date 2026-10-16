@@ -1,4 +1,6 @@
 ---
+import FamilyDiscovery from "../components/FamilyDiscovery.astro";
+import tools from "../data/tools.json";
 import "@fontsource-variable/manrope";
 import "@fontsource/ibm-plex-mono/400.css";
 import "../styles/global.css";
@@ -7,18 +9,22 @@ import { posthogScript } from "../lib/analytics.js";
 import "../styles/family.css";
 interface Props {
   title: string;
+  searchTitle?: string;
+  seoDescription?: string;
   description: string;
   slug: string;
   canonicalPath?: string;
   overview?: boolean;
 }
 const { title, description, slug } = Astro.props;
+const seoDescription = Astro.props.seoDescription ?? description;
+const searchTitle = Astro.props.searchTitle ?? title;
 const canonical = `https://utilitypot.modepot.io${Astro.props.canonicalPath ?? "/" + (slug ? "tools/" + slug + "/" : "")}`;
 const schema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: title,
-  description,
+  description: seoDescription,
   url: canonical,
   applicationCategory: "UtilitiesApplication",
   operatingSystem: "Web browser",
@@ -39,8 +45,8 @@ const schema = {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>{title} | UtilityPot</title>
-    <meta name="description" content={description} />
+    <title>{searchTitle} | UtilityPot</title>
+    <meta name="description" content={seoDescription} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/utilitypot-mark-v1.svg" />
     <script is:inline>
@@ -59,8 +65,8 @@ const schema = {
             : preference;
       })();
     </script>
-    <meta property="og:title" content={`${title} | UtilityPot`} />
-    <meta property="og:description" content={description} />
+    <meta property="og:title" content={`${searchTitle} | UtilityPot`} />
+    <meta property="og:description" content={seoDescription} />
     <meta property="og:url" content={canonical} />
     <meta
       property="og:image"
@@ -99,7 +105,7 @@ const schema = {
     <a href="#main" class="skip-link">
       Skip to tool
     </a>
-    <header class="utility-header">
+    <header class="utility-header" data-discovery-surface="header">
       <a class="brand" href="/">
         <img src="/utilitypot-mark-v1.svg" alt="" width="32" height="32" />
         <span>
@@ -107,10 +113,22 @@ const schema = {
         </span>
       </a>
       <nav class="family-nav" aria-label="Main">
-        <a href="https://modepot.io/">ModePot</a>
+        <a
+          href="https://modepot.io/"
+          class="ph-no-autocapture"
+          data-discovery-destination="modepot"
+        >
+          ModePot
+        </a>
         <a href="https://github.com/tugrulguner/utilitypot">GitHub</a>
         <a href="https://discord.gg/u3AANZr6RG">Community</a>
-        <a href="https://tugrul.modepot.io/">About Tugrul</a>
+        <a
+          href="https://tugrul.modepot.io/"
+          class="ph-no-autocapture"
+          data-discovery-destination="creator"
+        >
+          About Tugrul
+        </a>
       </nav>
       <select id="color-theme" aria-label="Color theme">
         <option value="auto">Auto</option>
@@ -126,10 +144,22 @@ const schema = {
         Menu
       </button>
       <nav id="family-menu" aria-label="Compact navigation" hidden>
-        <a href="https://modepot.io/">ModePot</a>
+        <a
+          href="https://modepot.io/"
+          class="ph-no-autocapture"
+          data-discovery-destination="modepot"
+        >
+          ModePot
+        </a>
         <a href="https://github.com/tugrulguner/utilitypot">GitHub</a>
         <a href="https://discord.gg/u3AANZr6RG">Community</a>
-        <a href="https://tugrul.modepot.io/">About Tugrul</a>
+        <a
+          href="https://tugrul.modepot.io/"
+          class="ph-no-autocapture"
+          data-discovery-destination="creator"
+        >
+          About Tugrul
+        </a>
         <a href="/#tools">Browse tools</a>
         <a href="/privacy/">Privacy &amp; limits</a>
       </nav>
@@ -137,21 +167,38 @@ const schema = {
     <main id="main" class="utility-main">
       {!Astro.props.overview && (
         <>
-          <p class="coordinate">UTILITYPOT / PART OF MODEPOT</p>
+          {tools.some((tool) => tool.slug === slug) ? (
+            <FamilyDiscovery surface="intro" />
+          ) : (
+            <p class="coordinate">UTILITYPOT / PART OF MODEPOT</p>
+          )}
           <h1>{title}</h1>
           <p class="utility-intro">{description}</p>
         </>
       )}
       <slot />
     </main>
-    <footer class="utility-footer">
+    <footer class="utility-footer" data-discovery-surface="footer">
       <p>
         Small tools. Inspectable results.{" "}
-        <a href="https://modepot.io/">Explore the ModePot family →</a>
+        <a
+          href="https://modepot.io/"
+          class="ph-no-autocapture"
+          data-discovery-destination="modepot"
+        >
+          Explore the ModePot family →
+        </a>
       </p>
       <p>
-        Created by <a href="https://tugrul.modepot.io/">Tugrul Guner</a> ·{" "}
-        <a href="/">Free tools</a> · <a href="/privacy/">Privacy & limits</a>
+        Created by{" "}
+        <a
+          href="https://tugrul.modepot.io/"
+          class="ph-no-autocapture"
+          data-discovery-destination="creator"
+        >
+          Tugrul Guner
+        </a>{" "}
+        · <a href="/">Free tools</a> · <a href="/privacy/">Privacy & limits</a>
       </p>
       <p class="next-link">
         <a href="/#tools">Next — Browse tools →</a>
@@ -159,6 +206,7 @@ const schema = {
     </footer>
     <script>
       import "../scripts/family-shell.js";
+      import "../scripts/discovery.js";
     </script>
   </body>
 </html>

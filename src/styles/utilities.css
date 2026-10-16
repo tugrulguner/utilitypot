@@ -498,3 +498,36 @@
   max-height: 16rem;
   overflow-y: auto;
 }
+
+/* Discovery stays secondary to the operating area and result controls. */
+.family-discovery {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin: 0.65rem 0 1.25rem;
+  color: var(--muted);
+}
+.utility-main > [data-discovery-surface="intro"] {
+  margin: 0 0 0.5rem;
+  line-height: 1.4;
+}
+[data-result-discovery] {
+  border-top: 1px solid var(--line);
+  padding-top: 0.75rem;
+  margin-bottom: 0;
+}
+.tool-discovery {
+  margin: 1.5rem 0;
+  padding: 1rem 0;
+  border-block: 1px solid var(--line);
+}
+.tool-discovery h2,
+.tool-guide h2 {
+  font-size: 1.1rem;
+}
+.tool-discovery p {
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.tool-guide li {
+  margin-block: 0.5rem;
+}
