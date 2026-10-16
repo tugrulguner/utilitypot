@@ -1,3 +1,8 @@
+import {
+  fixturePlan,
+  approvalGraph,
+  exampleEntities,
+} from "./workflow-fixtures.mjs";
 import { test, expect } from "@playwright/test";
 import fs from "node:fs/promises";
 for (const width of [1280, 390]) {
@@ -6,8 +11,8 @@ for (const width of [1280, 390]) {
     ["fix-excel-dates", "Fix dates", "#results"],
     ["meeting-time-finder", "Find times", "#results"],
     ["json-to-csv", "Convert", "#extra-results"],
-    ["entity-extractor", "Extract with Jev", "#extra-results"],
-    ["text-to-mermaid", "Create diagram", "#extra-results"],
+    ["entity-extractor", "Find matches", "#extra-results"],
+    ["text-to-mermaid", "Create flowchart", "#extra-results"],
     ["ask-a-webpage", "Find answer", "#extra-results"],
   ])
     test(`${width}px default journey ${slug} (AI responses are regression fixtures)`, async ({
@@ -23,12 +28,14 @@ for (const width of [1280, 390]) {
         const plan =
           tool === "entities"
             ? { entities: [{ type: "Person", text: "Ada", start: 0, end: 3 }] }
-            : {
-                status: "answered",
-                excerpts: [
-                  { text: input.text, start: 0, end: input.text.length },
-                ],
-              };
+            : tool === "diagram"
+              ? { graph: approvalGraph }
+              : {
+                  status: "answered",
+                  excerpts: [
+                    { text: input.text, start: 0, end: input.text.length },
+                  ],
+                };
         await route.fulfill({
           json: {
             source: "jev",
@@ -44,7 +51,9 @@ for (const width of [1280, 390]) {
       await page.getByRole("button", { name: action, exact: true }).click();
       await expect(page.locator(result)).toBeVisible();
       expect(calls).toBe(
-        ["entity-extractor", "ask-a-webpage"].includes(slug) ? 1 : 0,
+        ["entity-extractor", "text-to-mermaid", "ask-a-webpage"].includes(slug)
+          ? 1
+          : 0,
       );
       const pending = page.waitForEvent("download");
       await page
@@ -79,42 +88,53 @@ test("JSON arrays are selected only when unique, nested arrays require explicit 
   await page.locator("#extra-run").click();
   await expect(page.locator("#extra-results")).toBeVisible();
 });
-test("branching AI failure stays visible and manual graph editing recovers without another call", async ({
+test("branching AI failure remains explicit; retry requires another disclosed AI action", async ({
   page,
 }) => {
   let calls = 0;
   await page.route("**/api/utilities/interpret", (route) => {
     calls++;
-    return route.fulfill({
-      status: 503,
-      json: { error: "Inconsistent decision branches." },
-    });
+    return route.fulfill(
+      calls === 1
+        ? { status: 503, json: { error: "Inconsistent decision branches." } }
+        : {
+            json: {
+              source: "jev",
+              model: "fixture",
+              confidence: {},
+              plan: {
+                graph: {
+                  nodes: [
+                    { id: "n0", label: "Start", type: "terminal" },
+                    { id: "n1", label: "Approved?", type: "decision" },
+                    { id: "n2", label: "Ship", type: "terminal" },
+                    { id: "n3", label: "Reject", type: "terminal" },
+                  ],
+                  edges: [
+                    { from: "n0", to: "n1", label: "" },
+                    { from: "n1", to: "n2", label: "yes" },
+                    { from: "n1", to: "n3", label: "no" },
+                  ],
+                },
+              },
+            },
+          },
+    );
   });
   await page.goto("/tools/text-to-mermaid/");
   await page.locator("#source-text").fill("Start\nApproved?\nShip\nReject");
-  await page.locator("#diagram-mode").selectOption("jev");
   await page.locator("#instructions").fill("If yes ship, if no reject");
   await page.locator("#create-diagram").click();
   await expect(page.locator("#extra-status")).toContainText(
     "No AI graph was accepted",
   );
   await expect(page.locator("#extra-results")).toBeHidden();
-  await page.locator("#prepare-extra").click();
-  await page
-    .getByLabel("Step 2 type", { exact: true })
-    .selectOption("decision");
-  await page
-    .getByLabel("Step 2 yes destination", { exact: true })
-    .selectOption("n2");
-  await page
-    .getByLabel("Step 2 no destination", { exact: true })
-    .selectOption("n3");
-  await page
-    .getByLabel("Step 3 next destination", { exact: true })
-    .selectOption("");
-  await page.locator("#extra-run").click();
-  await expect(page.locator("#extra-output")).toContainText("n1 -->|no| n3");
+  await expect(page.locator("#graph-panel")).toBeHidden();
+  await expect(page.locator("#prepare-extra,#diagram-mode")).toHaveCount(0);
   expect(calls).toBe(1);
+  await page.locator("#create-diagram").click();
+  await expect(page.locator("#extra-output")).toContainText("n1 -->|no| n3");
+  expect(calls).toBe(2);
 });
 test("local uploads and literal CSV header preservation", async ({ page }) => {
   await page.goto("/tools/csv-to-nested-json/");
@@ -136,8 +156,10 @@ test("local uploads and literal CSV header preservation", async ({ page }) => {
 test("entity correction computes an exact repeated mention and blocks invented text", async ({
   page,
 }) => {
+  await fixturePlan(page, { entities: exampleEntities });
   await page.goto("/tools/entity-extractor/");
   await page.getByRole("button", { name: /^Load example:/ }).click();
+  await page.locator("#extra-ask").click();
   await page.locator("#entity-review > summary").click();
   await page.getByLabel("Mention 1", { exact: true }).fill("Lin");
   await page.getByLabel("Mention 1", { exact: true }).press("Tab");

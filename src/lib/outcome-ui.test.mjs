@@ -13,8 +13,8 @@ for (const action of ["Create nested JSON", "Fix dates", "Find times"])
   test(`direct action: ${action}`, () => assert.ok(basic.includes(action)));
 for (const action of [
   "Convert",
-  "Extract with Jev",
-  "Create diagram",
+  "Find matches",
+  "Create flowchart",
   "Find answer",
 ])
   test(`direct action: ${action}`, () => assert.ok(extra.includes(action)));

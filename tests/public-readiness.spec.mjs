@@ -128,7 +128,7 @@ for (const scenario of [
   });
 }
 
-test("unsafe numeric IDs stop local and AI conversion, including upload; quoted correction exports exact digits", async ({
+test("unsafe numeric IDs stop deterministic conversion, including upload; quoted correction exports exact digits", async ({
   page,
 }) => {
   let apiCalls = 0;
@@ -143,11 +143,7 @@ test("unsafe numeric IDs stop local and AI conversion, including upload; quoted 
     "Quote identifiers",
   );
   await expect(page.locator("#extra-results")).toBeHidden();
-  await page.getByText("Choose records with Jev", { exact: true }).click();
-  await page.locator("#extra-ask").click();
-  await expect(page.locator("#extra-status")).toContainText(
-    "Quote identifiers",
-  );
+  await expect(page.locator("#extra-ask")).toHaveCount(0);
   await page.locator("#source-file").setInputFiles({
     name: "payments.json",
     mimeType: "application/json",

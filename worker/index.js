@@ -1,7 +1,3 @@
-import { createCsvInterpretation } from "../src/lib/utilities/csv.js";
-import { createDatesInterpretation } from "../src/lib/utilities/dates.js";
-import { createMeetingInterpretation } from "../src/lib/utilities/meeting.js";
-import { createJsonCsvInterpretation } from "../src/lib/utilities/json-csv.js";
 import { createEntitiesInterpretation } from "../src/lib/utilities/entities.js";
 import { createDiagramInterpretation } from "../src/lib/utilities/diagram.js";
 import {
@@ -10,10 +6,6 @@ import {
   PageReadError,
 } from "../src/lib/utilities/webpage.js";
 const builders = {
-  csv: createCsvInterpretation,
-  dates: createDatesInterpretation,
-  meeting: createMeetingInterpretation,
-  jsonCsv: createJsonCsvInterpretation,
   entities: createEntitiesInterpretation,
   diagram: createDiagramInterpretation,
   qa: createQaInterpretation,
@@ -163,17 +155,14 @@ export async function handleRequest(request, env, providerFetch = fetch) {
     !env.UTILITY_RATE_LIMIT ||
     !env.UTILITY_GLOBAL_RATE_LIMIT
   )
-    return json(
-      { error: "AI is unavailable. Manual controls still work." },
-      503,
-    );
+    return json({ error: "Processing is unavailable. Try again later." }, 503);
   try {
     const ip = request.headers.get("cf-connecting-ip") || "unknown";
     const a = await env.UTILITY_RATE_LIMIT.limit({ key: `utilities:${ip}` });
     if (!a.success)
       return json(
         {
-          error: "AI rate limit reached. Wait a minute or use manual controls.",
+          error: "Request limit reached. Wait a minute before trying again.",
         },
         429,
       );
@@ -182,12 +171,12 @@ export async function handleRequest(request, env, providerFetch = fetch) {
     });
     if (!b.success)
       return json(
-        { error: "AI capacity reached. Try later or use manual controls." },
+        { error: "Processing capacity reached. Try again later." },
         429,
       );
   } catch {
     return json(
-      { error: "AI protection is unavailable. Manual controls still work." },
+      { error: "Request protection is unavailable. Try again later." },
       503,
     );
   }
@@ -211,6 +200,8 @@ export async function handleRequest(request, env, providerFetch = fetch) {
       return json({ error: safe.message, code: safe.code }, status);
     }
   }
+  let failurePhase = "provider_fetch",
+    providerStage = 0;
   try {
     let active = spec,
       model = "",
@@ -220,14 +211,17 @@ export async function handleRequest(request, env, providerFetch = fetch) {
     // Entity ends depend on selected starts; never ask unrelated endpoints
     // independently or spend more than the original per-action question budget.
     for (let stage = 0; stage < 2; stage++) {
+      providerStage = stage + 1;
       const count = Object.keys(active.questions).length;
       if (count === 0) {
+        failurePhase = "decode";
         plan = active.decode({});
         break;
       }
       if (count > remainingQuestions)
         throw new Error("Question budget exceeded");
       remainingQuestions -= count;
+      failurePhase = "provider_fetch";
       const r = await providerFetch("https://api.typesafe.ai/v1/systemone", {
         method: "POST",
         headers: {
@@ -244,11 +238,13 @@ export async function handleRequest(request, env, providerFetch = fetch) {
       if (!r.ok) {
         await r.body?.cancel();
         return json(
-          { error: "Jev is unavailable. Try later or use manual controls." },
+          { error: "Processing is unavailable. Try again later." },
           503,
         );
       }
+      failurePhase = "provider_body";
       const response = JSON.parse(await boundedText(r.body, 128000));
+      failurePhase = "response_validation";
       const answers = validateAnswers(active.questions, response);
       if (model && model !== response.model)
         throw new Error("Inconsistent models");
@@ -259,9 +255,11 @@ export async function handleRequest(request, env, providerFetch = fetch) {
         mergedAnswers[key] = answers[key];
       }
       if (stage === 0 && typeof active.followup === "function") {
+        failurePhase = "followup";
         active = active.followup(answers);
         continue;
       }
+      failurePhase = "decode";
       plan = active.decode(answers);
       break;
     }
@@ -275,11 +273,27 @@ export async function handleRequest(request, env, providerFetch = fetch) {
         Object.entries(mergedAnswers).map(([k, a]) => [k, a.confidence]),
       ),
     });
-  } catch {
+  } catch (error) {
+    // Only fixed enums leave this boundary; never expose input or exception text.
+    const codes = new Map([
+      ["Inconsistent entity starts.", "entity_starts_invalid"],
+      ["Inconsistent entity boundaries.", "entity_boundaries_invalid"],
+      ["Invalid or overlapping entity span.", "entity_span_invalid"],
+      ["Invalid response", "provider_response_invalid"],
+      ["Invalid keys", "provider_response_invalid"],
+      ["Invalid choices", "provider_choices_invalid"],
+      ["Invalid probabilities", "provider_probabilities_invalid"],
+      ["Invalid usage", "provider_usage_invalid"],
+    ]);
     return json(
       {
         error:
-          "AI interpretation could not be verified. Use manual controls or try later.",
+          "The interpretation could not be verified. No result was accepted. Try again later.",
+        code:
+          codes.get(error instanceof Error ? error.message : "") ||
+          "interpretation_unverified",
+        phase: failurePhase,
+        stage: providerStage,
       },
       503,
     );

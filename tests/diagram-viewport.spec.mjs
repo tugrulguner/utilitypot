@@ -1,3 +1,4 @@
+import { fixturePlan } from "./workflow-fixtures.mjs";
 import { test, expect } from "@playwright/test";
 
 test("mobile eight-step diagram is reviewable by page scrolling, not clipped inside a fixed frame", async ({
@@ -7,6 +8,28 @@ test("mobile eight-step diagram is reviewable by page scrolling, not clipped ins
   let apiCalls = 0;
   page.on("request", (r) => {
     if (r.url().includes("/api/utilities/")) apiCalls++;
+  });
+  const labels = [
+    "Receive request.",
+    "Assign a reviewer.",
+    "Read the request.",
+    "Check the supporting documents.",
+    "Record the decision.",
+    "Notify the requester.",
+    "Archive the record.",
+    "Finish the process.",
+  ];
+  await fixturePlan(page, {
+    graph: {
+      nodes: labels.map((label, i) => ({
+        id: `n${i}`,
+        label,
+        type: i === 7 ? "terminal" : "process",
+      })),
+      edges: labels
+        .slice(1)
+        .map((_, i) => ({ from: `n${i}`, to: `n${i + 1}`, label: "" })),
+    },
   });
   await page.goto("/tools/text-to-mermaid/");
   await page
@@ -24,7 +47,7 @@ test("mobile eight-step diagram is reviewable by page scrolling, not clipped ins
   const viewport = await frame.boundingBox();
   expect(drawing.height).toBeLessThanOrEqual(viewport.height + 2);
   expect(await frame.getAttribute("sandbox")).toBe("");
-  expect(apiCalls).toBe(0);
+  expect(apiCalls).toBe(1);
   await page.setViewportSize({ width: 1280, height: 900 });
   const desktopDrawing = await page
     .frameLocator("#extra-visual iframe")

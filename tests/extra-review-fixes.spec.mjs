@@ -28,34 +28,46 @@ test("local latency fixture: two valid 11-second entity stages fit the client de
   await expect(page.locator("#extra-status")).not.toContainText("timed out");
 });
 
-test("local failure fixture: rejected entity boundaries offer manual recovery without accepting spans", async ({
+test("rejected entity interpretation accepts no spans and exposes no pre-result manual fallback", async ({
   page,
 }) => {
-  await page.route("**/api/utilities/interpret", (route) =>
-    route.fulfill({
-      status: 503,
-      contentType: "application/json",
-      body: JSON.stringify({
-        error:
-          "AI interpretation could not be verified. Use manual controls or try later.",
-      }),
-    }),
-  );
+  let calls = 0;
+  await page.route("**/api/utilities/interpret", (route) => {
+    calls++;
+    return route.fulfill(
+      calls === 1
+        ? {
+            status: 503,
+            json: {
+              error:
+                "AI interpretation could not be verified. Try again later.",
+            },
+          }
+        : {
+            json: {
+              source: "jev",
+              model: "fixture",
+              confidence: {},
+              plan: {
+                entities: [{ type: "Person", text: "Noah", start: 9, end: 13 }],
+              },
+            },
+          },
+    );
+  });
   await page.goto("/tools/entity-extractor/");
   await page.locator("#source-text").fill("Mina met Noah.");
   await page.locator("#extra-ask").click();
   await expect(page.locator("#extra-status")).toContainText(
     "No AI matches were accepted",
   );
-  await expect(page.locator("#extra-status")).toContainText(
-    "Add mention manually",
-  );
-  await expect(page.locator("#add-mention")).toBeVisible();
   await expect(page.locator("#extra-results")).toBeHidden();
-  await page.locator("#add-mention").click();
-  await page.getByLabel("Mention 1", { exact: true }).fill("Noah");
-  await page.locator("#extra-run").click();
+  await expect(page.locator("#entity-review")).toBeHidden();
+  await expect(page.locator("#add-mention")).toBeHidden();
+  expect(calls).toBe(1);
+  await page.locator("#extra-ask").click();
   await expect(page.locator("#extra-visual mark")).toHaveText("Noah");
+  expect(calls).toBe(2);
 });
 
 test("single JSON object offers an explicit one-row conversion", async ({
@@ -97,7 +109,7 @@ test("invalid JSON and empty diagram input get actionable field-specific guidanc
   await expect(page.locator("#extra-status")).toContainText("double quotes");
   await page.goto("/tools/text-to-mermaid/");
   await page
-    .getByRole("button", { name: "Create diagram", exact: true })
+    .getByRole("button", { name: "Create flowchart", exact: true })
     .click();
   await expect(page.locator("#extra-status")).toContainText(
     "Add at least one step",

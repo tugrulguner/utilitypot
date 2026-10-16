@@ -12,11 +12,11 @@
 
 <p align="center"><a href="https://utilitypot.modepot.io/#tools">Browse tools</a> · <a href="#utilities">What ships</a> · <a href="#local-setup">Run locally</a> · <a href="https://utilitypot.modepot.io/privacy/">Privacy & limits</a> · <a href="docs/deployment-and-releases.md">Deployment & releases</a> · <a href="#contributing">Contribute</a></p>
 
-**Live app:** https://utilitypot.modepot.io/ — free, no signup. Manual computation stays in your browser; optional AI interpretation sends only the disclosed context after consent.
+**Live app:** https://utilitypot.modepot.io/ — free, no signup. CSV/JSON conversion, date cleanup and meeting-time calculation stay in your browser. Entity extraction, flowchart interpretation and webpage evidence selection use bounded AI after disclosed consent. Each utility has one workflow, not an AI/manual mode chooser.
 
 ## Utilities
 
-- CSV to nested JSON: paste/upload, choose a grouping column, preview parent records and child rows. Custom schemas and Jev-assisted mappings are optional advanced controls; strings and literal headers are preserved.
+- CSV to nested JSON: paste/upload, choose a grouping column, preview parent records and child rows. Custom output shapes use explicit field mappings; strings and literal headers are preserved. No AI or input upload is used.
 - JSON to CSV: select a record array, flatten objects, explicitly omit/join/reject other arrays; escape spreadsheet formulas. Numeric values that would be rounded are refused; quote long identifiers and high-precision values to preserve them.
 - Mixed spreadsheet dates: preserve original values, flag ambiguous dates and retain partial precision.
 - Meeting time finder: reviewed one-off windows, exclusions, timezone-aware overlap and calendar export.
@@ -26,7 +26,7 @@
 
 ## Simple workflows
 
-Start with your source and the outcome-named action, then review the readable preview and copy/download. Entity and diagram corrections use normal controls; raw JSON import is optional. Meetings show either time fields or natural-language availability, never both at once. Webpage questions combine reading and evidence selection into one explicitly disclosed action. AI buttons explain what is sent to Jev/TypeSafe before you click; local modes never send your input.
+Start with your source and one outcome-named action, then investigate the readable result and copy/download. The converters, date cleanup and meeting calculator use explicit task settings and never call AI. Meetings use timezone-aware time fields, with optional exclusions. Entity and diagram corrections are ordinary post-result investigation, not alternative execution modes. Webpage questions combine source reading and evidence selection in one disclosed action. The three AI utilities explain what is sent to Jev/TypeSafe before you click; failures remain explicit and never silently switch execution methods.
 
 ## Local setup
 
@@ -44,11 +44,13 @@ npm run build
 npx wrangler dev --local --ip 127.0.0.1 --port 4398 --inspector-port 9398
 ```
 
-For optional local inference, create a gitignored `.dev.vars` containing `TYPESAFE_API_KEY` through your own secure environment workflow. Do not put a key in browser variables, source, issues or chat. Never commit `.dev.vars` or print its values. Without a key, AI explicitly fails closed while manual converters and calculations remain usable.
+For optional local inference, create a gitignored `.dev.vars` containing `TYPESAFE_API_KEY` through your own secure environment workflow. Do not put a key in browser variables, source, issues or chat. Never commit `.dev.vars` or print its values. Without a key, the three AI utilities explicitly fail closed while the four browser-local converters and calculators remain usable.
 
 ## Verification
 
-Current readiness evidence is recorded in [the public-readiness report](docs/public-readiness.md) and its [generated ledger](docs/public-readiness-evidence.json). Run `UX_ORIGIN=https://utilitypot.modepot.io node scripts/fresh-ux-product-qa.mjs` for the current 23-scenario live gate. It makes real, potentially billable Jev calls and checks rendered outcomes, source spans and actual downloads without request mocks or inference retries. The earlier `npm run test:live` runner and [original live QA report](docs/live-product-qa.md) remain historical evidence, not a declaration of the latest production state. Fixture-green CI is not live semantic qualification.
+For the fixed local4/AI3 workflows, run `UX_ORIGIN=<approved hosted origin> UX_RESULTS_DIR=<dedicated evidence directory> node scripts/focused-workspace-product-qa.mjs`. The runner accepts production or an approved immutable Worker preview, makes real, potentially billable Jev calls at least 13.5 seconds apart, and checks zero-API local computation, source spans, investigation controls and actual downloads. It saves every case, response, failure and screenshot; it does not mock requests or retry inference. Temporary previews must be approved and restored separately.
+
+The [public-readiness report](docs/public-readiness.md), [generated ledger](docs/public-readiness-evidence.json), older 23-scenario `fresh-ux-product-qa.mjs` runner and [original live QA report](docs/live-product-qa.md) describe earlier workflows. They do not qualify this redesign or declare its deployment. Fixture-green CI is not live semantic qualification.
 
 ```sh
 npm test

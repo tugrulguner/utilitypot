@@ -1,6 +1,7 @@
+import { fixturePlan } from "./workflow-fixtures.mjs";
 import { test, expect } from "@playwright/test";
 
-test("overlapping manual categories navigate their exact source without missing marks", async ({
+test("overlapping accepted categories navigate their exact source without missing marks", async ({
   page,
 }) => {
   const errors = [];
@@ -11,16 +12,13 @@ test("overlapping manual categories navigate their exact source without missing 
   await page
     .locator("#instructions")
     .fill("Speaker: a named person who speaks");
-  await page
-    .getByText("Advanced: import a manual JSON plan", { exact: true })
-    .click();
-  await page.locator("#review-plan").fill(
-    JSON.stringify([
+  await fixturePlan(page, {
+    entities: [
       { type: "Person", text: "Nora Ivers", start: 0, end: 10 },
       { type: "Speaker", text: "Nora", start: 0, end: 4 },
-    ]),
-  );
-  await page.locator("#import-plan").click();
+    ],
+  });
+  await page.locator("#extra-ask").click();
   await expect(page.locator(".entity-document")).toHaveText("Nora Ivers.");
   await page
     .getByRole("button", { name: "Speaker Nora, occurrence 1", exact: true })

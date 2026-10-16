@@ -1,0 +1,240 @@
+/* Task workspaces: shared family chrome, purpose-shaped inputs and results. */
+.utility-app .diagram-viewport {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+.utility-app .diagram-viewport:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+.utility-app .investigation-controls button[aria-pressed="true"] {
+  border-color: var(--gold);
+  box-shadow: inset 0 -2px var(--gold);
+}
+.utility-app[data-utility="csv"] .result-inspector table {
+  min-width: 100%;
+  width: max-content;
+}
+.utility-app[data-utility="csv"] .result-inspector :is(th, td) {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+.utility-app .result-toolbar {
+  scroll-margin-block: 1rem;
+}
+.utility-page .utility-app[data-utility="csv"] .input-surface {
+  padding: 0.75rem;
+}
+@media (min-width: 1050px) {
+  .utility-main:has(> .utility-app[data-utility="dates"]) > .notice {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    margin-block: 0 0.5rem;
+  }
+  .utility-main > .utility-app[data-utility="dates"] {
+    grid-row: 5;
+  }
+  .utility-main:has(> .utility-app[data-utility="dates"]) > .discovery-rail {
+    grid-row: 5;
+  }
+  .utility-main:has(> .utility-app[data-utility="dates"] #results:not([hidden]))
+    > .discovery-rail {
+    grid-row: auto;
+  }
+}
+.utility-page .utility-app .workspace-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.65rem;
+  margin-bottom: 0.65rem;
+  border-bottom: 1px solid var(--line);
+}
+.utility-app .workspace-header h2 {
+  margin: 0.2rem 0;
+  font-size: 1.2rem;
+  letter-spacing: -0.025em;
+}
+.utility-app .workspace-kicker {
+  margin: 0 0 0.35rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.utility-app .workspace-description {
+  max-width: 65ch;
+  margin: 0.3rem 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.utility-page .utility-app .input-surface {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--control-border);
+  border-radius: 10px;
+  background: var(--control);
+}
+.utility-app .input-surface > label:first-child {
+  margin-top: 0;
+}
+.utility-page .utility-app :is(input, textarea, select) {
+  box-sizing: border-box;
+}
+.utility-page
+  .utility-app[data-extra-utility]:not([data-extra-utility="jsonCsv"])
+  #source-text {
+  font-family: var(--display);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+.utility-app .input-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  margin-block: 0.5rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.utility-app input[type="file"] {
+  font-size: 0.85rem;
+  padding: 0.3rem;
+}
+.utility-app input[type="file"]::file-selector-button {
+  min-height: 40px;
+  margin-right: 0.65rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--control-border);
+  border-radius: 5px;
+  background: var(--control);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.utility-app .settings-surface {
+  min-width: 0;
+  padding-block: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+.utility-app .result-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--line);
+}
+.utility-app .result-toolbar h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  letter-spacing: -0.025em;
+}
+.utility-app .result-toolbar .actions {
+  margin: 0;
+}
+.utility-app .result-summary {
+  padding: 0.8rem 1rem;
+  border-left: 3px solid var(--gold);
+  background: var(--control);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.utility-app .investigation-controls {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  padding-block: 0.65rem;
+  border-block: 1px solid var(--line);
+  margin-block: 0.8rem;
+}
+.utility-app .investigation-controls > * {
+  min-width: 0;
+}
+.utility-app .investigation-controls label {
+  margin: 0;
+}
+.utility-app .investigation-controls select {
+  width: auto;
+  max-width: 100%;
+}
+.utility-app .result-inspector {
+  min-width: 0;
+  line-height: 1.65;
+}
+.utility-app .result-inspector > details {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  margin-block: 0.65rem;
+}
+.utility-app .empty-result {
+  padding: 1.25rem;
+  border: 1px dashed var(--control-border);
+  border-radius: 10px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+.utility-app .empty-result p {
+  margin: 0.3rem 0;
+}
+.utility-app .table-scroll:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+.utility-app .result-inspector th {
+  color: var(--ink);
+  font-weight: 650;
+}
+.utility-app .result-inspector tbody tr:hover {
+  background: var(--control);
+}
+.utility-app .participant {
+  border-top: 3px solid var(--control-border);
+}
+.utility-app .participant h2 {
+  letter-spacing: -0.02em;
+}
+@media (min-width: 720px) {
+  .utility-app .meeting-comparison ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .utility-page .utility-app .input-surface {
+    padding: 0.75rem;
+  }
+  .utility-page .utility-app .workspace-header {
+    gap: 0.6rem;
+    padding-bottom: 0.65rem;
+    margin-bottom: 0.65rem;
+  }
+  .utility-app .result-toolbar {
+    align-items: flex-start;
+  }
+  .utility-app .result-toolbar .actions {
+    width: 100%;
+  }
+  .utility-app .investigation-controls > label {
+    width: 100%;
+  }
+  .utility-app .investigation-controls select {
+    width: 100%;
+  }
+}
+
+/* A short question should not inherit the full-source textarea minimum. */
+.utility-app[data-extra-utility="qa"] #instructions {
+  min-height: 5rem;
+}

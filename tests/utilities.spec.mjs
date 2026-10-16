@@ -85,94 +85,64 @@ test("meeting windows compute local times and export a matching calendar instant
     "DTSTART:20260615T083000Z",
   );
 });
-test("AI requires consent and sends only five CSV rows", async ({ page }) => {
-  let count = 0,
-    payload;
-  await page.route("**/api/utilities/interpret", async (route) => {
+test("CSV conversion sends no rows to AI, including rows beyond an old sample boundary", async ({
+  page,
+}) => {
+  let count = 0;
+  await page.route("**/api/**", (r) => {
     count++;
-    payload = route.request().postDataJSON();
-    await route.fulfill({
-      status: 503,
-      json: { error: "AI is unavailable. Manual controls still work." },
-    });
+    return r.abort();
   });
   await page.goto("/tools/csv-to-nested-json/");
   await page
-    .locator("details")
-    .evaluateAll((es) => es.forEach((e) => (e.open = true)));
-  await page.getByRole("button", { name: /^Load example:/ }).click();
-  expect(count).toBe(0);
-  await page
     .locator("#csv-input")
-    .fill("id,name\n1,A\n2,B\n3,C\n4,D\n5,E\n6,DO_NOT_SEND");
-  await page
-    .getByRole("button", { name: "Create with Jev", exact: true })
-    .click();
-  await expect(page.locator("#utility-status")).toContainText(
-    "AI is unavailable",
-  );
-  expect(count).toBe(1);
-  expect(payload.input.csv).not.toContain("DO_NOT_SEND");
+    .fill("id,name\n1,A\n2,B\n3,C\n4,D\n5,E\n6,PRIVATE_SIXTH_ROW");
+  await page.locator("#run").click();
+  await expect(page.locator("#results")).toBeVisible();
+  await expect(page.locator("#result-view")).toContainText("PRIVATE_SIXTH_ROW");
+  expect(count).toBe(0);
+  await expect(page.locator("#ask-jev")).toHaveCount(0);
 });
-test("fixture Jev proposal computes a reviewable preview in one action", async ({
+test("explicit date convention computes a reviewable preview in one local action", async ({
   page,
 }) => {
-  await page.route("**/api/utilities/interpret", (route) =>
-    route.fulfill({
-      status: 200,
-      json: {
-        source: "jev",
-        model: "fixture-jev",
-        plan: { convention: "day-first" },
-        confidence: { convention: 0.95 },
-      },
-    }),
-  );
   await page.goto("/tools/fix-excel-dates/");
-  await page
-    .locator("details")
-    .evaluateAll((es) => es.forEach((e) => (e.open = true)));
-  await page.getByRole("button", { name: /^Load example:/ }).click();
-  await page.getByRole("button", { name: "Fix with Jev", exact: true }).click();
-  await expect(page.locator("#date-convention")).toHaveValue("day-first");
+  await page.locator("#load-example").click();
+  await page.locator("#run").click();
+  await page.locator("#date-convention").selectOption("day-first");
+  await page.locator("#run").click();
   await expect(page.locator("#results")).toBeVisible();
+  await expect(page.locator("#result-view")).toContainText("2026-04-03");
   await expect(page.locator("#utility-status")).toContainText(
     "Processed 5 rows locally.",
   );
 });
-test("editing source invalidates an in-flight interpretation", async ({
+test("editing source invalidates an in-flight semantic interpretation", async ({
   page,
 }) => {
   let release;
-  const gate = new Promise((resolve) => {
-    release = resolve;
-  });
+  const gate = new Promise((r) => (release = r));
   await page.route("**/api/utilities/interpret", async (route) => {
     await gate;
-    await route.fulfill({
-      status: 200,
+    return route.fulfill({
       json: {
         source: "jev",
         model: "fixture",
-        plan: { convention: "month-first" },
-        confidence: { convention: 0.9 },
+        plan: { status: "not-answered", excerpts: [] },
+        confidence: {},
       },
     });
   });
-  await page.goto("/tools/fix-excel-dates/");
-  await page
-    .locator("details")
-    .evaluateAll((es) => es.forEach((e) => (e.open = true)));
-  await page.getByRole("button", { name: /^Load example:/ }).click();
+  await page.goto("/tools/ask-a-webpage/");
+  await page.locator("#source-text").fill("Original source");
+  await page.locator("#instructions").fill("What is this?");
   const sent = page.waitForRequest("**/api/utilities/interpret");
-  await page.getByRole("button", { name: "Fix with Jev", exact: true }).click();
+  await page.locator("#extra-ask").click();
   await sent;
-  await page.locator("#date-context").fill("New context");
+  await page.locator("#source-text").fill("New source");
   release();
-  await expect(
-    page.getByRole("button", { name: "Fix with Jev", exact: true }),
-  ).toBeEnabled();
-  await expect(page.locator("#date-convention")).toHaveValue("auto");
+  await expect(page.locator("#extra-ask")).toBeEnabled();
+  await expect(page.locator("#extra-results")).toBeHidden();
 });
 
 for (const [slug, title] of [

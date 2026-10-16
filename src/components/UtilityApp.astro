@@ -7,11 +7,11 @@ const { tool } = Astro.props;
 const examples = {
   csv: [
     "Load example: customers",
-    "Three rows → two customer groups: 001 has two items, 002 has one.",
+    "Example: three rows → two customer groups: 001 has two items, 002 has one.",
   ],
   dates: [
     "Load example: mixed dates",
-    "Try complete, unclear, invalid and month/year-only dates. Every original stays in the report.",
+    "Example: complete, unclear, invalid and month/year-only dates. Every original stays in the report.",
   ],
   meeting: [
     "Load example: working hours",
@@ -24,83 +24,70 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
 <section
   data-utility={tool}
   class="utility-app ph-no-capture ph-no-autocapture"
+  data-processing="local"
 >
   <section class="panel">
-    <div class="workspace-toolbar">
-      <h2>Input</h2>
+    <header class="workspace-header workspace-toolbar">
+      <div>
+        <p class="workspace-kicker">
+          {tool === "csv"
+            ? "CSV rows"
+            : tool === "dates"
+              ? "Date text"
+              : "Availability"}
+        </p>
+        <h2>
+          {tool === "csv"
+            ? "Add your data"
+            : tool === "dates"
+              ? "Clean up your date list"
+              : "Choose a shared time"}
+        </h2>
+      </div>
       <button disabled data-startup-was-enabled="true" id="load-example">
         {examples[tool][0]}
       </button>
-    </div>
-    <p id="example-outcome" class="notice">
+    </header>
+    <p id="example-outcome" class="workspace-description notice">
       {examples[tool][1]}
     </p>
     {tool === "csv" && (
       <>
-        <label for="csv-input">CSV data</label>
-        <textarea
-          id="csv-input"
-          rows="7"
-          maxlength="2000000"
-          placeholder="Customer,Name,SKU,Qty&#10;001,Ada,A01,2"
-        />
-        <label for="source-file">Or upload CSV (local only, up to 2 MB)</label>
-        <input id="source-file" type="file" accept=".csv,text/csv" />
+        <div class="input-surface">
+          <label for="csv-input">Paste your CSV rows</label>
+          <textarea
+            id="csv-input"
+            rows="7"
+            maxlength="2000000"
+            placeholder="Customer,Name,SKU,Qty&#10;001,Ada,A01,2"
+          />
+          <label for="source-file">
+            CSV file (≤2 MB; 20 columns / 10,000 rows)
+          </label>
+          <input id="source-file" type="file" accept=".csv,text/csv" />
+        </div>
         <label for="group-by">Group rows by</label>
         <select id="group-by">
           <option value="">Paste CSV to choose a field</option>
         </select>
         <p class="notice">
-          Rows with the same value in this column form one group. Every value
-          stays a string. Other columns become child rows with their original
-          header names. Up to 20 columns and 10,000 rows.
+          Group by a parent key. Other columns become child rows; values stay
+          text.
         </p>
-        <details>
-          <summary>Advanced structure and custom mapping</summary>
-          <label for="child-name">Child array name</label>
-          <input id="child-name" value="rows" maxlength="80" />
-          <div id="parent-fields" />
-          <label class="check">
-            <input id="custom-schema" type="checkbox" />
-            Use a custom output schema
-          </label>
-          <label for="json-example">Custom JSON example (one parent)</label>
-          <textarea
-            id="json-example"
-            rows="4"
-            maxlength="4000"
-            placeholder={'{"id":"001","items":[{"sku":"A01"}]}'}
-          />
-          <label for="csv-intent">Mapping instructions</label>
-          <input id="csv-intent" maxlength="800" />
-          <button disabled data-startup-was-enabled="true" id="prepare">
-            Prepare manual mapping
-          </button>
-          <p class="notice">
-            Create with Jev sends headers, five sample rows, this schema and
-            instructions to Jev/TypeSafe. Review proposed mappings; unknown
-            fields stop conversion.
-          </p>
-          <button disabled data-startup-was-enabled="true" id="ask-jev">
-            Create with Jev
-          </button>
-        </details>
-        <div id="mapping-panel" hidden>
-          <h3>Editable column mapping</h3>
-          <div id="mapping-fields" />
-        </div>
       </>
     )}
     {tool === "dates" && (
       <>
-        <label for="dates-input">Dates (one per line)</label>
-        <textarea
-          id="dates-input"
-          rows="7"
-          maxlength="200000"
-          placeholder="25/03/2026&#10;03/04/2026&#10;2026-02"
-        />
-        <p class="notice">
+        <div class="input-surface">
+          <label for="dates-input">Paste dates, one per line</label>
+          <textarea
+            id="dates-input"
+            rows="7"
+            maxlength="200000"
+            placeholder="25/03/2026&#10;03/04/2026&#10;2026-02"
+          />
+        </div>
+        <p class="input-meta notice">
           Original values stay in the report. Ambiguous, partial and invalid
           dates remain visible. Month-only formats: January 2027, Jan 2027,
           01/2027 (MM/YYYY), or 2027-01. Year-only: 2027. No day is invented.
@@ -122,24 +109,6 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
             </option>
           </select>
         </div>
-        <details>
-          <summary>Interpret source context with Jev</summary>
-          <label for="date-context">What do you know about the source?</label>
-          <textarea
-            id="date-context"
-            rows="2"
-            maxlength="1000"
-            placeholder="This export is from our UK office."
-          />
-          <p class="notice">
-            Fix with Jev sends up to 20 dates and this context to Jev/TypeSafe.
-            The proposed convention stays editable; unresolved dates are never
-            guessed.
-          </p>
-          <button disabled data-startup-was-enabled="true" id="ask-jev">
-            Fix with Jev
-          </button>
-        </details>
       </>
     )}
     {tool === "meeting" && (
@@ -154,16 +123,6 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
             <input id="duration" type="number" min="15" max="240" value="30" />
           </div>
         </div>
-        <label for="availability-mode">Availability</label>
-        <select id="availability-mode">
-          <option value="local">Enter local times — private</option>
-          <option value="jev">Describe times — use Jev</option>
-        </select>
-        <p id="meeting-consent" class="notice" hidden>
-          Find times with Jev sends the date, duration, participant labels,
-          zones and statements to Jev/TypeSafe. Review the proposed windows and
-          slots before export.
-        </p>
         <div id="participants">
           {[0, 1].map((i) => (
             <div class="participant panel" data-index={i}>
@@ -184,16 +143,6 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
                   <label for={`p${i}-name`}>Name for participant {i + 1}</label>
                   <input id={`p${i}-name`} data-field="name" maxlength="60" />
                 </details>
-              </div>
-              <div data-availability="jev" hidden>
-                <label for={`p${i}-text`}>Availability statement {i + 1}</label>
-                <textarea
-                  id={`p${i}-text`}
-                  data-field="text"
-                  rows="2"
-                  maxlength="500"
-                  placeholder="From 9am until 5pm, except noon to 1pm."
-                />
               </div>
               <div data-availability="local">
                 <div class="utility-grid">
@@ -245,6 +194,35 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
             : "Find times"}
       </button>
     </div>
+    {tool === "csv" && (
+      <>
+        {" "}
+        <details>
+          <summary>Output structure and custom field mapping</summary>
+          <label for="child-name">Child array name</label>
+          <input id="child-name" value="rows" maxlength="80" />
+          <div id="parent-fields" />
+          <label class="check">
+            <input id="custom-schema" type="checkbox" />
+            Use a custom output schema
+          </label>
+          <label for="json-example">Custom JSON example (one parent)</label>
+          <textarea
+            id="json-example"
+            rows="4"
+            maxlength="4000"
+            placeholder={'{"id":"001","items":[{"sku":"A01"}]}'}
+          />
+          <button id="prepare" disabled data-startup-was-enabled="true">
+            Set field mapping
+          </button>
+        </details>
+        <div id="mapping-panel" hidden>
+          <h3>Editable column mapping</h3>
+          <div id="mapping-fields" />
+        </div>
+      </>
+    )}
     {tool === "meeting" && (
       <>
         <div class="actions meeting-secondary-actions">
@@ -283,17 +261,31 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
   >
     Paste your source or load an example. Local actions stay in your browser.
   </p>
-  <section id="results" class="panel" hidden>
-    <h2>Result</h2>
-    <div id="result-view" />
-    <div class="actions">
-      <button disabled data-startup-was-enabled="true" id="download">
-        Download result
-      </button>
-      <button disabled data-startup-was-enabled="true" id="copy">
-        Copy result
-      </button>
-    </div>
+  <section
+    id="results"
+    class="panel"
+    tabindex="-1"
+    aria-labelledby="results-title"
+    hidden
+  >
+    <header class="result-toolbar">
+      <h2 id="results-title">
+        {tool === "csv"
+          ? "Nested records"
+          : tool === "dates"
+            ? "Date review"
+            : "Available meeting times"}
+      </h2>
+      <div class="actions">
+        <button disabled data-startup-was-enabled="true" id="download">
+          Download result
+        </button>
+        <button disabled data-startup-was-enabled="true" id="copy">
+          Copy result
+        </button>
+      </div>
+    </header>
+    <div id="result-view" class="result-inspector" />
     <FamilyDiscovery surface="result" />
   </section>
 </section>

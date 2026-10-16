@@ -24,7 +24,7 @@ export const guides = {
   "csv-to-nested-json": {
     title: "CSV to nested JSON converter — group rows locally",
     description:
-      "Group CSV rows by a shared column, review nested JSON, then copy or download. Keeps string values and leading zeros; optional AI mapping.",
+      "Group CSV rows by a shared column, review nested JSON, then copy or download. Keeps string values and leading zeros; everything stays in your browser.",
     steps: [
       "Paste CSV text or upload a CSV, then choose the column that identifies each parent.",
       "Review which columns stay on the parent and name the child array. Build the JSON and inspect every group.",
@@ -88,7 +88,7 @@ export const guides = {
       "Find people, companies or custom categories in short text. Review exact source spans, correct mentions manually and export JSON. Bounded AI extraction.",
     steps: [
       "Paste short text and choose people, companies or a custom category.",
-      "Use the disclosed AI action or add mentions manually. Review each exact source occurrence and label.",
+      "Find matches, then investigate each category, exact source occurrence and label.",
       "Validate the reviewed mentions, then copy or download JSON with source offsets.",
     ],
     example:
@@ -102,7 +102,7 @@ export const guides = {
     description:
       "Turn up to eight listed steps into a reviewable flowchart. Edit connections privately, render locally and download Mermaid or SVG.",
     steps: [
-      "List up to eight steps. Start a private sequential graph or describe connections for the disclosed AI action.",
+      "List up to eight steps and describe their connections, then create the flowchart.",
       "Review node types and destinations, especially both branches of each decision. Correct the graph before sharing.",
       "Render the reviewed graph and download Mermaid source or SVG.",
     ],

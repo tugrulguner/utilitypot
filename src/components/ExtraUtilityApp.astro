@@ -11,11 +11,11 @@ const examples = {
   ],
   entities: [
     "Load example: repeated names",
-    "Find Ada, Lin and Acme Labs. Correct highlights in the manual mention editor.",
+    "Find names in the sample source, then review accepted highlights after extraction.",
   ],
   diagram: [
     "Load example: approval steps",
-    "Four steps form an approval flowchart with Yes and No branches. Edit connections privately; export Mermaid or SVG.",
+    "Four supplied steps become an inspectable approval flowchart after Jev proposes connections.",
   ],
   qa: [
     "Load example: privacy passage",
@@ -26,16 +26,36 @@ const examples = {
 
 <section
   data-extra-utility={tool}
+  data-processing={tool === "jsonCsv" ? "local" : "ai"}
   class="utility-app ph-no-capture ph-no-autocapture"
 >
   <section class="panel">
-    <div class="workspace-toolbar">
-      <h2>Input</h2>
+    <div class="workspace-header">
+      <div>
+        <p class="workspace-kicker">
+          {tool === "jsonCsv"
+            ? "JSON records"
+            : tool === "entities"
+              ? "Text & categories"
+              : tool === "diagram"
+                ? "Steps & connections"
+                : "Source & question"}
+        </p>
+        <h2>
+          {tool === "jsonCsv"
+            ? "Choose records to convert"
+            : tool === "entities"
+              ? "Explore names in context"
+              : tool === "diagram"
+                ? "Describe the flow"
+                : "Find evidence in a source"}
+        </h2>
+      </div>
       <button disabled data-startup-was-enabled="true" id="extra-example">
         {examples[tool][0]}
       </button>
     </div>
-    <p id="example-outcome" class="notice">
+    <p id="example-outcome" class="workspace-description notice">
       {examples[tool][1]}
     </p>
     {tool === "qa" && (
@@ -100,6 +120,9 @@ const examples = {
       </label>
       <textarea
         id="source-text"
+        class={
+          tool === "jsonCsv" ? "input-surface" : "input-surface prose-input"
+        }
         rows="7"
         maxlength={
           tool === "jsonCsv"
@@ -149,18 +172,6 @@ const examples = {
             automatically.
           </p>
         </div>
-        <details>
-          <summary>Choose records with Jev</summary>
-          <label for="instructions">Which records do you need?</label>
-          <textarea id="instructions" rows="2" maxlength="800" />
-          <p class="notice">
-            Convert with Jev sends a reduced sample (five items per array) and
-            your instructions to Jev/TypeSafe.
-          </p>
-          <button disabled data-startup-was-enabled="true" id="extra-ask">
-            Convert with Jev
-          </button>
-        </details>
       </>
     )}
     {tool === "entities" && (
@@ -191,29 +202,16 @@ const examples = {
             placeholder="Place: a named city"
           />
         </div>
-        <p class="notice">
-          Extract sends text and categories to Jev/TypeSafe. Up to 120 source
-          tokens and three matches per category; review highlights.
+        <p id="processing-disclosure" class="notice">
+          Selecting Find matches sends text and selected categories to
+          Jev/TypeSafe. Up to 120 source tokens and three matches per category;
+          review highlights.
         </p>
       </>
     )}
-    {tool === "entities" && (
-      <details>
-        <summary>Extraction limits</summary>Up to 120 source tokens and 1–4
-        categories, three matches per category. This is not exhaustive
-        full-document extraction.
-      </details>
-    )}
     {tool === "diagram" && (
       <>
-        <label for="diagram-mode">Connections</label>
-        <select id="diagram-mode">
-          <option value="local">
-            Sequential — private, edit connections yourself
-          </option>
-          <option value="jev">Describe connections — use Jev</option>
-        </select>
-        <div id="connection-description" hidden>
+        <div id="connection-description">
           <label for="instructions">Describe the connections</label>
           <textarea
             id="instructions"
@@ -221,8 +219,8 @@ const examples = {
             maxlength="800"
             placeholder="If approved, send confirmation; otherwise notify rejection."
           />
-          <p class="notice">
-            Create diagram with Jev sends the listed steps and connection
+          <p id="processing-disclosure" class="notice">
+            Selecting Create flowchart sends the listed steps and connection
             description to Jev/TypeSafe. It selects relationships, never
             arbitrary code.
           </p>
@@ -242,10 +240,9 @@ const examples = {
           maxlength="400"
           placeholder="What does this source say about cancellation?"
         />
-        <p class="notice">
-          Find answer sends the source and your question to Jev/TypeSafe. URL
-          mode first reads the public page. Results quote the source, not
-          generated answers.
+        <p id="processing-disclosure" class="notice">
+          Selecting Find answer sends source + question to Jev/TypeSafe. URL
+          mode reads the public page first. Answers quote the source.
         </p>
         <p id="source-coverage" class="notice" />
         <details id="source-inspection" hidden>
@@ -254,10 +251,6 @@ const examples = {
         </details>
       </>
     )}
-    <p class="notice">
-      No saved inputs or input-content analytics.{" "}
-      <a href="/privacy/">Privacy &amp; limits</a>
-    </p>
     <div class="actions">
       {tool === "jsonCsv" && (
         <button
@@ -274,9 +267,10 @@ const examples = {
           disabled
           data-startup-was-enabled="true"
           id="extra-ask"
+          aria-describedby="processing-disclosure"
           class="primary"
         >
-          Extract with Jev
+          Find matches
         </button>
       )}
       {tool === "diagram" && (
@@ -284,9 +278,10 @@ const examples = {
           disabled
           data-startup-was-enabled="true"
           id="create-diagram"
+          aria-describedby="processing-disclosure"
           class="primary"
         >
-          Create diagram
+          Create flowchart
         </button>
       )}
       {tool === "qa" && (
@@ -294,28 +289,37 @@ const examples = {
           disabled
           data-startup-was-enabled="true"
           id="extra-ask"
+          aria-describedby="processing-disclosure"
           class="primary"
         >
           Find answer
         </button>
       )}
     </div>
+    {tool === "entities" && (
+      <details>
+        <summary>Extraction limits</summary>Up to 120 source tokens and 1–4
+        categories, three matches per category. This is not exhaustive
+        full-document extraction.
+      </details>
+    )}
+    <p class="notice">
+      No saved inputs or input-content analytics.{" "}
+      <a href="/privacy/">Privacy &amp; limits</a>
+    </p>
   </section>
   <p id="extra-status" class="utility-status" role="status" aria-live="polite">
     Enter your source or load an example.
   </p>
   {tool === "entities" && (
-    <details id="entity-review" class="panel">
-      <summary>Review or edit mentions manually</summary>
-      <h2>Review mentions</h2>
+    <details id="entity-review" class="panel" hidden>
+      <summary>Correct accepted mentions</summary>
+      <h2>Inspect and correct accepted mentions</h2>
       <p class="notice">
         Correct exact source text, choose its occurrence and category, or remove
         it. Offsets are computed locally.
       </p>
       <div id="entity-editor" />
-      <button disabled data-startup-was-enabled="true" id="add-mention">
-        Add mention manually
-      </button>
       <button disabled data-startup-was-enabled="true" id="extra-run">
         Update preview
       </button>
@@ -323,7 +327,7 @@ const examples = {
   )}
   {tool === "diagram" && (
     <details id="graph-panel" class="panel" hidden>
-      <summary>Edit steps and connections</summary>
+      <summary>Correct accepted steps and connections</summary>
       <h2>Edit diagram</h2>
       <p class="notice">
         Choose each node’s type and destinations. Yes and No apply to decisions.
@@ -332,21 +336,9 @@ const examples = {
       <button disabled data-startup-was-enabled="true" id="extra-run">
         Update diagram
       </button>
-      <button disabled data-startup-was-enabled="true" id="prepare-extra">
-        Start a private sequential diagram
-      </button>
     </details>
   )}
-  {(tool === "entities" || tool === "diagram") && (
-    <details>
-      <summary>Advanced: import a manual JSON plan</summary>
-      <label for="review-plan">Manual plan</label>
-      <textarea id="review-plan" rows="4" maxlength="20000" />
-      <button disabled data-startup-was-enabled="true" id="import-plan">
-        Import plan
-      </button>
-    </details>
-  )}
+
   <section
     id="extra-results"
     class="panel"
@@ -354,20 +346,30 @@ const examples = {
     aria-labelledby="extra-results-title"
     hidden
   >
-    <h2 id="extra-results-title">Result — review before sharing</h2>
-    <div id="extra-visual" />
+    <header class="result-toolbar">
+      <h2 id="extra-results-title">
+        {tool === "jsonCsv"
+          ? "Spreadsheet preview"
+          : tool === "entities"
+            ? "Matches in context"
+            : tool === "diagram"
+              ? "Your flowchart"
+              : "Source evidence"}
+      </h2>
+      <div class="actions">
+        <button disabled data-startup-was-enabled="true" id="extra-download">
+          Download result
+        </button>
+        <button disabled data-startup-was-enabled="true" id="extra-copy">
+          Copy result
+        </button>
+      </div>
+    </header>
+    <div id="extra-visual" class="result-inspector" />
     <details>
       <summary>Export code view</summary>
       <pre id="extra-output" />
     </details>
-    <div class="actions">
-      <button disabled data-startup-was-enabled="true" id="extra-download">
-        Download result
-      </button>
-      <button disabled data-startup-was-enabled="true" id="extra-copy">
-        Copy result
-      </button>
-    </div>
     <FamilyDiscovery surface="result" />
   </section>
 </section>

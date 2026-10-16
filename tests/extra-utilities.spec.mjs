@@ -1,3 +1,8 @@
+import {
+  fixturePlan,
+  exampleEntities,
+  approvalGraph,
+} from "./workflow-fixtures.mjs";
 import { test, expect } from "@playwright/test";
 import fs from "node:fs/promises";
 
@@ -52,21 +57,21 @@ test("JSON to CSV downloads actual nested values locally", async ({ page }) => {
 test("entity review validates exact offsets and highlights real source text", async ({
   page,
 }) => {
+  await fixturePlan(page, { entities: exampleEntities });
   await page.goto("/tools/entity-extractor/");
   await page.getByRole("button", { name: /^Load example:/ }).click();
+  await page.locator("#extra-ask").click();
   await page.locator("#entity-review > summary").click();
   await page.getByRole("button", { name: "Update preview" }).click();
   await expect(page.locator("#extra-visual mark")).toHaveText([
     "Ada",
     "Acme Labs",
   ]);
+  await page.getByLabel("Mention 1", { exact: true }).fill("Invented");
+  await page.getByLabel("Mention 1", { exact: true }).press("Tab");
   await page
-    .locator("details")
-    .evaluateAll((es) => es.forEach((e) => (e.open = true)));
-  await page
-    .locator("#review-plan")
-    .fill('[{"type":"Person","text":"Invented","start":0,"end":3}]');
-  await page.getByRole("button", { name: "Update preview" }).click();
+    .getByRole("button", { name: "Update preview", exact: true })
+    .click();
   await expect(page.locator("#extra-status")).toContainText("exactly match");
 });
 for (const [label, entities, expected] of [
@@ -116,8 +121,10 @@ for (const [label, entities, expected] of [
 test("reviewed Mermaid flowchart renders SVG and downloads valid Mermaid source", async ({
   page,
 }) => {
+  await fixturePlan(page, { graph: approvalGraph });
   await page.goto("/tools/text-to-mermaid/");
   await page.getByRole("button", { name: /^Load example:/ }).click();
+  await page.locator("#create-diagram").click();
   await page.locator("#graph-panel > summary").click();
   await page.getByRole("button", { name: "Update diagram" }).click();
   await expect(page.locator("#extra-status")).toContainText(
@@ -168,7 +175,7 @@ test("captured ModePot answer stays successful when passage confidence is low", 
   await page.locator("#instructions").fill("What is this webpage about?");
   await page.getByRole("button", { name: "Find answer", exact: true }).click();
   await expect(page.locator("#extra-results-title")).toHaveText(
-    "Result — review before sharing",
+    "Source evidence",
   );
   await expect(page.locator("#extra-visual blockquote")).toHaveText(
     "ModePot is an open-source workshop for modernizing software foundations—and inventing what comes next. AI-native and agent-friendly where they add real value.",

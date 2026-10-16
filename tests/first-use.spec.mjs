@@ -1,3 +1,8 @@
+import {
+  fixturePlan,
+  approvalGraph,
+  answeredSource,
+} from "./workflow-fixtures.mjs";
 import { test, expect } from "@playwright/test";
 const tools = [
   ["csv-to-nested-json", "customers", "#csv-input", "#results"],
@@ -104,9 +109,9 @@ test("mobile meetings hide optional names including cloned participants; sample 
 });
 for (const [slug, auxiliary] of [
   ["csv-to-nested-json", "#child-name"],
-  ["fix-excel-dates", "#date-context"],
+  ["fix-excel-dates", "#date-convention"],
   ["meeting-time-finder", "#p0-start"],
-  ["json-to-csv", "#instructions"],
+  ["json-to-csv", "#array-policy"],
   ["entity-extractor", "#instructions"],
   ["text-to-mermaid", "#instructions"],
   ["ask-a-webpage", "#instructions"],
@@ -116,7 +121,14 @@ for (const [slug, auxiliary] of [
   }) => {
     await page.goto(`/tools/${slug}/`);
     await page.locator(auxiliary).evaluate((el) => {
-      el.value = el.type === "time" ? "10:00" : "My setting";
+      el.value =
+        el.type === "time"
+          ? "10:00"
+          : el.id === "date-convention"
+            ? "day-first"
+            : el.id === "array-policy"
+              ? "join"
+              : "My setting";
       el.dispatchEvent(new Event("input", { bubbles: true }));
     });
     let prompted = false;
@@ -127,7 +139,13 @@ for (const [slug, auxiliary] of [
     await page.locator("#load-example, #extra-example").click();
     expect(prompted).toBe(true);
     await expect(page.locator(auxiliary)).toHaveValue(
-      auxiliary === "#p0-start" ? "10:00" : "My setting",
+      auxiliary === "#p0-start"
+        ? "10:00"
+        : auxiliary === "#date-convention"
+          ? "day-first"
+          : auxiliary === "#array-policy"
+            ? "join"
+            : "My setting",
     );
   });
 }
@@ -226,7 +244,7 @@ for (const [slug, extension, contents] of [
     ).toBe(0);
     await expect(source).not.toHaveValue(contents);
   });
-for (const slug of ["fix-excel-dates", "entity-extractor"])
+for (const slug of ["ask-a-webpage", "entity-extractor"])
   for (const accept of [false, true])
     test(`${slug}: pending interpretation ${accept ? "discarded on replace" : "preserved on cancel"}`, async ({
       page,
@@ -243,8 +261,8 @@ for (const slug of ["fix-excel-dates", "entity-extractor"])
             model: "regression-fixture",
             confidence: {},
             plan:
-              slug === "fix-excel-dates"
-                ? { convention: "day-first" }
+              slug === "ask-a-webpage"
+                ? answeredSource(route.request().postDataJSON().input.text)
                 : {
                     entities: [
                       { type: "Person", text: "Ada", start: 0, end: 3 },
@@ -255,16 +273,12 @@ for (const slug of ["fix-excel-dates", "entity-extractor"])
       });
       await page.goto(`/tools/${slug}/`);
       await page.locator("#load-example, #extra-example").click();
-      if (slug === "fix-excel-dates")
-        await page
-          .getByText("Interpret source context with Jev", { exact: true })
-          .click();
-      await page.locator("#ask-jev, #extra-ask").click();
+      await page.locator("#extra-ask").click();
       await expect.poll(() => calls).toBe(1);
       page.once("dialog", (d) => (accept ? d.accept() : d.dismiss()));
       await page.locator("#load-example, #extra-example").click();
       release();
-      await expect(page.locator("#ask-jev, #extra-ask")).toBeEnabled();
+      await expect(page.locator("#extra-ask")).toBeEnabled();
       if (accept)
         await expect(page.locator("#results, #extra-results")).toBeHidden();
       else await expect(page.locator("#results, #extra-results")).toBeVisible();
@@ -272,12 +286,23 @@ for (const slug of ["fix-excel-dates", "entity-extractor"])
 test("approval sample creates its described branches and fresh steps replace them", async ({
   page,
 }) => {
+  await fixturePlan(page, { graph: approvalGraph });
   await page.goto("/tools/text-to-mermaid/");
   await page.locator("#extra-example").click();
   await page.locator("#create-diagram").click();
   await expect(page.locator("#extra-output")).toContainText("-->|yes|");
   await expect(page.locator("#extra-output")).toContainText("-->|no|");
   await page.locator("#source-text").fill("Start\nFinish");
+  await page.unroute("**/api/utilities/interpret");
+  await fixturePlan(page, {
+    graph: {
+      nodes: [
+        { id: "n0", label: "Start", type: "terminal" },
+        { id: "n1", label: "Finish", type: "terminal" },
+      ],
+      edges: [{ from: "n0", to: "n1", label: "" }],
+    },
+  });
   await page.locator("#create-diagram").click();
   await expect(page.locator("#extra-output")).toContainText("Finish");
   await expect(page.locator("#extra-output")).not.toContainText("Approve");
