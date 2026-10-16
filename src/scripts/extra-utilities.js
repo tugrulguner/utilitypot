@@ -1,4 +1,8 @@
 import { resultDiscovery } from "../lib/discovery.js";
+import {
+  interpretationReview,
+  appendInterpretationDetails,
+} from "../lib/utilities/interpretation-feedback.js";
 import { exampleReplacementGuard } from "../lib/utilities/example-replacement.js";
 import Papa from "papaparse";
 import {
@@ -738,7 +742,15 @@ if (root) {
           text: $("source-text").value,
           question: $("instructions").value,
         };
-      status("Asking Jev for a source-grounded proposal…");
+      status(
+        tool === "entities"
+          ? "Finding names and categories…"
+          : tool === "qa"
+            ? "Finding a relevant passage…"
+            : tool === "jsonCsv"
+              ? "Choosing records and array handling…"
+              : "Reading flowchart steps and connections…",
+      );
       const r = await fetch("/api/utilities/interpret", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -781,6 +793,8 @@ if (root) {
             $("source-text").value.slice(e.start, e.end) !== e.text
           )
             throw Error("Evidence does not match the source snapshot.");
+        if (result.status !== "not-answered" && !result.excerpts?.length)
+          throw Error("No supporting excerpt was returned.");
         show(
           JSON.stringify(
             {
@@ -841,13 +855,33 @@ if (root) {
         outcome = token !== revision ? "cancelled" : "rejected";
         return;
       }
-      const weak = Object.values(data.confidence || {}).some(
-        (c) => typeof c !== "number" || c < 0.6,
-      );
-      status(
-        `Jev ${data.model}: ${tool === "qa" ? "evidence selected" : "proposal ready for review"}${weak ? "; uncertain selections require care" : ""}.`,
-        weak,
-      );
+      if (tool === "qa") {
+        const result = data.plan;
+        const passageUncertain =
+          result.status !== "not-answered" &&
+          result.excerpts.length > 0 &&
+          typeof data.confidence?.passage === "number" &&
+          data.confidence.passage < 0.6;
+        const answerUncertain =
+          result.status === "answered" &&
+          typeof data.confidence?.answerability === "number" &&
+          data.confidence.answerability < 0.6;
+        const outcome =
+          result.status === "answered"
+            ? answerUncertain
+              ? "Possible answer found in the source."
+              : "Answer found in the source."
+            : result.status === "partial"
+              ? "Partial evidence found in the source."
+              : "No answer found in the supplied source.";
+        status(
+          `${outcome}${answerUncertain ? " The source may not fully answer your question; review the excerpt." : ""}${passageUncertain ? " Several passages may fit; review the selected excerpt." : ""}`,
+        );
+      } else if (tool !== "entities") {
+        const review = interpretationReview(tool, data.confidence);
+        if (review) status(`${$("extra-status").textContent} ${review}`);
+        appendInterpretationDetails($("extra-visual"), data.model);
+      }
       outcome = "success";
     } catch (e) {
       if (token !== revision) {
@@ -977,8 +1011,11 @@ if (root) {
         }
         highlighted.append(document.createTextNode(source.slice(cursor)));
         $("extra-visual").append(highlighted);
+        const categoryCount = new Set(items.map((e) => e.type)).size;
         status(
-          "Source offsets validated locally. Entity classifications still require your review.",
+          items.length
+            ? `Found ${items.length} ${items.length === 1 ? "mention" : "mentions"} in ${categoryCount} ${categoryCount === 1 ? "category" : "categories"}. Review the highlights and categories.`
+            : "No matching names or terms found for the selected categories.",
         );
       }
       if (tool === "diagram") {
@@ -1055,7 +1092,7 @@ if (root) {
           outcome = "rejected";
           return false;
         }
-        status("Validated graph rendered locally in a sandboxed frame.");
+        status("Flowchart created. Review the step types and connections.");
       }
       outcome = "success";
       return true;

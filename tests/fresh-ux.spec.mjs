@@ -456,7 +456,7 @@ test("UX-05 Boston is discoverable on mobile and survives AI windows with calend
   await page.locator("#p0-text").fill("From 2pm to 6pm");
   await page.locator("#p1-text").fill("From 8am to noon");
   await page.locator("#run").click();
-  await expect(page.locator("#utility-status")).toContainText("Jev proposed");
+  await expect(page.locator("#utility-status")).toContainText("feasible slots");
   await expect(page.locator("#p1-zone")).toHaveValue("Boston");
   await expect(page.locator("#result-view")).toContainText("Boston");
 });

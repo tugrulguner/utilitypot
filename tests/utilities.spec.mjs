@@ -137,7 +137,7 @@ test("fixture Jev proposal computes a reviewable preview in one action", async (
   await expect(page.locator("#date-convention")).toHaveValue("day-first");
   await expect(page.locator("#results")).toBeVisible();
   await expect(page.locator("#utility-status")).toContainText(
-    "Review the editable preview",
+    "Processed 5 rows locally.",
   );
 });
 test("editing source invalidates an in-flight interpretation", async ({
