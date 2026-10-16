@@ -17,7 +17,7 @@
 ## Utilities
 
 - CSV to nested JSON: paste/upload, choose a grouping column, preview parent records and child rows. Custom schemas and Jev-assisted mappings are optional advanced controls; strings and literal headers are preserved.
-- JSON to CSV: select a record array, flatten objects, explicitly omit/join/reject other arrays; escape spreadsheet formulas.
+- JSON to CSV: select a record array, flatten objects, explicitly omit/join/reject other arrays; escape spreadsheet formulas. Numeric values that would be rounded are refused; quote long identifiers and high-precision values to preserve them.
 - Mixed spreadsheet dates: preserve original values, flag ambiguous dates and retain partial precision.
 - Meeting time finder: reviewed one-off windows, exclusions, timezone-aware overlap and calendar export.
 - Custom entity extraction: up to four definitions, three mentions per type and 120 source tokens. Exact offsets are validated; not exhaustive NER.
@@ -48,7 +48,7 @@ For optional local inference, create a gitignored `.dev.vars` containing `TYPESA
 
 ## Verification
 
-For product acceptance, run `npm run test:live` against the actual public webpage. This makes real, potentially billable Jev calls and records screenshots, responses and downloaded artifacts without network mocks. See [the live product QA report](docs/live-product-qa.md) for coverage, explicit manual corrections and currently outstanding production failures. Fixture-based regression tests are not a passing live-product gate.
+Current readiness evidence is recorded in [the public-readiness report](docs/public-readiness.md) and its [generated ledger](docs/public-readiness-evidence.json). Run `UX_ORIGIN=https://utilitypot.modepot.io node scripts/fresh-ux-product-qa.mjs` for the current 23-scenario live gate. It makes real, potentially billable Jev calls and checks rendered outcomes, source spans and actual downloads without request mocks or inference retries. The earlier `npm run test:live` runner and [original live QA report](docs/live-product-qa.md) remain historical evidence, not a declaration of the latest production state. Fixture-green CI is not live semantic qualification.
 
 ```sh
 npm test
@@ -66,7 +66,7 @@ Browser AI-success tests intercept requests with explicitly labeled fixtures. Th
 
 ## Server and deployment
 
-Astro generates static assets; a small Cloudflare Worker owns `/api/utilities/interpret` and `/api/utilities/read-page`. The provider endpoint and questions are server-authored, not a generic AI proxy. One request has at most 24 Choice questions, a 16 KB body cap, a 15-second provider timeout and no automatic retries.
+Astro generates static assets; a small Cloudflare Worker owns `/api/utilities/interpret` and `/api/utilities/read-page`. The provider endpoint and questions are server-authored, not a generic AI proxy. One request has at most 24 Choice questions across at most two provider stages, a 16 KB body cap, a 15-second timeout per provider stage and no automatic retries.
 
 The `UTILITY_RATE_LIMIT` and `UTILITY_GLOBAL_RATE_LIMIT` bindings allow 6/client and 30/aggregate requests per minute **per Cloudflare location**. They are eventually consistent abuse controls, not exact global spend caps. Read-page requests share the same limits. Missing bindings fail closed. Configure provider-side spend limits before enabling public AI.
 
