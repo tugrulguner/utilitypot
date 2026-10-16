@@ -990,8 +990,26 @@ if (root) {
         const frame = document.createElement("iframe");
         frame.title = "Rendered Mermaid flowchart";
         frame.setAttribute("sandbox", "");
-        frame.srcdoc = `<!doctype html><html><body style="margin:0;background:#0b101b;color:white">${svg}</body></html>`;
-        frame.style.cssText = "width:100%;height:480px;border:0";
+        frame.srcdoc = `<!doctype html><html><head><style>svg{display:block}</style></head><body style="margin:0;background:#0b101b;color:white">${svg}</body></html>`;
+        frame.style.cssText = "display:block;width:100%;height:480px;border:0";
+        const viewBox = new DOMParser()
+          .parseFromString(svg, "image/svg+xml")
+          .documentElement.getAttribute("viewBox")
+          ?.trim()
+          .split(/[\s,]+/)
+          .map(Number);
+        if (
+          viewBox?.length === 4 &&
+          viewBox.every(Number.isFinite) &&
+          viewBox[2] > 0 &&
+          viewBox[3] > 0
+        ) {
+          // Preserve readable native SVG size on desktop, shrink responsively
+          // on mobile, and let the page scroll through the entire diagram.
+          frame.style.maxWidth = `${viewBox[2]}px`;
+          frame.style.aspectRatio = `${viewBox[2]} / ${viewBox[3]}`;
+          frame.style.height = "auto";
+        }
         $("extra-visual").append(frame);
         const b = document.createElement("button");
         b.textContent = "Download SVG";
