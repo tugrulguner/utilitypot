@@ -69,6 +69,50 @@ test("entity review validates exact offsets and highlights real source text", as
   await page.getByRole("button", { name: "Update preview" }).click();
   await expect(page.locator("#extra-status")).toContainText("exactly match");
 });
+for (const [label, entities, expected] of [
+  [
+    "multiple",
+    [
+      { type: "Person", text: "Nora", start: 0, end: 4 },
+      { type: "Organization", text: "Acme", start: 15, end: 19 },
+    ],
+    "Found 2 mentions in 2 categories. Review the highlights and categories.",
+  ],
+  [
+    "one",
+    [{ type: "Person", text: "Nora", start: 0, end: 4 }],
+    "Found 1 mention in 1 category. Review the highlights and categories.",
+  ],
+  ["none", [], "No matching names or terms found for the selected categories."],
+]) {
+  test(`entity results show useful ${label} match feedback, not model workflow`, async ({
+    page,
+  }) => {
+    await page.route("**/api/utilities/interpret", (route) =>
+      route.fulfill({
+        json: {
+          source: "jev",
+          model: "jev-1.13.0",
+          confidence: { t0_m0_start: 1, unused_absence: 0.1 },
+          plan: { entities, needsReview: true },
+        },
+      }),
+    );
+    await page.goto("/tools/entity-extractor/");
+    await page.locator("#source-text").fill("Nora joined at Acme.");
+    await page.locator("#extra-ask").click();
+    await expect(page.locator("#extra-results")).toBeVisible();
+    await expect(page.locator("#extra-status")).toHaveText(expected);
+    await expect(page.locator("#extra-status")).not.toHaveClass(/error/);
+    await expect(page.locator("#extra-status")).not.toContainText(
+      /Jev|proposal|offset|jev-/,
+    );
+    await expect(page.locator("#extra-visual mark")).toHaveText(
+      entities.map((e) => e.text),
+    );
+  });
+}
+
 test("reviewed Mermaid flowchart renders SVG and downloads valid Mermaid source", async ({
   page,
 }) => {
@@ -84,7 +128,7 @@ test("reviewed Mermaid flowchart renders SVG and downloads valid Mermaid source"
   await expect(page.frameLocator("iframe").locator("svg")).toBeVisible();
   await expect(page.locator("#extra-output")).toContainText("n1 -->|yes| n2");
 });
-test("webpage questions show selected exact evidence and no-answer, using explicit fixtures", async ({
+test("captured ModePot answer stays successful when passage confidence is low", async ({
   page,
 }) => {
   let payload;
@@ -94,16 +138,19 @@ test("webpage questions show selected exact evidence and no-answer, using explic
     await route.fulfill({
       json: {
         source: "jev",
-        model: "fixture",
-        confidence: { answerability: 0.95, passage: 0.9 },
+        model: "jev-1.13.0",
+        confidence: { answerability: 1, passage: 0.43 },
         plan: {
           status: "answered",
           excerpts: [
             {
-              id: "p2",
-              text: text.split("\n\n")[2],
-              start: text.indexOf(text.split("\n\n")[2]),
-              end: text.length,
+              id: "p3",
+              text: "ModePot is an open-source workshop for modernizing software foundations—and inventing what comes next. AI-native and agent-friendly where they add real value.",
+              start: text.indexOf("ModePot is an open-source workshop"),
+              end:
+                text.indexOf("ModePot is an open-source workshop") +
+                "ModePot is an open-source workshop for modernizing software foundations—and inventing what comes next. AI-native and agent-friendly where they add real value."
+                  .length,
             },
           ],
         },
@@ -111,10 +158,29 @@ test("webpage questions show selected exact evidence and no-answer, using explic
     });
   });
   await page.goto("/tools/ask-a-webpage/");
-  await page.getByRole("button", { name: /^Load example:/ }).click();
+  await page
+    .locator("#source-text")
+    .fill(
+      "ModePot is an open-source workshop for modernizing software foundations—and inventing what comes next. AI-native and agent-friendly where they add real value.",
+    );
+  await page.locator("#instructions").fill("What is this webpage about?");
   await page.getByRole("button", { name: "Find answer", exact: true }).click();
-  await expect(page.locator("#extra-output")).toContainText(
-    "does not store submitted text",
+  await expect(page.locator("#extra-results-title")).toHaveText(
+    "Result — review before sharing",
+  );
+  await expect(page.locator("#extra-visual blockquote")).toHaveText(
+    "ModePot is an open-source workshop for modernizing software foundations—and inventing what comes next. AI-native and agent-friendly where they add real value.",
+  );
+  await expect(page.locator("#extra-status")).toContainText(
+    "Answer found in the source.",
+  );
+  await expect(page.locator("#extra-status")).toContainText(
+    "Several passages may fit; review the selected excerpt.",
+  );
+  await expect(page.locator("#extra-status")).not.toHaveClass(/error/);
+  await expect(page.locator("#extra-status")).not.toContainText("jev-1.13.0");
+  await expect(page.locator("#extra-status")).not.toContainText(
+    "evidence selected",
   );
   expect(payload.tool).toBe("qa");
   await page.unroute("**/api/utilities/interpret");
@@ -132,7 +198,122 @@ test("webpage questions show selected exact evidence and no-answer, using explic
   await expect(page.locator("#extra-visual")).toHaveText(
     "Not answered by the supplied source.",
   );
+  await expect(page.locator("#extra-status")).toContainText(
+    "No answer found in the supplied source.",
+  );
+  await expect(page.locator("#extra-status")).not.toContainText(
+    "Several passages may fit",
+  );
+  await expect(page.locator("#extra-status")).not.toHaveClass(/error/);
 });
+test("partial reader results state partial evidence without error styling", async ({
+  page,
+}) => {
+  await page.route("**/api/utilities/interpret", (route) =>
+    route.fulfill({
+      json: {
+        source: "jev",
+        model: "fixture",
+        confidence: { answerability: 0.55, passage: 0.4 },
+        plan: {
+          status: "partial",
+          excerpts: [
+            { id: "p1", text: "A relevant passage.", start: 0, end: 19 },
+          ],
+        },
+      },
+    }),
+  );
+  await page.goto("/tools/ask-a-webpage/");
+  await page.locator("#source-text").fill("A relevant passage.");
+  await page.locator("#instructions").fill("What happened?");
+  await page.getByRole("button", { name: "Find answer", exact: true }).click();
+  await expect(page.locator("#extra-visual blockquote")).toHaveText(
+    "A relevant passage.",
+  );
+  await expect(page.locator("#extra-status")).toContainText(
+    "Partial evidence found in the source.",
+  );
+  await expect(page.locator("#extra-status")).toContainText(
+    "Several passages may fit; review the selected excerpt.",
+  );
+  await expect(page.locator("#extra-status")).not.toHaveClass(/error/);
+});
+
+test("reader interpretation API failures remain visible errors", async ({
+  page,
+}) => {
+  await page.route("**/api/utilities/interpret", (route) =>
+    route.fulfill({ status: 503, json: { error: "Jev is unavailable." } }),
+  );
+  await page.goto("/tools/ask-a-webpage/");
+  await page.locator("#source-text").fill("Source text.");
+  await page.locator("#instructions").fill("What is this?");
+  await page.getByRole("button", { name: "Find answer", exact: true }).click();
+  await expect(page.locator("#extra-status")).toContainText(
+    "Jev is unavailable.",
+  );
+  await expect(page.locator("#extra-status")).toHaveClass(/error/);
+  await expect(page.locator("#extra-results")).toBeHidden();
+  await expect(page.locator("#extra-ask")).toBeEnabled();
+});
+
+test("uncertain answerability is disclosed without calling a valid response an error", async ({
+  page,
+}) => {
+  await page.route("**/api/utilities/interpret", (route) =>
+    route.fulfill({
+      json: {
+        source: "jev",
+        model: "fixture",
+        confidence: { answerability: 0.4, passage: 0.95 },
+        plan: {
+          status: "answered",
+          excerpts: [
+            { id: "p0", text: "A relevant passage.", start: 0, end: 19 },
+          ],
+        },
+      },
+    }),
+  );
+  await page.goto("/tools/ask-a-webpage/");
+  await page.locator("#source-text").fill("A relevant passage.");
+  await page.locator("#instructions").fill("What happened?");
+  await page.getByRole("button", { name: "Find answer", exact: true }).click();
+  await expect(page.locator("#extra-status")).toContainText(
+    "Possible answer found in the source.",
+  );
+  await expect(page.locator("#extra-status")).toContainText(
+    "The source may not fully answer your question; review the excerpt.",
+  );
+  await expect(page.locator("#extra-status")).not.toHaveClass(/error/);
+  await expect(page.locator("#extra-visual blockquote")).toHaveText(
+    "A relevant passage.",
+  );
+});
+
+test("answered response without an excerpt is a failure, not empty success", async ({
+  page,
+}) => {
+  await page.route("**/api/utilities/interpret", (route) =>
+    route.fulfill({
+      json: {
+        source: "jev",
+        model: "fixture",
+        confidence: { answerability: 1, passage: 1 },
+        plan: { status: "answered", excerpts: [] },
+      },
+    }),
+  );
+  await page.goto("/tools/ask-a-webpage/");
+  await page.locator("#source-text").fill("A relevant passage.");
+  await page.locator("#instructions").fill("What happened?");
+  await page.getByRole("button", { name: "Find answer", exact: true }).click();
+  await expect(page.locator("#extra-status")).toHaveClass(/error/);
+  await expect(page.locator("#extra-results")).toBeHidden();
+  await expect(page.locator("#extra-ask")).toBeEnabled();
+});
+
 test("all seven utility pages are readable at desktop and mobile widths without runtime errors", async ({
   page,
 }, info) => {
