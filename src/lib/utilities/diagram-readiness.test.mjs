@@ -23,12 +23,12 @@ test("diagram questions explicitly map human step 4 to internal n3", () => {
     step: 4,
     label: "If approved, create account.",
   });
-  assert.deepEqual(spec.questions.next1.criteria.n3, {
+  assert.deepEqual(spec.questions.next1.criteria.step4, {
     step: 4,
     label: "If approved, create account.",
   });
-  assert.match(spec.questions.next1.instructions, /step 2 \(n1\)/i);
-  assert.match(spec.questions.else1.instructions, /step 2 \(n1\)/i);
+  assert.match(spec.questions.next1.instructions, /human step 2/i);
+  assert.match(spec.questions.else1.instructions, /human step 2/i);
   assert.equal(Object.keys(spec.questions).length, 16);
   assert.ok(Object.hasOwn(spec.questions.next1.criteria, "none"));
 });
@@ -105,9 +105,18 @@ test("human step metadata never changes public graph IDs or labels", () => {
             : "process",
     };
     answers[`next${i}`] = {
-      choice: ["n1", "n3", "none", "n4", "n5", "n6", "n7", "none"][i],
+      choice: [
+        "step2",
+        "step4",
+        "none",
+        "step5",
+        "step6",
+        "step7",
+        "step8",
+        "none",
+      ][i],
     };
-    answers[`else${i}`] = { choice: i === 1 ? "n2" : "none" };
+    answers[`else${i}`] = { choice: i === 1 ? "step3" : "none" };
   }
   const followup = spec.followup(answers);
   assert.equal(Object.keys(followup.questions).length, 8);
