@@ -91,7 +91,8 @@ for (const width of [1280, 390]) {
     await page
       .getByRole("button", { name: "Back to matches", exact: true })
       .click();
-    await expect(page.locator(".entity-index")).toBeFocused();
+    await expect(jump).toBeFocused();
+    await expect(jump).toBeInViewport();
     await expect(page.locator(".entity-index")).toBeInViewport();
     await expect(workspace).toContainText("Up to 3 mentions per category");
     const download = page.waitForEvent("download");

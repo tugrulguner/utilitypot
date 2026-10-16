@@ -905,6 +905,7 @@ if (root) {
         index.setAttribute("aria-label", "Found entities and occurrences");
         index.tabIndex = -1;
         index.hidden = !items.length;
+        let returnToOccurrence = null;
         workspace.classList.toggle("is-empty", !items.length);
         const limit = document.createElement("p");
         limit.className = "notice";
@@ -975,6 +976,7 @@ if (root) {
                 `${category} ${name}, occurrence ${occurrence + 1}`,
               );
               button.addEventListener("click", () => {
+                returnToOccurrence = button;
                 for (const nodes of marks.values())
                   for (const mark of nodes) mark.classList.remove("is-current");
                 const selected = marks.get(n);
@@ -1011,9 +1013,10 @@ if (root) {
           back.type = "button";
           back.textContent = "Back to matches";
           back.addEventListener("click", () => {
-            index.focus({ preventScroll: true });
-            index.scrollIntoView({
-              block: "start",
+            const target = returnToOccurrence || index;
+            target.focus({ preventScroll: true });
+            target.scrollIntoView({
+              block: returnToOccurrence ? "center" : "start",
               behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
                 ? "auto"
                 : "smooth",
