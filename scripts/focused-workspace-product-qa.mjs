@@ -154,9 +154,16 @@ async function paid(selector) {
   assert.equal(body.source, "jev");
   assert.ok(body.model);
   await expect(page.locator(selector)).toBeEnabled({ timeout: 55000 });
-  await expect(
-    page.locator("[data-interpretation-details]"),
-  ).not.toHaveAttribute("open", "");
+  const details = page.locator("[data-interpretation-details]");
+  if (await details.count())
+    await expect(details).not.toHaveAttribute("open", "");
+  else
+    assert.equal(
+      await page
+        .locator("#extra-output")
+        .evaluate((e) => e.closest("details").open),
+      false,
+    );
   return body;
 }
 async function scenario(name, run) {
@@ -330,7 +337,10 @@ try {
       ),
       /DTSTART:20270211T140000Z/,
     );
-    assert.match(await saveDownload("#download", "boston-result"), /Boston/);
+    assert.match(
+      await saveDownload("#download", "boston-result"),
+      /2027-02-11T14:00:00Z/,
+    );
     assert.equal(requests.length, before);
     return { screenshots: await views("boston", "#results") };
   });
@@ -339,21 +349,19 @@ try {
     async () => {
       const before = requests.length;
       await go("json-to-csv");
-      await page
-        .locator("#source-text")
-        .fill(
-          JSON.stringify({
-            orders: [
-              {
-                id: "9007199254740993",
-                note: "=SUM(1,2)",
-                paid: false,
-                tags: ["a", "b"],
-              },
-            ],
-            other: [{ id: "ignore" }],
-          }),
-        );
+      await page.locator("#source-text").fill(
+        JSON.stringify({
+          orders: [
+            {
+              id: "9007199254740993",
+              note: "=SUM(1,2)",
+              paid: false,
+              tags: ["a", "b"],
+            },
+          ],
+          other: [{ id: "ignore" }],
+        }),
+      );
       await expect(page.locator("#row-path")).toHaveValue("");
       await page.locator("#row-path").selectOption("orders");
       await page.locator("#extra-run").click();
@@ -451,7 +459,7 @@ try {
         assert.match(code, /\|(no|false)\|/i);
         assert.match(
           await saveDownload(
-            "#extra-svg",
+            'button:has-text("Download SVG")',
             custom ? "graph-custom-svg" : "graph-default-svg",
           ),
           /<svg/,
@@ -527,7 +535,7 @@ try {
     assert.equal(plan.status, "not-answered");
     assert.deepEqual(plan.excerpts, []);
     await expect(page.locator("#extra-status")).toContainText(
-      "No supporting passage found",
+      "No answer found in the supplied source.",
     );
     await expect(page.locator("#extra-status")).not.toHaveClass(/error/);
     return { screenshots: await views("reader-abstention", "#extra-results") };
