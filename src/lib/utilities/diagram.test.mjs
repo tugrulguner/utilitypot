@@ -83,3 +83,77 @@ test("source-backed graph emits escaped Mermaid, not model-authored code", () =>
     }).includes("<script>"),
   );
 });
+
+test("fresh UX: roles see relationship proposals in a bounded second stage", async () => {
+  const captured = JSON.parse(
+    await readFile(
+      new URL("./fixtures/diagram-returns-fresh-audit.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  const spec = createDiagramInterpretation(captured.input);
+  assert.equal(typeof spec.followup, "function");
+  assert.equal(Object.keys(spec.questions).length, 12);
+  const relationships = {};
+  for (const n of captured.response.plan.graph.nodes) {
+    const i = n.id.slice(1),
+      edges = captured.response.plan.graph.edges.filter((e) => e.from === n.id);
+    relationships[`next${i}`] = {
+      choice: edges.find((e) => e.label !== "no")?.to || "none",
+    };
+    relationships[`else${i}`] = {
+      choice: edges.find((e) => e.label === "no")?.to || "none",
+    };
+  }
+  const original = structuredClone(relationships);
+  const roles = spec.followup(relationships);
+  assert.equal(Object.keys(roles.questions).length, 6);
+  assert.equal(
+    roles.state.relationships.find((r) => r.from === "n3").next,
+    "n4",
+  );
+  assert.equal(typeof roles.questions.type3.instructions, "object");
+  assert.match(
+    roles.questions.type3.criteria.terminal.not_for,
+    /incoming.*outgoing/i,
+  );
+  const wrong = Object.fromEntries(
+    captured.response.plan.graph.nodes.map((n) => [
+      `type${n.id.slice(1)}`,
+      { choice: n.type },
+    ]),
+  );
+  const proposal = roles.decode(wrong);
+  assert.deepEqual(proposal.graph, captured.response.plan.graph);
+  assert.match(proposal.reviewIssues.join(" "), /n3.*incoming.*outgoing/i);
+  const corrected = structuredClone(wrong);
+  corrected.type3.choice = "process";
+  corrected.type5.choice = "terminal";
+  assert.deepEqual(roles.decode(corrected).reviewIssues, []);
+  assert.deepEqual(relationships, original);
+});
+
+test("fresh UX: start terminals, self edges and speculative negatives retain their meanings", () => {
+  const spec = createDiagramInterpretation({
+    text: "Start\nWork\nEnd",
+    instructions: "Start then work then end.",
+  });
+  const a = {
+    type0: { choice: "terminal" },
+    next0: { choice: "n1" },
+    else0: { choice: "n2" },
+    type1: { choice: "process" },
+    next1: { choice: "n2" },
+    else1: { choice: "n0" },
+    type2: { choice: "terminal" },
+    next2: { choice: "none" },
+    else2: { choice: "n0" },
+  };
+  assert.deepEqual(spec.decode(a).reviewIssues, []);
+  a.next1.choice = "n1";
+  assert.ok(
+    spec.decode(a).graph.edges.some((e) => e.from === "n1" && e.to === "n1"),
+  );
+  a.type1.choice = "unknown";
+  assert.throws(() => spec.decode(a), /role.*n1.*review/i);
+});

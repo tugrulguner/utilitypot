@@ -60,3 +60,24 @@ test("nested arrays report precise paths and stay reject-by-default", () => {
   assert.deepEqual(spec.state.nestedArrayPaths, ["items"]);
   assert.equal(spec.state.arrays, "reject");
 });
+
+test("fresh UX: array question references instructions and contrasts JSON serialization with omission", () => {
+  const instructions = "Keep tags as JSON text in one cell";
+  const spec = createJsonCsvInterpretation({
+    sample: '{"orders":[{"id":"0008","tags":["gift"],"paid":false}]}',
+    instructions,
+  });
+  assert.equal(spec.state.instructions, instructions);
+  assert.equal(typeof spec.questions.arrays.instructions, "object");
+  assert.match(spec.questions.arrays.instructions.question, /`instructions`/);
+  assert.equal(typeof spec.questions.arrays.criteria.join, "object");
+  assert.match(spec.questions.arrays.criteria.join.not_for, /concatenat/i);
+  assert.match(spec.questions.arrays.criteria.reject.not_for, /explicit/i);
+  for (const policy of ["join", "omit", "reject"]) {
+    assert.equal(
+      spec.decode({ rows: { choice: "orders" }, arrays: { choice: policy } })
+        .arrays,
+      policy,
+    );
+  }
+});

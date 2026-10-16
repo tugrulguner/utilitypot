@@ -45,11 +45,24 @@ export function normalizeDates(text, convention = "auto") {
         status: "partial",
         note: "Year only; no month/day invented.",
       };
-    const partial = s.match(/^(\d{4})-(\d{2})$/);
+    const namedMonth = s.match(/^([A-Za-z]+)\s+(\d{4})$/);
+    const numericMonth = s.match(/^(\d{2})\/(\d{4})$/);
+    const partial =
+      s.match(/^(\d{4})-(\d{2})$/) ||
+      (numericMonth && [s, numericMonth[2], numericMonth[1]]) ||
+      (namedMonth && [
+        s,
+        namedMonth[2],
+        months.findIndex(
+          (v) =>
+            v === namedMonth[1].toLowerCase() ||
+            v.slice(0, 3) === namedMonth[1].toLowerCase(),
+        ) + 1,
+      ]);
     if (partial && +partial[1] >= 1 && +partial[2] >= 1 && +partial[2] <= 12)
       return {
         ...row,
-        normalized: s,
+        normalized: `${partial[1]}-${String(partial[2]).padStart(2, "0")}`,
         status: "partial",
         note: "Month precision preserved; no day invented.",
       };

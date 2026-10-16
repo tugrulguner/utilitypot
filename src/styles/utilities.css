@@ -482,3 +482,19 @@
     height: 120px;
   }
 }
+
+/* Preserve atomic spreadsheet values inside the existing scrollable preview. */
+.csv-preview table {
+  min-width: 40rem;
+}
+.utility-page .csv-preview th,
+.utility-page .csv-preview td {
+  min-width: 6rem;
+  white-space: pre;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+#city-matches {
+  max-height: 16rem;
+  overflow-y: auto;
+}

@@ -77,6 +77,7 @@ export function findSlots(dateText, duration, participants) {
       local: windows.map((w) => ({
         name: w.p.name,
         zone: w.p.zone,
+        ...(w.p.cityLabel ? { cityLabel: w.p.cityLabel } : {}),
         start: start.toZonedDateTimeISO(w.p.zone).toString(),
         end: end.toZonedDateTimeISO(w.p.zone).toString(),
       })),

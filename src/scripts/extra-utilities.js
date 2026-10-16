@@ -6,13 +6,14 @@ import {
   sourceMention,
 } from "../lib/utilities/outcome.js";
 import { jsonToCsv } from "../lib/utilities/json-csv.js";
-import { mermaidSource } from "../lib/utilities/diagram.js";
+import { mermaidSource, graphRoleIssues } from "../lib/utilities/diagram.js";
 import { createEntitiesInterpretation } from "../lib/utilities/entities.js";
 const root = document.querySelector("[data-extra-utility]");
 if (root) {
   const allowExampleReplacement = exampleReplacementGuard(root);
   const tool = root.getAttribute("data-extra-utility"),
     $ = (id) => root.querySelector(`#${id}`);
+  let manualArrayPolicy = null;
   let revision = 0,
     output = "",
     filename = "",
@@ -60,6 +61,10 @@ if (root) {
   }
   root.addEventListener("input", (e) => {
     clear();
+    if (tool === "jsonCsv") {
+      if (e.target.id === "array-policy") manualArrayPolicy = e.target.value;
+      if (e.target.id === "source-text") manualArrayPolicy = null;
+    }
     if (
       ["source-text", "instructions"].includes(e.target.id) &&
       $("review-plan")
@@ -89,11 +94,13 @@ if (root) {
       ["source-text", "page-url", "source-mode"].includes(e.target.id)
     ) {
       fetchedUrl = "";
+      fetchedMetadata = null;
       $("source-coverage").textContent = "";
       $("source-inspection").hidden = true;
     }
   });
   let fetchedUrl = "";
+  let fetchedMetadata = null;
   function definitions() {
     if (tool !== "entities") return $("instructions").value;
     return [
@@ -152,6 +159,7 @@ if (root) {
   });
   $("source-file")?.addEventListener("change", async (e) => {
     clear();
+    manualArrayPolicy = null;
     const token = revision,
       file = e.target.files[0];
     if (!file) return;
@@ -503,6 +511,7 @@ if (root) {
   $("extra-example").addEventListener("click", () => {
     if (!allowExampleReplacement()) return;
     clear();
+    manualArrayPolicy = null;
     if ($("source-file")) $("source-file").value = "";
     if (tool === "jsonCsv") {
       $("source-text").value = JSON.stringify(
@@ -561,6 +570,7 @@ if (root) {
     }
     if (tool === "qa") {
       fetchedUrl = "";
+      fetchedMetadata = null;
       $("source-coverage").textContent = "";
       $("fetched-source").textContent = "";
       $("source-inspection").hidden = true;
@@ -611,6 +621,12 @@ if (root) {
       if (!r.ok) throw Error(data.error || "Could not read the page.");
       $("source-text").value = data.text;
       fetchedUrl = data.url;
+      fetchedMetadata = {
+        truncated: data.truncated === true,
+        ...(Number.isInteger(data.redirects)
+          ? { redirects: data.redirects }
+          : {}),
+      };
       $("source-inspection").hidden = false;
       $("fetched-source").textContent = data.text;
       $("source-coverage").textContent = data.truncated
@@ -623,7 +639,46 @@ if (root) {
       throw e;
     }
   }
+  function missingField(id, message) {
+    clear();
+    status(message, true);
+    $(id).focus();
+    return false;
+  }
+  function requiredAiFields() {
+    if (tool === "entities") {
+      if (!$("source-text").value.trim())
+        return missingField("source-text", "Paste text to extract from.");
+      if (!definitions().trim())
+        return missingField(
+          $("custom-category").checked ? "instructions" : "people-category",
+          "Choose at least one entity type or enter a custom definition.",
+        );
+      if ($("custom-category").checked && !$("instructions").value.trim())
+        return missingField(
+          "instructions",
+          "Enter a custom entity definition or turn off Custom types.",
+        );
+    }
+    if (tool === "qa") {
+      const urlMode = $("source-mode").value === "url";
+      if (urlMode && !$("page-url").value.trim())
+        return missingField(
+          "page-url",
+          "Enter a public webpage URL, or switch to pasted text.",
+        );
+      if (!urlMode && !$("source-text").value.trim())
+        return missingField("source-text", "Paste webpage text to search.");
+      if (!$("instructions").value.trim())
+        return missingField(
+          "instructions",
+          "Enter a question about the source.",
+        );
+    }
+    return true;
+  }
   async function askJev() {
+    if (!requiredAiFields()) return;
     if (tool === "diagram" && !$("source-text").value.trim()) {
       status(
         "Add at least one step in the Steps field before creating a diagram.",
@@ -671,8 +726,10 @@ if (root) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tool, input }),
-        // Entity extraction may use two bounded 15-second provider stages.
-        signal: AbortSignal.timeout(tool === "entities" ? 35000 : 20000),
+        // Entity spans and diagram roles use two bounded 15-second stages.
+        signal: AbortSignal.timeout(
+          ["entities", "diagram"].includes(tool) ? 35000 : 20000,
+        ),
       });
       responseStatus = r.status;
       const data = await r.json();
@@ -685,7 +742,7 @@ if (root) {
         throw new Error("Unverified interpretation.");
       if (tool === "jsonCsv") {
         paths(data.plan.path);
-        $("array-policy").value = data.plan.arrays;
+        $("array-policy").value = manualArrayPolicy ?? data.plan.arrays;
       }
       if (tool === "entities") {
         $("review-plan").value = JSON.stringify(data.plan.entities, null, 2);
@@ -707,7 +764,40 @@ if (root) {
           )
             throw Error("Evidence does not match the source snapshot.");
         show(
-          JSON.stringify(result, null, 2),
+          JSON.stringify(
+            {
+              ...result,
+              question: input.question,
+              source: {
+                kind:
+                  fetchedUrl && $("source-mode").value === "url"
+                    ? "fetched-url"
+                    : "pasted-text",
+                text: input.text,
+                coverage: {
+                  characters: input.text.length,
+                  paragraphs: input.text
+                    .split(/\n\s*\n/)
+                    .filter((s) => s.trim()).length,
+                  truncated:
+                    $("source-mode").value === "url" &&
+                    fetchedMetadata?.truncated === true,
+                },
+                ...(fetchedUrl && $("source-mode").value === "url"
+                  ? {
+                      url: fetchedUrl,
+                      ...(Number.isInteger(fetchedMetadata?.redirects)
+                        ? {
+                            retrieval: { redirects: fetchedMetadata.redirects },
+                          }
+                        : {}),
+                    }
+                  : {}),
+              },
+            },
+            null,
+            2,
+          ),
           "utilitypot-evidence.json",
           "application/json",
         );
@@ -792,17 +882,29 @@ if (root) {
         show(result, "utilitypot-data.csv", "text/csv");
         const parsed = Papa.parse(result).data;
         const table = document.createElement("table");
-        for (const row of parsed.slice(0, 101)) {
+        for (const [index, row] of parsed.slice(0, 101).entries()) {
           const tr = document.createElement("tr");
           for (const value of row) {
-            const td = document.createElement("td");
+            const td = document.createElement(index === 0 ? "th" : "td");
+            if (index === 0) td.scope = "col";
             td.textContent = value;
             tr.append(td);
           }
           table.append(tr);
         }
         const wrap = document.createElement("div");
-        wrap.className = "table-scroll";
+        wrap.className = "table-scroll csv-preview";
+        wrap.tabIndex = 0;
+        wrap.setAttribute("role", "region");
+        wrap.setAttribute(
+          "aria-label",
+          "CSV preview — scroll horizontally for all columns",
+        );
+        const hint = document.createElement("p");
+        hint.className = "notice";
+        hint.textContent =
+          "Scroll horizontally to review all columns. Values are shown without splitting.";
+        $("extra-visual").append(hint);
         wrap.append(table);
         $("extra-visual").append(wrap);
         status(
@@ -866,7 +968,8 @@ if (root) {
           throw new Error(
             "Add at least one step in the Steps field before creating a diagram.",
           );
-        const code = mermaidSource(JSON.parse($("review-plan").value));
+        const graph = JSON.parse($("review-plan").value);
+        const code = mermaidSource(graph);
         outcome = "unexpected_failure";
         const { default: mermaid } = await import("mermaid");
         mermaid.initialize({
@@ -905,6 +1008,17 @@ if (root) {
           setTimeout(() => URL.revokeObjectURL(url), 1000);
         });
         $("extra-visual").append(b);
+        const issues = graphRoleIssues(graph);
+        if (issues.length) {
+          const warning = document.createElement("p");
+          warning.className = "notice error";
+          warning.textContent = `Review shapes before sharing: ${issues.join(" ")}`;
+          $("extra-visual").prepend(warning);
+          $("graph-panel").open = true;
+          status(warning.textContent, true);
+          outcome = "rejected";
+          return false;
+        }
         status("Validated graph rendered locally in a sandboxed frame.");
       }
       outcome = "success";
