@@ -70,9 +70,13 @@ test("repeated-mention ends are conditioned on confirmed starts and bounded befo
     t1_m0_end: { choice: "w4" },
     t1_m1_end: { choice: "w10" },
   };
-  assert.throws(
-    () => followup.decode({ ...ends, t0_m1_end: { choice: "none" } }),
-    /Inconsistent entity boundaries/,
+  // The endpoint question explicitly permits none: reject this nomination,
+  // not the entire extraction or later independently verified mentions.
+  assert.deepEqual(
+    followup
+      .decode({ ...ends, t0_m1_end: { choice: "none" } })
+      .entities.map((e) => e.text),
+    ["Mina Patel", "Mina Patel", "Orion Labs", "Cedar Systems"],
   );
   const plan = followup.decode(ends);
   assert.deepEqual(
@@ -149,4 +153,36 @@ test("custom entities are copied from validated source spans with offsets", () =
   );
   for (const e of entities) assert.equal(text.slice(e.start, e.end), e.text);
   assert.equal(entityTokens("Élodie met Ada.")[0].text, "Élodie");
+});
+
+test("an endpoint abstention is local to its nomination, while impossible absent starts still fail closed", () => {
+  const spec = createEntitiesInterpretation({
+    text: "Mina Rao met Noah Kim.",
+    definitions: "Person: a named person",
+  });
+  const answers = {
+    t0_m0_start: { choice: "w0" },
+    t0_m0_end: { choice: "none" },
+    t0_m1_start: { choice: "w3" },
+    t0_m1_end: { choice: "w4" },
+    t0_m2_start: { choice: "none" },
+    t0_m2_end: { choice: "none" },
+  };
+  const snapshot = structuredClone(answers);
+  assert.deepEqual(spec.decode(answers).entities, [
+    { type: "Person", text: "Noah Kim", start: 13, end: 21 },
+  ]);
+  assert.deepEqual(answers, snapshot, "Do not rewrite raw decisions");
+  assert.deepEqual(
+    spec.decode({ ...answers, t0_m1_end: { choice: "none" } }).entities,
+    [],
+  );
+  assert.throws(
+    () => spec.decode({ ...answers, t0_m2_end: { choice: "w4" } }),
+    /Inconsistent entity boundaries/,
+  );
+  assert.throws(
+    () => spec.decode({ ...answers, t0_m1_end: { choice: "w0" } }),
+    /Invalid or overlapping entity span/,
+  );
 });

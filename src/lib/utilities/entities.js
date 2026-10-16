@@ -197,10 +197,15 @@ export function createEntitiesInterpretation(input) {
             absent = true;
             continue;
           }
-          if (s === "none" || e === "none" || absent)
+          if (s === "none" || absent)
             throw new Error("Inconsistent entity boundaries.");
-          const start = tokens.find((t) => t.id === s),
-            end = tokens.find((t) => t.id === e);
+          // The conditioned endpoint question explicitly offers none when this
+          // nominated start is unsupported. Honor that typed abstention without
+          // inventing a span or rejecting other independently verified mentions.
+          const start = tokens.find((t) => t.id === s);
+          if (!start) throw new Error("Invalid or overlapping entity span.");
+          if (e === "none") continue;
+          const end = tokens.find((t) => t.id === e);
           if (
             !start ||
             !end ||

@@ -72,7 +72,7 @@ test("diagnostics identify inconsistent starts before any second provider reques
   await verify(r, "followup", 1, "entity_starts_invalid");
   assert.equal(calls, 1);
 });
-test("diagnostics identify a rejected end without accepting or fabricating a span", async () => {
+test("a verified end-stage abstention returns no span without fabricating a result", async () => {
   let calls = 0;
   const r = await handleRequest(request(), env, async (_url, init) => {
     calls++;
@@ -81,7 +81,10 @@ test("diagnostics identify a rejected end without accepting or fabricating a spa
       envelope(questions, (k) => (k === "t0_m0_start" ? "w0" : "none")),
     );
   });
-  await verify(r, "decode", 2, "entity_boundaries_invalid");
+  assert.equal(r.status, 200);
+  const body = await r.json();
+  assert.deepEqual(body.plan.entities, []);
+  assert.doesNotMatch(JSON.stringify(body), /PRIVATE_KEY_SENTINEL/);
   assert.equal(calls, 2);
 });
 test("unknown provider exceptions stay sanitized", async () => {

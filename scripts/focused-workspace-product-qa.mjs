@@ -7,6 +7,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { chromium, expect } from "@playwright/test";
 import Papa from "papaparse";
+import { waitForHostedAssets } from "./hosted-asset-readiness.mjs";
 const origin = process.env.UX_ORIGIN;
 assert.match(
   origin || "",
@@ -30,7 +31,8 @@ const records = [],
   requests = [],
   consoleErrors = [],
   downloads = [],
-  pending = new Set();
+  pending = new Set(),
+  setup = { assetReadiness: [] };
 let lastPaid = 0;
 page.on("request", (r) => {
   if (new URL(r.url()).pathname.startsWith("/api/utilities/")) {
@@ -89,6 +91,7 @@ async function persist() {
         method:
           "Real hosted UI and Worker/Jev; no request mocks, inference retries or local AI fallback",
         source,
+        setup,
         records,
         requests,
         responses,
@@ -233,6 +236,12 @@ async function exactEntities(text) {
   return raw;
 }
 try {
+  setup.ready = await waitForHostedAssets(origin, {
+    onProbe: async (probe) => {
+      setup.assetReadiness.push(probe);
+      await persist();
+    },
+  });
   for (const [slug, button, result, download] of [
     ["csv-to-nested-json", "#run", "#results", "#download"],
     ["fix-excel-dates", "#run", "#results", "#download"],
