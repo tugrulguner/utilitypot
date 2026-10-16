@@ -1,4 +1,5 @@
 ---
+import FamilyDiscovery from "./FamilyDiscovery.astro";
 interface Props {
   tool: "csv" | "dates" | "meeting";
 }
@@ -293,6 +294,7 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
         Copy result
       </button>
     </div>
+    <FamilyDiscovery surface="result" />
   </section>
 </section>
 <p id="utility-startup" class="notice" role="status" aria-live="polite">

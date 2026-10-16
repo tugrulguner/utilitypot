@@ -1,3 +1,4 @@
+import { resultDiscovery } from "../lib/discovery.js";
 import { exampleReplacementGuard } from "../lib/utilities/example-replacement.js";
 import { groupCsv } from "../lib/utilities/outcome.js";
 import Papa from "papaparse";
@@ -11,6 +12,9 @@ import {
 } from "../lib/utilities/meeting-presentation.js";
 const root = document.querySelector("[data-utility]");
 if (root) {
+  const discovery = resultDiscovery(
+    root.querySelector("[data-result-discovery]"),
+  );
   const allowExampleReplacement = exampleReplacementGuard(root);
   const tool = root.getAttribute("data-utility"),
     $ = (id) => root.querySelector(`#${id}`);
@@ -37,26 +41,34 @@ if (root) {
     globalThis.crypto?.randomUUID?.() ??
     `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const begin = (action) => {
+    const discoveryRevision = discovery.reset();
     const id = attemptId();
     capture("utility_action_started", {
       tool: analyticsTool,
       action,
       attempt_id: id,
     });
-    return { id, action };
+    return { id, action, discoveryRevision };
   };
-  const complete = (attempt, outcome) =>
+  const complete = (attempt, outcome) => {
     capture("utility_action_completed", {
       tool: analyticsTool,
       action: attempt.action,
       attempt_id: attempt.id,
       outcome,
     });
+    discovery.complete(
+      outcome,
+      !$("results").hidden,
+      attempt.discoveryRevision,
+    );
+  };
   const status = (text, error = false) => {
     $("utility-status").textContent = text;
     $("utility-status").classList.toggle("error", error);
   };
   const invalidate = () => {
+    discovery.reset();
     revision++;
     output = "";
     slots = [];
@@ -381,11 +393,11 @@ if (root) {
   async function askJev() {
     if (!requiredFields()) return;
     const button = $("ask-jev") || $("run");
-    const attempt = begin("ai_interpretation");
     let outcome = "unexpected_failure",
       responseStatus = 0;
     let input;
     invalidate();
+    const attempt = begin("ai_interpretation");
     const token = revision;
     try {
       if (tool === "csv") {

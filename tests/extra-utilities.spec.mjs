@@ -158,7 +158,9 @@ test("all seven utility pages are readable at desktop and mobile widths without 
         ),
       ).toBe(true);
       await expect(
-        page.getByRole("link", { name: "ModePot", exact: true }),
+        page
+          .locator("header .family-nav")
+          .getByRole("link", { name: "ModePot", exact: true }),
       ).toBeVisible();
       await page.screenshot({
         path: info.outputPath(slug + "-" + width + ".png"),

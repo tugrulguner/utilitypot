@@ -1,4 +1,6 @@
 ---
+import ToolDiscovery from "../../components/ToolDiscovery.astro";
+import { guides } from "../../data/discovery.js";
 import UtilityLayout from "../../layouts/UtilityLayout.astro";
 import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
 ---
@@ -6,9 +8,12 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
 <UtilityLayout
   title="Ask a webpage"
   description="Ask about a public page or pasted text. Get the exact supporting passage."
+  seoDescription={guides["ask-a-webpage"].description}
+  searchTitle={guides["ask-a-webpage"].title}
   slug="ask-a-webpage"
 >
   <ExtraUtilityApp tool="qa" />
+  <ToolDiscovery slug="ask-a-webpage" />
   <details class="prose tool-help">
     <summary>How this tool works &amp; limits</summary>
     <h2>What this tool does</h2>

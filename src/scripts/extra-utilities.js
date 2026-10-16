@@ -1,3 +1,4 @@
+import { resultDiscovery } from "../lib/discovery.js";
 import { exampleReplacementGuard } from "../lib/utilities/example-replacement.js";
 import Papa from "papaparse";
 import {
@@ -13,6 +14,10 @@ import { mermaidSource, graphRoleIssues } from "../lib/utilities/diagram.js";
 import { createEntitiesInterpretation } from "../lib/utilities/entities.js";
 const root = document.querySelector("[data-extra-utility]");
 if (root) {
+  const discovery = resultDiscovery(
+    root.querySelector("[data-result-discovery]"),
+  );
+  let evidenceAnswered = false;
   const allowExampleReplacement = exampleReplacementGuard(root);
   const tool = root.getAttribute("data-extra-utility"),
     $ = (id) => root.querySelector(`#${id}`);
@@ -38,26 +43,36 @@ if (root) {
     globalThis.crypto?.randomUUID?.() ??
     `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const begin = (action) => {
+    const discoveryRevision =
+      action === "read_page" ? undefined : discovery.reset();
     const id = attemptId();
     capture("utility_action_started", {
       tool: analyticsTool,
       action,
       attempt_id: id,
     });
-    return { id, action };
+    return { id, action, discoveryRevision };
   };
-  const complete = (attempt, outcome) =>
+  const complete = (attempt, outcome) => {
     capture("utility_action_completed", {
       tool: analyticsTool,
       action: attempt.action,
       attempt_id: attempt.id,
       outcome,
     });
+    if (attempt.action === "read_page") return;
+    discovery.complete(
+      outcome,
+      !$("extra-results").hidden && (tool !== "qa" || evidenceAnswered),
+      attempt.discoveryRevision,
+    );
+  };
   const status = (s, error = false) => {
     $("extra-status").textContent = s;
     $("extra-status").classList.toggle("error", error);
   };
   function clear() {
+    discovery.reset();
     revision++;
     output = "";
     $("extra-results").hidden = true;
@@ -402,8 +417,8 @@ if (root) {
     $("extra-results").hidden = false;
     const results = $("extra-results");
     const rect = results.getBoundingClientRect();
+    results.focus({ preventScroll: true });
     if (rect.top < 0 || rect.bottom > window.innerHeight) {
-      results.focus({ preventScroll: true });
       results.scrollIntoView({ block: "start", behavior: "smooth" });
     }
   }
@@ -756,6 +771,7 @@ if (root) {
       }
       if (tool === "qa") {
         const result = data.plan;
+        evidenceAnswered = result.status === "answered";
         if (!["answered", "partial", "not-answered"].includes(result.status))
           throw new Error("Invalid answer status.");
         for (const e of result.excerpts || [])

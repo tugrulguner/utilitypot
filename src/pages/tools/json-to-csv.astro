@@ -1,4 +1,6 @@
 ---
+import ToolDiscovery from "../../components/ToolDiscovery.astro";
+import { guides } from "../../data/discovery.js";
 import UtilityLayout from "../../layouts/UtilityLayout.astro";
 import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
 ---
@@ -6,9 +8,12 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
 <UtilityLayout
   title="JSON to CSV"
   description="Turn JSON records into a spreadsheet-ready CSV."
+  seoDescription={guides["json-to-csv"].description}
+  searchTitle={guides["json-to-csv"].title}
   slug="json-to-csv"
 >
   <ExtraUtilityApp tool="jsonCsv" />
+  <ToolDiscovery slug="json-to-csv" />
   <details class="prose tool-help">
     <summary>How this tool works &amp; limits</summary>
     <h2>What this tool does</h2>
