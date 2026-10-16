@@ -327,6 +327,49 @@ const examples = {
     </div>
   </section>
 </section>
+<p id="utility-startup" class="notice" role="status" aria-live="polite">
+  Loading tool controls. You can paste or type source now; your text stays in
+  this browser.
+</p>
+<script is:inline>
+  (() => {
+    const notice = document.getElementById("utility-startup");
+    let ready = false;
+    document.querySelectorAll(".utility-app button").forEach((button) => {
+      if (!button.disabled) {
+        button.dataset.startupWasEnabled = "true";
+        button.disabled = true;
+      }
+    });
+    window.addEventListener(
+      "utilitypot:ready",
+      () => {
+        ready = true;
+        notice.hidden = true;
+        document
+          .querySelectorAll(
+            '.utility-app button[data-startup-was-enabled="true"]',
+          )
+          .forEach((button) => {
+            button.disabled = false;
+            delete button.dataset.startupWasEnabled;
+          });
+      },
+      { once: true },
+    );
+    const failed = () => {
+      if (ready) return;
+      notice.textContent =
+        "Tool controls did not finish loading. Your text is still here and can be copied. Check your connection, then reload this page to try again.";
+      notice.classList.add("error");
+    };
+    window.addEventListener("error", (event) => {
+      if (event.filename?.includes(".js")) failed();
+    });
+    window.addEventListener("unhandledrejection", failed);
+    setTimeout(failed, 12000);
+  })();
+</script>
 <script>
   import "../scripts/extra-utilities.js";
 </script>

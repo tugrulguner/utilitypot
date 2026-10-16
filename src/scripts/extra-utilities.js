@@ -5,7 +5,10 @@ import {
   sequentialGraph,
   sourceMention,
 } from "../lib/utilities/outcome.js";
-import { jsonToCsv } from "../lib/utilities/json-csv.js";
+import {
+  jsonToCsv,
+  validateJsonNumberPrecision,
+} from "../lib/utilities/json-csv.js";
 import { mermaidSource, graphRoleIssues } from "../lib/utilities/diagram.js";
 import { createEntitiesInterpretation } from "../lib/utilities/entities.js";
 const root = document.querySelector("[data-extra-utility]");
@@ -418,8 +421,10 @@ if (root) {
     if (s.length > 2000000) throw new Error("JSON exceeds 2 MB.");
     if (!s.trim()) throw new Error("Enter a JSON document before converting.");
     try {
+      validateJsonNumberPrecision(s);
       return JSON.parse(s);
-    } catch {
+    } catch (error) {
+      if (/quote identifiers/.test(error.message)) throw error;
       throw new Error(
         "Check the JSON document: add matching braces and brackets, commas, and double quotes.",
       );
@@ -1053,4 +1058,13 @@ if (root) {
       status("Clipboard unavailable; use download.", true);
     }
   });
+  if (tool === "jsonCsv" && $("source-text").value.trim()) {
+    try {
+      paths();
+      status("Source loaded. Review the record array before converting.");
+    } catch (error) {
+      status(error.message, true);
+    }
+  }
+  window.dispatchEvent(new Event("utilitypot:ready"));
 }

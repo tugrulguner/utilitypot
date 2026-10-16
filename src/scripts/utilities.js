@@ -757,4 +757,5 @@ if (root) {
   });
   // Preserve text entered or restored before the module attached its listeners.
   if (tool === "csv" && $("csv-input").value.trim()) syncCsv();
+  window.dispatchEvent(new Event("utilitypot:ready"));
 }

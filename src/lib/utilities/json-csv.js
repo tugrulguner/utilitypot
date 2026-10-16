@@ -1,5 +1,54 @@
 import Papa from "papaparse";
 const bad = new Set(["__proto__", "constructor", "prototype"]);
+const unsafeNumberMessage =
+  "JSON numbers would lose precision. Quote identifiers or high-precision values as strings, then try again.";
+function canonicalDecimal(token) {
+  const match = /^(-?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(token);
+  if (!match) return null;
+  const exponent = Number(match[4] || 0) - (match[3]?.length || 0);
+  if (!Number.isSafeInteger(exponent) || Math.abs(exponent) > 100000)
+    return null;
+  let digits = (match[2] + (match[3] || "")).replace(/^0+/, "");
+  if (!digits) return "0";
+  let scale = exponent;
+  while (digits.endsWith("0")) {
+    digits = digits.slice(0, -1);
+    scale++;
+  }
+  return `${match[1]}${digits}e${scale}`;
+}
+const jsonNumberPattern = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
+export function validateJsonNumberPrecision(raw) {
+  if (typeof raw !== "string" || raw.length > 2000000)
+    throw new Error("Use a JSON document up to 2 MB.");
+  for (let i = 0; i < raw.length;) {
+    if (raw[i] === '"') {
+      i++;
+      while (i < raw.length) {
+        if (raw[i] === "\\") i += 2;
+        else if (raw[i++] === '"') break;
+      }
+      continue;
+    }
+    if (raw[i] === "-" || (raw[i] >= "0" && raw[i] <= "9")) {
+      jsonNumberPattern.lastIndex = i;
+      const match = jsonNumberPattern.exec(raw);
+      if (match) {
+        const token = match[0],
+          number = Number(token);
+        if (
+          !Number.isFinite(number) ||
+          (number === 0 && /[1-9]/.test(token)) ||
+          canonicalDecimal(token) !== canonicalDecimal(number.toString())
+        )
+          throw new Error(unsafeNumberMessage);
+        i += token.length;
+        continue;
+      }
+    }
+    i++;
+  }
+}
 export function arrayPaths(data) {
   const out = [];
   function visit(v, path, depth) {
@@ -102,8 +151,10 @@ export function createJsonCsvInterpretation(input) {
     throw new Error("Use a small JSON sample and instructions.");
   let data;
   try {
+    validateJsonNumberPrecision(input.sample);
     data = JSON.parse(input.sample);
-  } catch {
+  } catch (error) {
+    if (error.message === unsafeNumberMessage) throw error;
     throw new Error("Enter valid JSON (check commas, quotes, and brackets). ");
   }
   const paths = arrayPaths(data);
