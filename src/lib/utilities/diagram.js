@@ -66,15 +66,6 @@ export function createDiagramInterpretation(input) {
   criteria.none = "No explicit destination; terminal or unresolved.";
   const questions = {};
   nodes.forEach((n, i) => {
-    questions[`type${i}`] = {
-      type: "choice",
-      instructions: `What is step ${n.id}'s role in the described process?`,
-      criteria: {
-        process: "An action or ordinary step.",
-        decision: "A conditional branch or question.",
-        terminal: "A start or end state.",
-      },
-    };
     questions[`next${i}`] = {
       type: "choice",
       instructions: `Which explicit step follows ${n.id}? For a decision, select its affirmative/true branch. Choose none if no relation is supported. Do not assume the next listed line is necessarily the next process step.`,
@@ -86,31 +77,103 @@ export function createDiagramInterpretation(input) {
       criteria,
     };
   });
+  const state = { nodes, instructions: input.instructions };
+  function decode(a) {
+    const typed = nodes.map((n, i) => {
+      if (a[`type${i}`].choice === "unknown")
+        throw new Error(
+          `Role of ${n.id} is unresolved; review its type and connections manually.`,
+        );
+      return { ...n, type: a[`type${i}`].choice };
+    });
+    const edges = [];
+    typed.forEach((n, i) => {
+      const next = a[`next${i}`].choice,
+        alt = a[`else${i}`].choice;
+      if (next !== "none")
+        edges.push({
+          from: n.id,
+          to: next,
+          label: n.type === "decision" ? "yes" : "",
+        });
+      // Questions run independently: a false-branch answer is relevant only
+      // when this node was actually classified as a decision.
+      if (n.type === "decision" && alt !== "none") {
+        if (alt === next) throw new Error("Inconsistent decision branches.");
+        edges.push({ from: n.id, to: alt, label: "no" });
+      }
+    });
+    const graph = { nodes: typed, edges };
+    mermaidSource(graph);
+    return { graph, needsReview: true, reviewIssues: graphRoleIssues(graph) };
+  }
   return {
-    state: { nodes, instructions: input.instructions },
+    state,
     questions,
-    decode(a) {
-      const typed = nodes.map((n, i) => ({ ...n, type: a[`type${i}`].choice }));
-      const edges = [];
-      typed.forEach((n, i) => {
-        const next = a[`next${i}`].choice,
-          alt = a[`else${i}`].choice;
-        if (next !== "none")
-          edges.push({
+    // Retain direct decoding for replay of complete captured answers.
+    decode,
+    followup(relationships) {
+      const roleQuestions = {};
+      for (const [i, node] of nodes.entries()) {
+        roleQuestions[`type${i}`] = {
+          type: "choice",
+          instructions: {
+            question: `What is the role of ${node.id} in the complete process described by \`nodes\` and \`instructions\`?`,
+            context:
+              "Use `relationships` to check the proposed continuation, together with the source description. Relationships are proposals, not facts that override source instructions.",
+            branches:
+              "negativeIfDecision is speculative: it matters only if the source actually makes this node a decision. Ignore it for ordinary actions and start/end states.",
+            boundaries:
+              "A start can have outgoing connections. An end has no continuation. An intermediate action is not an endpoint just because it completes a subtask. A final action can express the end of the whole path. Do not infer an end solely from an unsupported/none destination.",
+          },
+          criteria: {
+            process: {
+              what: "An ordinary action or intermediate step, including an action on a conditional path.",
+              not_for:
+                "A branching question or an explicit start/end boundary of the path.",
+            },
+            decision: {
+              what: "A question or condition that selects between paths.",
+              not_for:
+                "An action merely prefixed with the condition under which it runs.",
+            },
+            terminal: {
+              what: "An explicit start or end of a process path; includes a final action that closes the path. Start may lead onward; end does not.",
+              not_for:
+                "An intermediate step with incoming and outgoing continuation. Completion of one task is not completion of the path.",
+            },
+            unknown: {
+              what: "Role is unsupported, ambiguous, or contradicts the described connections; manual review is needed.",
+            },
+          },
+        };
+      }
+      return {
+        state: {
+          ...state,
+          relationships: nodes.map((n, i) => ({
             from: n.id,
-            to: next,
-            label: n.type === "decision" ? "yes" : "",
-          });
-        // Questions run independently: a false-branch answer is relevant only
-        // when this node was actually classified as a decision.
-        if (n.type === "decision" && alt !== "none") {
-          if (alt === next) throw new Error("Inconsistent decision branches.");
-          edges.push({ from: n.id, to: alt, label: "no" });
-        }
-      });
-      const graph = { nodes: typed, edges };
-      mermaidSource(graph);
-      return { graph, needsReview: true };
+            next: relationships[`next${i}`].choice,
+            negativeIfDecision: relationships[`else${i}`].choice,
+          })),
+        },
+        questions: roleQuestions,
+        decode: (roles) => decode({ ...relationships, ...roles }),
+      };
     },
   };
+}
+
+export function graphRoleIssues(graph) {
+  return graph.nodes
+    .filter(
+      (n) =>
+        n.type === "terminal" &&
+        graph.edges.some((e) => e.to === n.id && e.from !== n.id) &&
+        graph.edges.some((e) => e.from === n.id && e.to !== n.id),
+    )
+    .map(
+      (n) =>
+        `${n.id} (${n.label}) is marked Start / end but has incoming and outgoing connections. Review its type or destinations; an intermediate action usually needs Process.`,
+    );
 }

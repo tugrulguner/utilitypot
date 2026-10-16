@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-test("live QA response deadline exceeds the staged entity client deadline", async () => {
+test("live QA response deadline exceeds the staged entity and diagram client deadline", async () => {
   const client = await readFile(
     new URL("../scripts/extra-utilities.js", import.meta.url),
     "utf8",
@@ -11,7 +11,9 @@ test("live QA response deadline exceeds the staged entity client deadline", asyn
     new URL("../../scripts/review-product-qa.mjs", import.meta.url),
     "utf8",
   );
-  const clientMs = client.match(/tool\s*===\s*"entities"\s*\?\s*(\d+)/)?.[1];
+  const clientMs = client.match(
+    /\["entities",\s*"diagram"\]\.includes\(tool\)\s*\?\s*(\d+)/,
+  )?.[1];
   const qaMs = qa.match(/page\.waitForResponse\([\s\S]*?timeout:\s*(\d+)/)?.[1];
   assert.ok(clientMs, "entity deadline must be explicit");
   assert.ok(qaMs, "QA must not inherit the shorter default response timeout");

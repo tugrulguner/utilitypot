@@ -40,3 +40,30 @@ test("wholly empty dates are rejected while blank lines in data remain rows", ()
     ["converted", "empty", "converted"],
   );
 });
+
+test("fresh UX: named and numeric month/year preserve precision without guessing", () => {
+  const values = ["January 2027", "Jan 2027", "01/2027", "12/0001", "2027-01"];
+  const rows = normalizeDates(values.join("\n"));
+  assert.deepEqual(
+    rows.map((r) => r.normalized),
+    ["2027-01", "2027-01", "2027-01", "0001-12", "2027-01"],
+  );
+  assert.ok(rows.every((r) => r.status === "partial"));
+  assert.deepEqual(
+    rows.map((r) => r.original),
+    values,
+  );
+  for (const value of [
+    "00/2027",
+    "13/2027",
+    "01/0000",
+    "January 0000",
+    "January 10000",
+    "next January",
+    "Janu 2027",
+    "1/27",
+    "2027-13",
+  ]) {
+    assert.equal(normalizeDates(value)[0].status, "invalid", value);
+  }
+});

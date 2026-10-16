@@ -1,0 +1,96 @@
+{
+  "provenance": "Actual application plan captured by the fresh production UX audit on 2026-10-15; raw provider distributions were not captured. No probabilities reconstructed.",
+  "input": {
+    "text": "Receive a returned parcel.\nIs the item damaged?\nIf damaged, route the parcel to inspection and stop.\nIf not damaged, restock the item.\nEmail the customer a confirmation.\nClose the return.",
+    "instructions": "Step 2 is the only decision. Yes goes to step 3, which is terminal. No goes to step 4, then step 5, then step 6. Step 1 goes to step 2. Never connect the damaged path to restocking."
+  },
+  "response": {
+    "source": "jev",
+    "model": "jev-1.13.0",
+    "plan": {
+      "graph": {
+        "nodes": [
+          {
+            "id": "n0",
+            "label": "Receive a returned parcel.",
+            "type": "process"
+          },
+          {
+            "id": "n1",
+            "label": "Is the item damaged?",
+            "type": "decision"
+          },
+          {
+            "id": "n2",
+            "label": "If damaged, route the parcel to inspection and stop.",
+            "type": "terminal"
+          },
+          {
+            "id": "n3",
+            "label": "If not damaged, restock the item.",
+            "type": "terminal"
+          },
+          {
+            "id": "n4",
+            "label": "Email the customer a confirmation.",
+            "type": "process"
+          },
+          {
+            "id": "n5",
+            "label": "Close the return.",
+            "type": "process"
+          }
+        ],
+        "edges": [
+          {
+            "from": "n0",
+            "to": "n1",
+            "label": ""
+          },
+          {
+            "from": "n1",
+            "to": "n2",
+            "label": "yes"
+          },
+          {
+            "from": "n1",
+            "to": "n3",
+            "label": "no"
+          },
+          {
+            "from": "n3",
+            "to": "n4",
+            "label": ""
+          },
+          {
+            "from": "n4",
+            "to": "n5",
+            "label": ""
+          }
+        ]
+      },
+      "needsReview": true
+    },
+    "needsReview": true,
+    "confidence": {
+      "type0": 0.66,
+      "next0": 0.69,
+      "else0": 0.76,
+      "type1": 0.8,
+      "next1": 0.94,
+      "else1": 0.98,
+      "type2": 0.61,
+      "next2": 0.93,
+      "else2": 0.82,
+      "type3": 0.55,
+      "next3": 0.38,
+      "else3": 0.72,
+      "type4": 1,
+      "next4": 0.95,
+      "else4": 0.88,
+      "type5": 0.35,
+      "next5": 0.95,
+      "else5": 0.89
+    }
+  }
+}

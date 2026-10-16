@@ -44,7 +44,7 @@
   {
     "slug": "ask-a-webpage",
     "title": "Ask a webpage",
-    "description": "Find an exact passage in pasted text or a page from a supported documentation site.",
+    "description": "Find exact passages in pasted text or public HTTP/HTTPS pages. Blocked or unsupported pages require pasted text.",
     "tool": "qa",
     "processing": "Uses AI"
   }

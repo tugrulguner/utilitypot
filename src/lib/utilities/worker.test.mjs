@@ -406,3 +406,67 @@ test("upstream exceptions never expose credential or exception text", async () =
   assert(!body.includes("test-server-only"));
   assert(!body.includes("raw input"));
 });
+
+test("fresh UX diagram stages preserve the 24-question budget and raw uncertain negatives", async () => {
+  let calls = 0,
+    questions = 0;
+  const result = await handleRequest(
+    request({
+      tool: "diagram",
+      input: {
+        text: Array.from({ length: 8 }, (_, i) => `Step ${i}`).join("\n"),
+        instructions: "A sequential process.",
+      },
+    }),
+    env,
+    async (_url, init) => {
+      const body = JSON.parse(init.body);
+      calls++;
+      questions += Object.keys(body.questions).length;
+      if (calls === 2) assert.equal(body.state.relationships[0].next, "n1");
+      const answers = Object.fromEntries(
+        Object.entries(body.questions).map(([id, q]) => {
+          const index = Number(id.replace(/\D/g, ""));
+          const choice = id.startsWith("type")
+            ? index === 7
+              ? "terminal"
+              : "process"
+            : id.startsWith("next")
+              ? index === 7
+                ? "none"
+                : `n${index + 1}`
+              : "n0";
+          // Synthetic envelope: deliberately uncertain, irrelevant negative branches.
+          const keys = Object.keys(q.criteria),
+            uncertain = id.startsWith("else");
+          return [
+            id,
+            {
+              type: "choice",
+              choice,
+              confidence: uncertain ? 0 : 1,
+              probabilities: Object.fromEntries(
+                keys.map((k) => [
+                  k,
+                  uncertain ? 1 / keys.length : k === choice ? 1 : 0,
+                ]),
+              ),
+            },
+          ];
+        }),
+      );
+      return Response.json({
+        model: "jev-test-fixture",
+        answers,
+        usage: { input_tokens: 1, output_tokens: 1 },
+      });
+    },
+  );
+  assert.equal(result.status, 200);
+  const out = await result.json();
+  assert.equal(calls, 2);
+  assert.equal(questions, 24);
+  assert.equal(out.plan.graph.edges.length, 7);
+  assert.equal(out.confidence.else0, 0);
+  assert.deepEqual(out.plan.reviewIssues, []);
+});

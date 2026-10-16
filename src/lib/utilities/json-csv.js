@@ -140,12 +140,30 @@ export function createJsonCsvInterpretation(input) {
       },
       arrays: {
         type: "choice",
-        instructions:
-          "What does the user request for other nested arrays within a record? Default to reject when the instruction is not explicit.",
+        instructions: {
+          question:
+            "Which nested-array policy is explicitly requested in `instructions` for records in `sample`?",
+          scope:
+            "Read the user's requested representation, independently of which array supplies rows. JSON text in one cell preserves an array without expanding rows.",
+          uncertainty:
+            "Choose reject when no supported policy is explicit, the request conflicts, or its meaning is unclear. Do not assume omission or serialization from the sample alone.",
+        },
         criteria: {
-          omit: "Explicitly exclude nested-array fields.",
-          join: "Explicitly serialize each nested array into one JSON-text cell.",
-          reject: "No explicit policy; stop rather than silently lose data.",
+          join: {
+            what: "Preserve each nested array by JSON serialization into one cell, including brackets, quotes and all values. The internal key join means JSON.stringify.",
+            not_for:
+              "Concatenating array elements with a delimiter, expanding rows, or dropping fields.",
+          },
+          omit: {
+            what: "The user explicitly requests removing nested-array fields from the CSV.",
+            not_for:
+              "Keeping arrays as JSON text or otherwise preserving their contents.",
+          },
+          reject: {
+            what: "Stop conversion: no explicit supported array policy, conflicting or unclear instructions, or an explicit request to stop on arrays.",
+            not_for:
+              "An explicit request to preserve arrays as JSON text in a cell, or explicitly omit them.",
+          },
         },
       },
     },

@@ -17,10 +17,7 @@ const examples = {
     "Sample London–Kolkata hours, not your availability. Find 30-minute overlaps.",
   ],
 };
-const zones = Intl.supportedValuesOf("timeZone");
-const city = (zone: string) => zone.split("/").at(-1)!.replaceAll("_", " ");
-const uniqueCity = (zone: string) =>
-  zones.filter((other) => city(other) === city(zone)).length === 1;
+import { meetingCities } from "../lib/utilities/meeting-presentation.js";
 ---
 
 <section
@@ -98,7 +95,8 @@ const uniqueCity = (zone: string) =>
         />
         <p class="notice">
           Original values stay in the report. Ambiguous, partial and invalid
-          dates remain visible.
+          dates remain visible. Month-only formats: January 2027, Jan 2027,
+          01/2027 (MM/YYYY), or 2027-01. Year-only: 2027. No day is invented.
         </p>
         <div id="convention-panel" hidden>
           <p id="date-convention-scope" class="notice">
@@ -216,10 +214,11 @@ const uniqueCity = (zone: string) =>
             </div>
           ))}
         </div>
+
         <datalist id="zones">
-          {zones.map((zone) => (
-            <option value={uniqueCity(zone) ? city(zone) : zone}>
-              {city(zone)} · {zone}
+          {meetingCities.map(({ value, zone }) => (
+            <option value={value}>
+              {value} · {zone}
             </option>
           ))}
         </datalist>
@@ -238,10 +237,29 @@ const uniqueCity = (zone: string) =>
       </button>
     </div>
     {tool === "meeting" && (
-      <div class="actions meeting-secondary-actions">
-        <button id="add-person">Add participant</button>
-        <button id="remove-person">Remove last</button>
-      </div>
+      <>
+        <div class="actions meeting-secondary-actions">
+          <button id="add-person">Add participant</button>
+          <button id="remove-person">Remove last</button>
+        </div>
+        <details>
+          <summary>Supported cities and timezones</summary>
+          <p class="notice">
+            Search this local list, then enter a city above. Only listed cities
+            and valid IANA timezones are supported. For ambiguous names,
+            identify the state or country and choose its known timezone.
+          </p>
+          <label for="city-search">Search supported cities or aliases</label>
+          <input id="city-search" type="search" maxlength="80" />
+          <ul id="city-matches" aria-live="polite">
+            {meetingCities.map(({ value, zone }) => (
+              <li>
+                {value} · {zone}
+              </li>
+            ))}
+          </ul>
+        </details>
+      </>
     )}
   </section>
   <p

@@ -189,6 +189,11 @@ if (root) {
     });
     $("mapping-panel").hidden = false;
   }
+  $("city-search")?.addEventListener("input", (event) => {
+    const query = event.target.value.trim().toLocaleLowerCase("en");
+    for (const item of $("city-matches").children)
+      item.hidden = !item.textContent.toLocaleLowerCase("en").includes(query);
+  });
   function participants() {
     return [...root.querySelectorAll(".participant")].map((p, index) => {
       const person = Object.fromEntries(
@@ -199,7 +204,9 @@ if (root) {
       );
       const field = p.querySelector('[data-field="zone"]');
       try {
-        person.zone = resolveMeetingZone(person.zone).zone;
+        const resolved = resolveMeetingZone(person.zone);
+        person.zone = resolved.zone;
+        person.cityLabel = resolved.label;
         field.setCustomValidity("");
         field.removeAttribute("aria-invalid");
       } catch (e) {
@@ -211,10 +218,14 @@ if (root) {
       return person;
     });
   }
-  function setPeople(people) {
+  function setPeople(people, preserveIdentity = false) {
     [...root.querySelectorAll(".participant")].forEach((p, i) => {
       for (const e of p.querySelectorAll("[data-field]"))
-        if (people[i] && Object.hasOwn(people[i], e.dataset.field))
+        if (
+          people[i] &&
+          Object.hasOwn(people[i], e.dataset.field) &&
+          !(preserveIdentity && ["zone", "name"].includes(e.dataset.field))
+        )
           e.value = people[i][e.dataset.field];
     });
   }
@@ -341,7 +352,34 @@ if (root) {
       root.querySelector(".participant:last-child").remove();
     }
   });
+  function requiredFields() {
+    let field, message;
+    if (tool === "csv" && !$("csv-input").value.trim()) {
+      field = $("csv-input");
+      message = "Paste CSV data with a header row and at least one data row.";
+    }
+    if (tool === "meeting") {
+      if (!$("meeting-date").value) {
+        field = $("meeting-date");
+        message = "Choose a meeting date.";
+      } else {
+        const empty = [
+          ...root.querySelectorAll('.participant [data-field="zone"]'),
+        ].findIndex((e) => !e.value.trim());
+        if (empty >= 0) {
+          field = $(`p${empty}-zone`);
+          message = `Enter a city or timezone for participant ${empty + 1}. Search Supported cities below.`;
+        }
+      }
+    }
+    if (!field) return true;
+    invalidate();
+    status(message, true);
+    field.focus();
+    return false;
+  }
   async function askJev() {
+    if (!requiredFields()) return;
     const button = $("ask-jev") || $("run");
     const attempt = begin("ai_interpretation");
     let outcome = "unexpected_failure",
@@ -401,7 +439,7 @@ if (root) {
         $("date-convention").value = data.plan.convention;
       }
       if (tool === "meeting") {
-        setPeople(data.plan.participants);
+        setPeople(data.plan.participants, true);
         $("availability-mode").value = "local";
         syncAvailability();
         if (data.plan.participants.some((p) => p.scope !== "supported")) {
@@ -453,6 +491,7 @@ if (root) {
     runLocal();
   });
   function runLocal(emit = true) {
+    if (!requiredFields()) return false;
     const attempt = emit ? begin("manual_run") : null;
     let outcome = "rejected";
     try {
