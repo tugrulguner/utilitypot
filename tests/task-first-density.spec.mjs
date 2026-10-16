@@ -1,11 +1,12 @@
+import { fixturePlan } from "./workflow-fixtures.mjs";
 import { test, expect } from "@playwright/test";
 const tools = [
   ["csv-to-nested-json", "Create nested JSON"],
   ["fix-excel-dates", "Fix dates"],
   ["meeting-time-finder", "Find times"],
   ["json-to-csv", "Convert"],
-  ["entity-extractor", "Extract with Jev"],
-  ["text-to-mermaid", "Create diagram"],
+  ["entity-extractor", "Find matches"],
+  ["text-to-mermaid", "Create flowchart"],
   ["ask-a-webpage", "Find answer"],
 ];
 for (const width of [1280, 390])
@@ -53,10 +54,19 @@ test("source tabs visibly distinguish the selected input without starting infere
 test("diagram presents its result before optional connection editing", async ({
   page,
 }) => {
+  await fixturePlan(page, {
+    graph: {
+      nodes: [
+        { id: "n0", label: "Receive request", type: "process" },
+        { id: "n1", label: "Send receipt", type: "terminal" },
+      ],
+      edges: [{ from: "n0", to: "n1", label: "" }],
+    },
+  });
   await page.goto("/tools/text-to-mermaid/");
   await page.locator("#source-text").fill("Receive request\nSend receipt");
   await page
-    .getByRole("button", { name: "Create diagram", exact: true })
+    .getByRole("button", { name: "Create flowchart", exact: true })
     .click();
   await expect(
     page

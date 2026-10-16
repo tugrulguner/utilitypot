@@ -9,34 +9,36 @@ import UtilityLayout from "../layouts/UtilityLayout.astro";
   canonicalPath="/privacy/"
 >
   <section class="prose">
-    <h2>Manual processing</h2>
+    <h2>Utilities that stay in your browser</h2>
     <p>
-      Manual conversion, normalization, scheduling and diagram rendering run in
-      your browser. This application has no account database, saved input
-      history, session replay or input analytics. Anonymous, opt-out-respecting
-      PostHog analytics measure page views and coarse tool actions, using a
-      pseudonymous browser identifier in local storage rather than analytics
-      cookies. SDK opt-out is stored in the browser. Pageview URLs retain the
-      public path but remove query strings and fragments; referrers are reduced
-      to their origin, and campaign/ad-click identifiers are discarded,
-      including persisted acquisition properties. Analytics does not record form
-      values, page text, provider responses, or output. Family and creator
-      discovery clicks record only a fixed destination name and placement
-      (intro, result or project showcase), not link text or input. These clicks
-      do not establish return visits. Manual processing and downloads remain in
-      your browser; download events measure user intent, not completed transfer.
-      Hosting providers still process ordinary request metadata under their own
-      policies.
+      CSV/JSON conversion, date cleanup and meeting-time calculation run in your
+      browser without AI. Diagram rendering is also local after its source steps
+      and connections have been interpreted by AI. This application has no
+      account database, saved input history, session replay or input analytics.
+      Anonymous, opt-out-respecting PostHog analytics measure page views and
+      coarse tool actions, using a pseudonymous browser identifier in local
+      storage rather than analytics cookies. SDK opt-out is stored in the
+      browser. Pageview URLs retain the public path but remove query strings and
+      fragments; referrers are reduced to their origin, and campaign/ad-click
+      identifiers are discarded, including persisted acquisition properties.
+      Analytics does not record form values, page text, provider responses, or
+      output. Family and creator discovery clicks record only a fixed
+      destination name and placement (intro, result or project showcase), not
+      link text or input. These clicks do not establish return visits. Local
+      computation and downloads remain in your browser; download events measure
+      user intent, not completed transfer. Hosting providers still process
+      ordinary request metadata under their own policies.
     </p>
-    <h2>When you choose Ask Jev</h2>
+    <h2>Utilities that use AI</h2>
     <p>
-      After explicit consent, the context described beside that button is sent
-      to our Cloudflare Worker and TypeSafe. This can include sample values,
-      source text, definitions, availability or questions. Do not submit
-      confidential or personal information without authority. The application
-      does not persist these inputs or log provider bodies. TypeSafe processing
-      and retention are governed by its terms, not a claim that inference is
-      fully local.
+      Entity extraction, flowchart interpretation and webpage evidence selection
+      use AI. After explicit consent, the context described beside the primary
+      action is sent to our Cloudflare Worker and TypeSafe. This can include
+      source text, category definitions, step relationships or questions. Do not
+      submit confidential or personal information without authority. The
+      application does not persist these inputs or log provider bodies. TypeSafe
+      processing and retention are governed by its terms, not a claim that
+      inference is fully local.
     </p>
     <h2>Public-page reading</h2>
     <p>

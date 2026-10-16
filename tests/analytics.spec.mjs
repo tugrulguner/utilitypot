@@ -1,3 +1,9 @@
+import {
+  exampleInterpretation,
+  answeredSource,
+  fixturePlan,
+  approvalGraph,
+} from "./workflow-fixtures.mjs";
 import { test, expect } from "@playwright/test";
 import { gunzipSync } from "node:zlib";
 test.use({
@@ -132,8 +138,7 @@ test("real CDN SDK emits sanitized pageview and bounded manual action events", a
     events.some(
       (e) =>
         e.event === "$pageview" &&
-        e.properties?.$current_url ===
-          "http://127.0.0.1:4540/tools/fix-excel-dates/",
+        e.properties?.$current_url === `${baseURL}/tools/fix-excel-dates/`,
     ),
   ).toBeTruthy();
   expect(
@@ -215,9 +220,9 @@ test("all seven tool handlers emit no initial example action and bounded complet
       await page.locator("#row-path").selectOption("orders");
       await page.getByRole("button", { name: "Convert", exact: true }).click();
     } else if (action === "manual" && slug === "entity-extractor") {
-      await page.getByRole("button", { name: "Update preview" }).click();
+      await exampleInterpretation(page, slug);
     } else if (action === "manual" && slug === "text-to-mermaid") {
-      await page.getByRole("button", { name: "Update diagram" }).click();
+      await exampleInterpretation(page, slug);
     } else {
       await page.route("**/api/utilities/read-page", (route) =>
         route.fulfill({
@@ -315,12 +320,10 @@ test("manual validation and presentation failures classify distinctly across uti
         }),
     },
     {
-      slug: "entity-extractor",
+      slug: "json-to-csv",
       run: async (p) => {
         await p.getByRole("button", { name: /^Load example:/ }).click();
-        if (!(await p.locator("#entity-review").evaluate((e) => e.open)))
-          await p.locator("#entity-review > summary").click();
-        await p.getByRole("button", { name: "Update preview" }).click();
+        await p.locator("#extra-run").click();
       },
       failPresentation: async (p) =>
         p.evaluate(() => {
@@ -384,7 +387,7 @@ test("invalid manual input is rejected and a valid retry succeeds with a distinc
   context,
 }) => {
   const posts = await installSink(context, page);
-  for (const slug of ["meeting-time-finder", "entity-extractor"]) {
+  for (const slug of ["meeting-time-finder", "json-to-csv"]) {
     await page.goto(`/tools/${slug}/`);
     await page
       .locator("details")
@@ -397,7 +400,7 @@ test("invalid manual input is rejected and a valid retry succeeds with a distinc
       await page
         .locator("details")
         .evaluateAll((es) => es.forEach((e) => (e.open = true)));
-      await page.locator("#review-plan").fill("{INVALID_PRIVATE_SENTINEL");
+      await page.locator("#source-text").fill("{INVALID_PRIVATE_SENTINEL");
     }
     const before = decodedEvents(posts).filter(
       (e) => e.event === "utility_action_completed",
@@ -447,7 +450,7 @@ test("edited inputs cancel stale AI completions without presenting success", asy
   context,
 }) => {
   const posts = await installSink(context, page);
-  for (const slug of ["fix-excel-dates", "entity-extractor"]) {
+  for (const slug of ["ask-a-webpage", "entity-extractor"]) {
     let release;
     const gate = new Promise((resolve) => {
       release = resolve;
@@ -458,7 +461,10 @@ test("edited inputs cancel stale AI completions without presenting success", asy
         contentType: "application/json",
         body: JSON.stringify({
           source: "jev",
-          plan: { convention: "day-first", entities: [] },
+          plan:
+            route.request().postDataJSON().tool === "qa"
+              ? { status: "not-answered", excerpts: [] }
+              : { entities: [] },
           confidence: {},
           model: "fixture",
         }),
@@ -470,7 +476,6 @@ test("edited inputs cancel stale AI completions without presenting success", asy
       .evaluateAll((es) => es.forEach((e) => (e.open = true)));
     await page.waitForFunction(() => window.posthog?.__loaded);
     await page.getByRole("button", { name: /^Load example:/ }).click();
-    const dates = slug === "fix-excel-dates";
     const before = decodedEvents(posts).filter(
       (e) => e.event === "utility_action_completed",
     ).length;
@@ -478,11 +483,9 @@ test("edited inputs cancel stale AI completions without presenting success", asy
     await page
       .locator("details")
       .evaluateAll((es) => es.forEach((e) => (e.open = true)));
-    await page.locator(dates ? "#ask-jev" : "#extra-ask").click();
+    await page.locator("#extra-ask").click();
     await request;
-    await page
-      .locator(dates ? "#dates-input" : "#source-text")
-      .fill("EDITED_PRIVATE_SENTINEL");
+    await page.locator("#source-text").fill("EDITED_PRIVATE_SENTINEL");
     release();
     await expect
       .poll(() =>
@@ -492,9 +495,7 @@ test("edited inputs cancel stale AI completions without presenting success", asy
           .map((e) => e.properties.outcome),
       )
       .toEqual(["cancelled"]);
-    await expect(
-      page.locator(dates ? "#results" : "#extra-results"),
-    ).toBeHidden();
+    await expect(page.locator("#extra-results")).toBeHidden();
     await context.unroute("**/api/utilities/interpret");
   }
   expect(JSON.stringify(decodedEvents(posts))).not.toContain(
@@ -519,11 +520,11 @@ test("a pending diagram render cannot report success after its source changes", 
     await gate;
     await route.continue();
   });
+  await fixturePlan(page, { graph: approvalGraph });
   await page.goto("/tools/text-to-mermaid/");
   await page.waitForFunction(() => window.posthog?.__loaded);
   await page.getByRole("button", { name: /^Load example:/ }).click();
-  await page.locator("#graph-panel > summary").click();
-  await page.locator("#extra-run").click();
+  await page.locator("#create-diagram").click();
   await pending;
   await page.locator("#source-text").fill("STALE_DIAGRAM_PRIVATE_SENTINEL");
   release();
@@ -559,7 +560,8 @@ test("calendar, SVG, and result download intents are attributed exactly once", a
     await page.waitForFunction(() => window.posthog?.__loaded);
     await page.getByRole("button", { name: /^Load example:/ }).click();
     const meeting = slug === "meeting-time-finder";
-    await page.locator(meeting ? "#run" : "#extra-run").click();
+    if (meeting) await page.locator("#run").click();
+    else await exampleInterpretation(page, slug);
     for (const name of [specialized, "Download result"]) {
       const download = page.waitForEvent("download");
       await page.getByRole("button", { name, exact: true }).click();
@@ -621,7 +623,7 @@ test("a throwing analytics capture cannot block a local operation or its present
   context,
 }) => {
   await installSink(context, page);
-  for (const slug of ["fix-excel-dates", "entity-extractor"]) {
+  for (const slug of ["fix-excel-dates", "json-to-csv"]) {
     await page.goto(`/tools/${slug}/`);
     await page
       .locator("details")
@@ -641,7 +643,7 @@ test("a throwing analytics capture cannot block a local operation or its present
     ).toBeVisible();
     if (slug === "fix-excel-dates")
       await expect(page.locator("#result-view table tbody tr")).toHaveCount(5);
-    else await expect(page.locator("#extra-visual mark")).not.toHaveCount(0);
+    else await expect(page.locator("#extra-visual tr")).toHaveCount(3);
   }
 });
 
@@ -681,16 +683,24 @@ test("AI request completion distinguishes presented success, client rejection, a
       route.fulfill({
         status: fixture.status,
         contentType: "application/json",
-        body: JSON.stringify(fixture.body),
+        body: JSON.stringify(
+          fixture.outcome === "success"
+            ? {
+                ...fixture.body,
+                plan: answeredSource(route.request().postDataJSON().input.text),
+                confidence: { answerability: 0.9, passage: 0.9 },
+              }
+            : fixture.body,
+        ),
       }),
     );
-    await page.goto(`${baseURL}/tools/fix-excel-dates/`);
+    await page.goto(`${baseURL}/tools/ask-a-webpage/`);
     await page
       .locator("details")
       .evaluateAll((es) => es.forEach((e) => (e.open = true)));
     await page.waitForFunction(() => window.posthog?.__loaded);
     await page.getByRole("button", { name: /^Load example:/ }).click();
-    await page.getByRole("button", { name: "Fix with Jev" }).click();
+    await page.getByRole("button", { name: "Find answer" }).click();
     await expect
       .poll(
         () =>
@@ -701,8 +711,8 @@ test("AI request completion distinguishes presented success, client rejection, a
       )
       .toBe(1);
     if (fixture.outcome === "success")
-      await expect(page.locator("#utility-status")).toContainText(
-        "Processed 5 rows locally.",
+      await expect(page.locator("#extra-status")).toContainText(
+        "Answer found in the source.",
       );
     const events = decodedEvents(posts);
     const started = events.find((e) => e.event === "utility_action_started");
@@ -710,11 +720,11 @@ test("AI request completion distinguishes presented success, client rejection, a
       (e) => e.event === "utility_action_completed",
     );
     expect(started.properties).toMatchObject({
-      tool: "fix_excel_dates",
+      tool: "ask_a_webpage",
       action: "ai_interpretation",
     });
     expect(completed.properties).toMatchObject({
-      tool: "fix_excel_dates",
+      tool: "ask_a_webpage",
       action: "ai_interpretation",
       outcome: fixture.outcome,
       attempt_id: started.properties.attempt_id,

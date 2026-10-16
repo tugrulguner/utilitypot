@@ -1,8 +1,4 @@
 import { resultDiscovery } from "../lib/discovery.js";
-import {
-  interpretationReview,
-  appendInterpretationDetails,
-} from "../lib/utilities/interpretation-feedback.js";
 import { exampleReplacementGuard } from "../lib/utilities/example-replacement.js";
 import { groupCsv } from "../lib/utilities/outcome.js";
 import Papa from "papaparse";
@@ -79,13 +75,13 @@ if (root) {
     $("results").hidden = true;
   };
   root.addEventListener("input", (e) => {
-    if (e.target.id === "slot-choice") return;
+    if (e.target.closest("#results")) return;
     if (e.target.dataset.field === "zone") {
       e.target.setCustomValidity("");
       e.target.removeAttribute("aria-invalid");
     }
     invalidate();
-    if (["csv-input", "json-example", "csv-intent"].includes(e.target.id)) {
+    if (["csv-input", "json-example"].includes(e.target.id)) {
       $("mapping-panel").hidden = true;
       fields = [];
       if (e.target.id === "csv-input") syncCsv();
@@ -116,15 +112,6 @@ if (root) {
       status(e.message, true);
     }
   }
-  function syncAvailability() {
-    const ai = $("availability-mode").value === "jev";
-    root
-      .querySelectorAll("[data-availability]")
-      .forEach((e) => (e.hidden = (e.dataset.availability === "jev") !== ai));
-    $("meeting-consent").hidden = !ai;
-    $("run").textContent = ai ? "Find times with Jev" : "Find times";
-  }
-  $("availability-mode")?.addEventListener("change", syncAvailability);
   $("source-file")?.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -176,11 +163,12 @@ if (root) {
         : headers.find((h) => h === path) || "",
     }));
     const group = $("group-by");
+    const previousGroup = group.value;
     group.replaceChildren(
       new Option("No grouping", ""),
       ...headers.map((h) => new Option(h, h)),
     );
-    group.value = plan?.groupBy || "";
+    group.value = plan?.groupBy ?? previousGroup;
     const container = $("mapping-fields");
     container.replaceChildren();
     fields.forEach((f, i) => {
@@ -257,8 +245,6 @@ if (root) {
         null,
         2,
       );
-      $("csv-intent").value =
-        "One customer per Customer ID. Collect each row as an item. Name identifies the customer, SKU the item, Qty the quantity.";
       buildMapping({
         groupBy: "Customer",
         fields: [
@@ -272,16 +258,12 @@ if (root) {
     if (tool === "dates") {
       $("dates-input").value =
         "25/03/2026\n03/04/2026\n2026-02\n2025-02-29\nMarch 15, 2026";
-      $("date-context").value =
-        "This export is from a UK office and uses day-first numeric dates.";
       $("date-convention").value = "auto";
     }
     if (tool === "meeting") {
       const today = new Date();
       $("meeting-date").value =
         `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-      $("availability-mode").value = "local";
-      syncAvailability();
       while (root.querySelectorAll(".participant").length < 2)
         $("add-person").click();
       $("duration").value = "30";
@@ -315,7 +297,7 @@ if (root) {
       $("mapping-panel").hidden = true;
     }
     status(
-      "Example loaded. Review the settings before running; AI has not been called.",
+      "Example loaded. Review the settings, then run locally in this browser.",
     );
   });
   $("prepare")?.addEventListener("click", () => {
@@ -394,120 +376,7 @@ if (root) {
     field.focus();
     return false;
   }
-  async function askJev() {
-    if (!requiredFields()) return;
-    const button = $("ask-jev") || $("run");
-    let outcome = "unexpected_failure",
-      responseStatus = 0;
-    let input;
-    invalidate();
-    const attempt = begin("ai_interpretation");
-    const token = revision;
-    try {
-      if (tool === "csv") {
-        const r = parseCsv($("csv-input").value);
-        input = {
-          csv: Papa.unparse(r.slice(0, 5)),
-          example: $("json-example").value,
-          instructions: $("csv-intent").value,
-        };
-      }
-      if (tool === "dates")
-        input = {
-          sample: $("dates-input").value.split(/\r?\n/).slice(0, 20).join("\n"),
-          context: $("date-context").value,
-        };
-      if (tool === "meeting")
-        input = {
-          date: $("meeting-date").value,
-          duration: Number($("duration").value),
-          participants: participants().map(({ name, zone, text }) => ({
-            name,
-            zone,
-            text,
-          })),
-        };
-      button.disabled = true;
-      status(
-        {
-          csv: "Reading column relationships…",
-          dates: "Checking date formats…",
-          meeting: "Reading availability…",
-        }[tool],
-      );
-      const r = await fetch("/api/utilities/interpret", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tool, input }),
-        signal: AbortSignal.timeout(20000),
-      });
-      responseStatus = r.status;
-      const data = await r.json();
-      if (token !== revision) {
-        outcome = "cancelled";
-        return;
-      }
-      if (!r.ok)
-        throw new Error(
-          data.error || "AI is unavailable. Use manual controls.",
-        );
-      if (data.source !== "jev" || !data.plan)
-        throw new Error("The AI response could not be verified.");
-      if (tool === "csv") {
-        $("custom-schema").checked = true;
-        buildMapping(data.plan);
-      }
-      if (tool === "dates") {
-        $("date-convention").value = data.plan.convention;
-      }
-      if (tool === "meeting") {
-        setPeople(data.plan.participants, true);
-        $("availability-mode").value = "local";
-        syncAvailability();
-        if (data.plan.participants.some((p) => p.scope !== "supported")) {
-          status(
-            "Some availability is unsupported or ambiguous. Correct the editable windows before finding times.",
-            true,
-          );
-          outcome = "rejected";
-          return;
-        }
-      }
-      if (!runLocal(false)) {
-        outcome = "rejected";
-        return;
-      }
-      const review = interpretationReview(tool, data.confidence);
-      if (review) status(`${$("utility-status").textContent} ${review}`);
-      appendInterpretationDetails($("result-view"), data.model);
-      outcome = "success";
-    } catch (e) {
-      if (token !== revision) {
-        outcome = "cancelled";
-        return;
-      }
-      outcome =
-        e.name === "TimeoutError" ||
-        (responseStatus >= 400 && responseStatus < 500)
-          ? "rejected"
-          : "unexpected_failure";
-      status(
-        e.name === "TimeoutError"
-          ? "AI timed out. Manual controls still work."
-          : e.message,
-        true,
-      );
-    } finally {
-      complete(attempt, outcome);
-      button.disabled = false;
-    }
-  }
-  $("ask-jev")?.addEventListener("click", askJev);
-  $("run").addEventListener("click", () => {
-    if (tool === "meeting" && $("availability-mode").value === "jev")
-      return askJev();
-    runLocal();
-  });
+  $("run").addEventListener("click", () => runLocal());
   function runLocal(emit = true) {
     if (!requiredFields()) return false;
     const attempt = emit ? begin("manual_run") : null;
@@ -575,6 +444,12 @@ if (root) {
               }
               const wrap = document.createElement("div");
               wrap.className = "table-scroll";
+              wrap.tabIndex = 0;
+              wrap.setAttribute("role", "region");
+              wrap.setAttribute(
+                "aria-label",
+                "Child records — scroll horizontally for every column",
+              );
               wrap.append(table);
               item.append(wrap);
             }
@@ -648,7 +523,35 @@ if (root) {
         const wrapper = document.createElement("div");
         wrapper.className = "table-scroll";
         wrapper.append(table);
-        $("result-view").replaceChildren(wrapper, cards);
+        const filter = document.createElement("select");
+        filter.id = "date-filter";
+        filter.setAttribute("aria-label", "Filter date records");
+        filter.className = "investigation-controls";
+        filter.append(
+          new Option("All date records", "all"),
+          new Option("Needs attention (ambiguous or invalid)", "attention"),
+          new Option("Ambiguous only", "review"),
+          new Option("Invalid dates", "invalid"),
+        );
+        const applyDateFilter = () => {
+          const selected = filter.value;
+          [...table.tBodies[0].rows].forEach((row, index) => {
+            row.hidden =
+              selected !== "all" &&
+              !(selected === "attention"
+                ? ["review", "invalid"].includes(result[index].status)
+                : result[index].status === selected);
+          });
+          [...cards.children].forEach((card, index) => {
+            card.hidden =
+              selected !== "all" &&
+              !(selected === "attention"
+                ? ["review", "invalid"].includes(result[index].status)
+                : result[index].status === selected);
+          });
+        };
+        filter.addEventListener("change", applyDateFilter);
+        $("result-view").replaceChildren(filter, wrapper, cards);
         status(
           `Processed ${result.length} rows locally. ${result.filter((r) => r.status === "review").length} need review; ${result.filter((r) => r.status === "invalid").length} are invalid. Preview shows at most 100 rows; download includes every row.`,
         );
@@ -743,6 +646,16 @@ if (root) {
           );
         }
       }
+      const panel = $("results");
+      panel.focus({ preventScroll: true });
+      const bounds = panel.getBoundingClientRect();
+      if (bounds.top < 0 || bounds.bottom > innerHeight)
+        panel.scrollIntoView({
+          block: "start",
+          behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? "auto"
+            : "smooth",
+        });
       outcome = "success";
       return true;
     } catch (e) {

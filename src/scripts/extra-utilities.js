@@ -6,11 +6,7 @@ import {
 } from "../lib/utilities/interpretation-feedback.js";
 import { exampleReplacementGuard } from "../lib/utilities/example-replacement.js";
 import Papa from "papaparse";
-import {
-  recordChoices,
-  sequentialGraph,
-  sourceMention,
-} from "../lib/utilities/outcome.js";
+import { recordChoices, sourceMention } from "../lib/utilities/outcome.js";
 import {
   jsonToCsv,
   validateJsonNumberPrecision,
@@ -27,6 +23,7 @@ if (root) {
   const tool = root.getAttribute("data-extra-utility"),
     $ = (id) => root.querySelector(`#${id}`);
   let manualArrayPolicy = null;
+  let reviewPlan = "";
   let revision = 0,
     output = "",
     filename = "",
@@ -83,22 +80,21 @@ if (root) {
     $("extra-results").hidden = true;
     if (tool === "entities") $("extra-visual").replaceChildren();
   }
+  function forgetInterpretation() {
+    reviewPlan = "";
+    for (const id of ["entity-review", "graph-panel"])
+      if ($(id)) $(id).hidden = true;
+    for (const id of ["entity-editor", "graph-editor"])
+      $(id)?.replaceChildren();
+  }
   root.addEventListener("input", (e) => {
     clear();
+    if (!e.target.closest("#entity-review, #graph-panel"))
+      forgetInterpretation();
     if (tool === "jsonCsv") {
       if (e.target.id === "array-policy") manualArrayPolicy = e.target.value;
       // Keep an explicit policy while its visible control remains selected.
       // Editing or uploading source must not silently return authority to AI.
-    }
-    if (
-      ["source-text", "instructions"].includes(e.target.id) &&
-      $("review-plan")
-    ) {
-      $("review-plan").value = "";
-      $(
-        tool === "entities" ? "entity-editor" : "graph-editor",
-      ).replaceChildren();
-      if (tool === "diagram") $("graph-panel").hidden = true;
     }
     if (e.target.id === "source-text" && tool === "jsonCsv") {
       $("row-path").replaceChildren();
@@ -142,11 +138,7 @@ if (root) {
     if (tool === "entities")
       $("custom-definitions").hidden = !$("custom-category").checked;
     if (tool === "diagram") {
-      const ai = $("diagram-mode").value === "jev";
-      $("connection-description").hidden = !ai;
-      $("create-diagram").textContent = ai
-        ? "Create diagram with Jev"
-        : "Create diagram";
+      $("create-diagram").textContent = "Create flowchart";
     }
     if (tool === "qa") {
       const url = $("source-mode").value === "url";
@@ -159,7 +151,7 @@ if (root) {
       });
     }
   }
-  for (const id of ["custom-category", "diagram-mode", "source-mode"])
+  for (const id of ["custom-category", "source-mode"])
     $(id)?.addEventListener("change", syncModes);
   const sourceTabs = [...root.querySelectorAll("[data-source-mode]")];
   sourceTabs.forEach((tab, i) => {
@@ -211,7 +203,7 @@ if (root) {
     return wrap;
   }
   function editEntities() {
-    const items = JSON.parse($("review-plan").value || "[]");
+    const items = JSON.parse(reviewPlan || "[]");
     const types = createEntitiesInterpretation({
       text: $("source-text").value,
       definitions: definitions(),
@@ -222,7 +214,7 @@ if (root) {
       row.className = "mention-row";
       const update = (value) => {
         items[i] = value;
-        $("review-plan").value = JSON.stringify(items);
+        reviewPlan = JSON.stringify(items);
         clear();
       };
       row.append(
@@ -285,7 +277,7 @@ if (root) {
       remove.textContent = `Remove mention ${i + 1}`;
       remove.addEventListener("click", () => {
         items.splice(i, 1);
-        $("review-plan").value = JSON.stringify(items);
+        reviewPlan = JSON.stringify(items);
         clear();
         editEntities();
         runLocal();
@@ -296,42 +288,20 @@ if (root) {
   }
   for (const id of ["people-category", "companies-category", "custom-category"])
     $(id)?.addEventListener("change", () => {
-      if (!$("review-plan").value) return;
+      if (!reviewPlan) return;
       try {
         editEntities();
       } catch (e) {
         status(e.message, true);
       }
     });
-  $("add-mention")?.addEventListener("click", () => {
-    try {
-      const spec = createEntitiesInterpretation({
-        text: $("source-text").value,
-        definitions: definitions(),
-      });
-      const items = JSON.parse($("review-plan").value || "[]");
-      if (items.length >= 12) throw Error("At most 12 mentions.");
-      const token = spec.state.tokens[0];
-      items.push({
-        type: spec.state.types[0].name,
-        text: token.text,
-        start: token.start,
-        end: token.end,
-      });
-      $("review-plan").value = JSON.stringify(items);
-      clear();
-      editEntities();
-    } catch (e) {
-      status(e.message, true);
-    }
-  });
   function editGraph() {
-    const graph = JSON.parse($("review-plan").value);
+    const graph = JSON.parse(reviewPlan);
     mermaidSource(graph);
     $("graph-panel").hidden = false;
     $("graph-editor").replaceChildren();
     const save = () => {
-      $("review-plan").value = JSON.stringify(graph);
+      reviewPlan = JSON.stringify(graph);
       clear();
     };
     graph.nodes.forEach((node, i) => {
@@ -385,33 +355,7 @@ if (root) {
       $("graph-editor").append(row);
     });
   }
-  $("create-diagram")?.addEventListener("click", () => {
-    if ($("diagram-mode").value === "jev") return askJev();
-    try {
-      clear();
-      if (!$("source-text").value.trim())
-        throw new Error(
-          "Add at least one step in the Steps field before creating a diagram.",
-        );
-      if (!$("review-plan").value.trim())
-        $("review-plan").value = JSON.stringify(
-          sequentialGraph($("source-text").value),
-        );
-      editGraph();
-      runLocal();
-    } catch (e) {
-      status(e.message, true);
-    }
-  });
-  $("import-plan")?.addEventListener("click", () => {
-    try {
-      clear();
-      tool === "diagram" ? editGraph() : editEntities();
-      runLocal();
-    } catch (e) {
-      status(e.message, true);
-    }
-  });
+  $("create-diagram")?.addEventListener("click", askJev);
   function show(text, name, type = "text/plain") {
     output = text;
     filename = name;
@@ -536,6 +480,7 @@ if (root) {
   $("extra-example").addEventListener("click", () => {
     if (!allowExampleReplacement()) return;
     clear();
+    forgetInterpretation();
     manualArrayPolicy = null;
     if ($("source-file")) $("source-file").value = "";
     if (tool === "jsonCsv") {
@@ -549,8 +494,6 @@ if (root) {
         null,
         2,
       );
-      $("instructions").value =
-        "One row per order. Do not silently drop other nested arrays.";
       paths("orders");
       $("array-policy").value = "reject";
     }
@@ -561,37 +504,14 @@ if (root) {
       syncModes();
       $("source-text").value = "Ada works at Acme Labs. Lin joined Acme Labs.";
       $("instructions").value = "";
-      $("review-plan").value = JSON.stringify(
-        [
-          { type: "Person", text: "Ada", start: 0, end: 3 },
-          { type: "Organization", text: "Acme Labs", start: 13, end: 22 },
-        ],
-        null,
-        2,
-      );
+      reviewPlan = "";
     }
     if (tool === "diagram") {
       $("source-text").value =
         "Receive request\nApprove request?\nSend confirmation\nNotify rejection";
       $("instructions").value =
         "Receive a request, then decide approval. If yes send confirmation; if no notify rejection.";
-      $("review-plan").value = JSON.stringify(
-        {
-          nodes: [
-            { id: "n0", label: "Receive request", type: "process" },
-            { id: "n1", label: "Approve request?", type: "decision" },
-            { id: "n2", label: "Send confirmation", type: "terminal" },
-            { id: "n3", label: "Notify rejection", type: "terminal" },
-          ],
-          edges: [
-            { from: "n0", to: "n1", label: "" },
-            { from: "n1", to: "n2", label: "yes" },
-            { from: "n1", to: "n3", label: "no" },
-          ],
-        },
-        null,
-        2,
-      );
+      reviewPlan = "";
     }
     if (tool === "qa") {
       fetchedUrl = "";
@@ -604,29 +524,12 @@ if (root) {
       $("instructions").value = "Does the application store my submitted text?";
       $("page-url").value = "";
     }
-    if (tool === "entities") editEntities();
-    if (tool === "diagram") {
-      $("diagram-mode").value = "local";
-      syncModes();
-      editGraph();
-    }
+    if (tool === "diagram") syncModes();
     if (tool === "qa") {
       $("source-mode").value = "paste";
       syncModes();
     }
-    status("Example loaded. This is sample data, not live AI output.");
-  });
-  $("prepare-extra")?.addEventListener("click", () => {
-    try {
-      clear();
-      $("review-plan").value = JSON.stringify(
-        sequentialGraph($("source-text").value),
-      );
-      editGraph();
-      runLocal();
-    } catch (e) {
-      status(e.message, true);
-    }
+    status("Example loaded. Review the sample inputs before continuing.");
   });
   async function readPage(token) {
     const attempt = begin("read_page");
@@ -710,6 +613,7 @@ if (root) {
       return;
     }
     clear();
+    forgetInterpretation();
     const attempt = begin("ai_interpretation");
     let outcome = "unexpected_failure",
       responseStatus = 0;
@@ -724,11 +628,6 @@ if (root) {
       )
         return;
       let input;
-      if (tool === "jsonCsv")
-        input = {
-          sample: JSON.stringify(sample(jsonData())),
-          instructions: $("instructions").value,
-        };
       if (tool === "entities")
         input = {
           text: $("source-text").value,
@@ -776,11 +675,11 @@ if (root) {
         $("array-policy").value = manualArrayPolicy ?? data.plan.arrays;
       }
       if (tool === "entities") {
-        $("review-plan").value = JSON.stringify(data.plan.entities, null, 2);
+        reviewPlan = JSON.stringify(data.plan.entities, null, 2);
         editEntities();
       }
       if (tool === "diagram") {
-        $("review-plan").value = JSON.stringify(data.plan.graph, null, 2);
+        reviewPlan = JSON.stringify(data.plan.graph, null, 2);
         editGraph();
       }
       if (tool === "qa") {
@@ -896,8 +795,8 @@ if (root) {
           ? "rejected"
           : "unexpected_failure";
       if (token === revision) {
-        if (tool === "entities") $("entity-review").open = true;
-        if (tool === "diagram") {
+        if (tool === "entities" && reviewPlan) $("entity-review").open = true;
+        if (tool === "diagram" && reviewPlan) {
           $("graph-panel").hidden = false;
           $("graph-panel").open = true;
         }
@@ -906,9 +805,9 @@ if (root) {
             ? "Jev timed out. No result was accepted."
             : e.message +
                 (tool === "diagram"
-                  ? " No AI graph was accepted. Start a private sequential diagram below, then edit types and destinations."
+                  ? " No AI graph was accepted. Review the input and try again."
                   : tool === "entities"
-                    ? " No AI matches were accepted. Shorten the text and try again, or use Add mention manually below to select exact source text and its occurrence."
+                    ? " No AI matches were accepted. Shorten the text and try again."
                     : ""),
           true,
         );
@@ -966,7 +865,7 @@ if (root) {
         );
       }
       if (tool === "entities") {
-        const items = JSON.parse($("review-plan").value),
+        const items = JSON.parse(reviewPlan),
           source = $("source-text").value;
         const spec = createEntitiesInterpretation({
           text: source,
@@ -1137,7 +1036,7 @@ if (root) {
           throw new Error(
             "Add at least one step in the Steps field before creating a diagram.",
           );
-        const graph = JSON.parse($("review-plan").value);
+        const graph = JSON.parse(reviewPlan);
         const code = mermaidSource(graph);
         outcome = "unexpected_failure";
         const { default: mermaid } = await import("mermaid");
@@ -1177,7 +1076,42 @@ if (root) {
           frame.style.aspectRatio = `${viewBox[2]} / ${viewBox[3]}`;
           frame.style.height = "auto";
         }
-        $("extra-visual").append(frame);
+        const viewport = document.createElement("div");
+        viewport.className = "diagram-viewport";
+        viewport.tabIndex = 0;
+        viewport.setAttribute("role", "region");
+        viewport.setAttribute(
+          "aria-label",
+          "Flowchart inspection — scroll horizontally at actual size",
+        );
+        viewport.append(frame);
+        if (
+          viewBox?.length === 4 &&
+          viewBox.every(Number.isFinite) &&
+          viewBox[2] > 0 &&
+          viewBox[3] > 0
+        ) {
+          frame.dataset.intrinsicWidth = String(viewBox[2]);
+          const controls = document.createElement("div");
+          controls.className = "investigation-controls";
+          const fit = document.createElement("button"),
+            actual = document.createElement("button");
+          fit.type = actual.type = "button";
+          fit.textContent = "Fit width";
+          actual.textContent = "Actual size";
+          const resize = (natural) => {
+            frame.style.width = natural ? `${viewBox[2]}px` : "100%";
+            frame.style.maxWidth = natural ? "none" : `${viewBox[2]}px`;
+            fit.setAttribute("aria-pressed", String(!natural));
+            actual.setAttribute("aria-pressed", String(natural));
+          };
+          fit.addEventListener("click", () => resize(false));
+          actual.addEventListener("click", () => resize(true));
+          resize(false);
+          controls.append(fit, actual);
+          $("extra-visual").append(controls);
+        }
+        $("extra-visual").append(viewport);
         const b = document.createElement("button");
         b.textContent = "Download SVG";
         b.addEventListener("click", () => {
@@ -1208,6 +1142,7 @@ if (root) {
         }
         status("Flowchart created. Review the step types and connections.");
       }
+      if (tool === "entities") $("entity-review").hidden = false;
       outcome = "success";
       return true;
     } catch (e) {

@@ -1,3 +1,9 @@
+import {
+  fixturePlan,
+  exampleInterpretation,
+  approvalGraph,
+  answeredSource,
+} from "./workflow-fixtures.mjs";
 import { test, expect } from "@playwright/test";
 const slugs = [
   "csv-to-nested-json",
@@ -67,7 +73,9 @@ for (const [slug, run, edit] of [
     await page
       .locator("details")
       .evaluateAll((es) => es.forEach((e) => (e.open = true)));
-    await page.locator(run).click();
+    if (["entity-extractor", "text-to-mermaid"].includes(slug))
+      await exampleInterpretation(page, slug);
+    else await page.locator(run).click();
     const discovery = page.locator("[data-result-discovery]");
     await expect(discovery).toBeVisible();
     expect(
@@ -84,7 +92,9 @@ for (const [slug, run, edit] of [
       .locator(edit)
       .fill(edit === "#duration" ? "45" : "PRIVATE_EDIT_SENTINEL");
     await expect(discovery).toBeHidden();
-    expect(api).toBe(0);
+    expect(api).toBe(
+      ["entity-extractor", "text-to-mermaid"].includes(slug) ? 1 : 0,
+    );
   });
 test("portfolio telemetry preserves primary, keyboard and middle navigation without duplicates", async ({
   page,
@@ -214,41 +224,38 @@ test("edited source cancels pending fixture result discovery", async ({
       json: {
         source: "jev",
         model: "discovery-test-fixture",
-        plan: { convention: "day-first" },
+        plan: answeredSource(route.request().postDataJSON().input.text),
         confidence: {},
       },
     });
   });
-  await page.goto("/tools/fix-excel-dates/");
+  await page.goto("/tools/ask-a-webpage/");
   await page.getByRole("button", { name: /^Load example:/ }).click();
   await page
     .locator("details")
     .evaluateAll((es) => es.forEach((e) => (e.open = true)));
   const pending = page.waitForRequest("**/api/utilities/interpret");
-  await page.locator("#ask-jev").click();
+  await page.locator("#extra-ask").click();
   await pending;
-  await page.locator("#dates-input").fill("2026-02-03");
+  await page.locator("#source-text").fill("2026-02-03");
   release();
-  await expect(page.locator("#ask-jev")).toBeEnabled();
+  await expect(page.locator("#extra-ask")).toBeEnabled();
   await expect(page.locator("[data-result-discovery]")).toBeHidden();
-  await page.locator("#run").click();
+  await page.locator("#extra-ask").click();
   await expect(page.locator("[data-result-discovery]")).toBeVisible();
 });
 
 test("rejected graph preview is not promoted as a successful result", async ({
   page,
 }) => {
-  await page.goto("/tools/text-to-mermaid/");
-  await page.getByRole("button", { name: /^Load example:/ }).click();
-  await page
-    .locator("details")
-    .evaluateAll((es) => es.forEach((e) => (e.open = true)));
-  const graph = JSON.parse(await page.locator("#review-plan").inputValue());
+  const graph = structuredClone(approvalGraph);
   const decision = graph.nodes.find((n) => n.type === "decision");
   expect(decision).toBeTruthy();
   decision.type = "terminal";
-  await page.locator("#review-plan").fill(JSON.stringify(graph));
-  await page.locator("#import-plan").click();
+  await fixturePlan(page, { graph });
+  await page.goto("/tools/text-to-mermaid/");
+  await page.locator("#extra-example").click();
+  await page.locator("#create-diagram").click();
   await expect(page.locator("#extra-status")).toHaveClass(/error/);
   await expect(page.locator("[data-result-discovery]")).toBeHidden();
 });

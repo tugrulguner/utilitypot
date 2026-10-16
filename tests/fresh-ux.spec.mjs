@@ -41,9 +41,13 @@ const orders = {
   ],
 };
 
-test("UX-01 explicit manual array policy survives a conflicting fixture proposal", async ({
+test("UX-01 explicit array policy persists across local recomputation, source edits and uploads", async ({
   page,
 }) => {
+  let calls = 0;
+  page.on("request", (r) => {
+    if (r.url().includes("/api/utilities/")) calls++;
+  });
   await page.route("**/api/utilities/interpret", (route) =>
     route.fulfill({
       json: {
@@ -58,18 +62,14 @@ test("UX-01 explicit manual array policy survives a conflicting fixture proposal
   await page.locator("#source-text").fill(JSON.stringify(orders));
   await page.locator("#row-path").selectOption("orders");
   await page.locator("#array-policy").selectOption("join");
-  await page.getByText("Choose records with Jev", { exact: true }).click();
-  await page
-    .locator("#instructions")
-    .fill("Keep tags as JSON text in one cell");
-  await page.locator("#extra-ask").click();
+  await page.locator("#extra-run").click();
   await expect(page.locator("#array-policy")).toHaveValue("join");
   await expect(page.locator("#extra-results")).toBeVisible();
   expect(await downloadText(page, "#extra-download")).toContain("priority");
   const replacement = { orders: [{ id: "0010", tags: ["replacement"] }] };
   await page.locator("#source-text").fill(JSON.stringify(replacement));
   await expect(page.locator("#array-policy")).toHaveValue("join");
-  await page.locator("#extra-ask").click();
+  await page.locator("#extra-run").click();
   await expect(page.locator("#array-policy")).toHaveValue("join");
   await expect(page.locator("#extra-results")).toBeVisible();
   expect(await downloadText(page, "#extra-download")).toContain("replacement");
@@ -81,13 +81,15 @@ test("UX-01 explicit manual array policy survives a conflicting fixture proposal
   await expect(page.locator("#source-text")).toHaveValue(
     JSON.stringify(orders),
   );
-  await page.locator("#extra-ask").click();
+  await page.locator("#extra-run").click();
   await expect(page.locator("#array-policy")).toHaveValue("join");
   await expect(page.locator("#extra-results")).toBeVisible();
   await page.locator("#array-policy").selectOption("reject");
-  await page.locator("#extra-ask").click();
+  await page.locator("#extra-run").click();
   await expect(page.locator("#extra-results")).toBeHidden();
   await expect(page.locator("#extra-status")).toContainText("explicit policy");
+  expect(calls).toBe(0);
+  await expect(page.locator("#extra-ask")).toHaveCount(0);
 });
 
 test("UX-02 mobile CSV cells keep complete atomic values and export parity", async ({
@@ -273,7 +275,6 @@ test("UX-04 captured contradictory diagram opens actionable type review", async 
   );
   await page.goto("/tools/text-to-mermaid/");
   await page.locator("#source-text").fill(capture.input.text);
-  await page.locator("#diagram-mode").selectOption("jev");
   await page.locator("#instructions").fill(capture.input.instructions);
   await page.locator("#create-diagram").click();
   await expect(page.locator("#extra-status")).toContainText(
@@ -311,7 +312,6 @@ test("UX-04 two-stage diagram fixture fits the bounded client deadline", async (
   });
   await page.goto("/tools/text-to-mermaid/");
   await page.locator("#source-text").fill("Start\nEnd");
-  await page.locator("#diagram-mode").selectOption("jev");
   await page.locator("#instructions").fill("Start then end.");
   await page.locator("#create-diagram").click();
   await expect(page.locator("#extra-results")).toBeVisible({ timeout: 27000 });
@@ -387,7 +387,7 @@ test("UX-08 missing fields focus the visible repair without network or lost inpu
   expect(requests).toBe(0);
 });
 
-test("UX-05 Boston is discoverable on mobile and survives AI windows with calendar parity", async ({
+test("UX-05 Boston is discoverable on mobile and keeps its city label when explicit windows change, with calendar parity", async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -425,40 +425,23 @@ test("UX-05 Boston is discoverable on mobile and survives AI windows with calend
     "DTSTART:20270211T130000Z",
   );
   await page.screenshot({ path: testInfo.outputPath("mobile.png") });
-  await page.route("**/api/utilities/interpret", (route) =>
-    route.fulfill({
-      json: {
-        source: "jev",
-        model: "LOCAL FIXTURE",
-        confidence: {},
-        plan: {
-          participants: [
-            {
-              name: "",
-              zone: "Europe/Berlin",
-              start: "14:00",
-              end: "18:00",
-              scope: "supported",
-            },
-            {
-              name: "",
-              zone: "America/New_York",
-              start: "08:00",
-              end: "12:00",
-              scope: "supported",
-            },
-          ],
-        },
-      },
-    }),
-  );
-  await page.locator("#availability-mode").selectOption("jev");
-  await page.locator("#p0-text").fill("From 2pm to 6pm");
-  await page.locator("#p1-text").fill("From 8am to noon");
+  let calls = 0;
+  await page.route("**/api/utilities/**", (route) => {
+    calls++;
+    return route.abort();
+  });
+  await page.locator("#p1-start").fill("09:00");
+  await page.locator("#p1-end").fill("11:00");
   await page.locator("#run").click();
   await expect(page.locator("#utility-status")).toContainText("feasible slots");
   await expect(page.locator("#p1-zone")).toHaveValue("Boston");
   await expect(page.locator("#result-view")).toContainText("Boston");
+  const updated = await downloadText(
+    page,
+    'button:has-text("Add to calendar")',
+  );
+  expect(updated).toContain("DTSTART:20270211T140000Z");
+  expect(calls).toBe(0);
 });
 
 test("UX-07 partial dates remain readable on mobile and exact in downloaded CSV", async ({

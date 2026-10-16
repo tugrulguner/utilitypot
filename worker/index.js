@@ -1,7 +1,3 @@
-import { createCsvInterpretation } from "../src/lib/utilities/csv.js";
-import { createDatesInterpretation } from "../src/lib/utilities/dates.js";
-import { createMeetingInterpretation } from "../src/lib/utilities/meeting.js";
-import { createJsonCsvInterpretation } from "../src/lib/utilities/json-csv.js";
 import { createEntitiesInterpretation } from "../src/lib/utilities/entities.js";
 import { createDiagramInterpretation } from "../src/lib/utilities/diagram.js";
 import {
@@ -10,10 +6,6 @@ import {
   PageReadError,
 } from "../src/lib/utilities/webpage.js";
 const builders = {
-  csv: createCsvInterpretation,
-  dates: createDatesInterpretation,
-  meeting: createMeetingInterpretation,
-  jsonCsv: createJsonCsvInterpretation,
   entities: createEntitiesInterpretation,
   diagram: createDiagramInterpretation,
   qa: createQaInterpretation,
@@ -163,17 +155,14 @@ export async function handleRequest(request, env, providerFetch = fetch) {
     !env.UTILITY_RATE_LIMIT ||
     !env.UTILITY_GLOBAL_RATE_LIMIT
   )
-    return json(
-      { error: "AI is unavailable. Manual controls still work." },
-      503,
-    );
+    return json({ error: "Processing is unavailable. Try again later." }, 503);
   try {
     const ip = request.headers.get("cf-connecting-ip") || "unknown";
     const a = await env.UTILITY_RATE_LIMIT.limit({ key: `utilities:${ip}` });
     if (!a.success)
       return json(
         {
-          error: "AI rate limit reached. Wait a minute or use manual controls.",
+          error: "Request limit reached. Wait a minute before trying again.",
         },
         429,
       );
@@ -182,12 +171,12 @@ export async function handleRequest(request, env, providerFetch = fetch) {
     });
     if (!b.success)
       return json(
-        { error: "AI capacity reached. Try later or use manual controls." },
+        { error: "Processing capacity reached. Try again later." },
         429,
       );
   } catch {
     return json(
-      { error: "AI protection is unavailable. Manual controls still work." },
+      { error: "Request protection is unavailable. Try again later." },
       503,
     );
   }
@@ -244,7 +233,7 @@ export async function handleRequest(request, env, providerFetch = fetch) {
       if (!r.ok) {
         await r.body?.cancel();
         return json(
-          { error: "Jev is unavailable. Try later or use manual controls." },
+          { error: "Processing is unavailable. Try again later." },
           503,
         );
       }
@@ -279,7 +268,7 @@ export async function handleRequest(request, env, providerFetch = fetch) {
     return json(
       {
         error:
-          "AI interpretation could not be verified. Use manual controls or try later.",
+          "The interpretation could not be verified. No result was accepted. Try again later.",
       },
       503,
     );

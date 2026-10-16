@@ -4,28 +4,28 @@
     "title": "CSV to nested JSON",
     "description": "Group repeated CSV rows into nested JSON and choose which fields stay together.",
     "tool": "csv",
-    "processing": "Local · AI optional"
+    "processing": "In your browser"
   },
   {
     "slug": "fix-excel-dates",
     "title": "Fix mixed spreadsheet dates",
     "description": "Clean up supported date text and keep unclear or invalid values visible.",
     "tool": "dates",
-    "processing": "Local · AI optional"
+    "processing": "In your browser"
   },
   {
     "slug": "meeting-time-finder",
     "title": "Find a meeting time",
     "description": "Compare availability across cities and download a calendar event.",
     "tool": "meeting",
-    "processing": "Local · AI optional"
+    "processing": "In your browser"
   },
   {
     "slug": "json-to-csv",
     "title": "JSON to CSV",
     "description": "Turn JSON records or one object into CSV for a spreadsheet.",
     "tool": "jsonCsv",
-    "processing": "Local · AI optional"
+    "processing": "In your browser"
   },
   {
     "slug": "entity-extractor",
@@ -39,7 +39,7 @@
     "title": "Turn steps into a flowchart",
     "description": "Turn up to eight listed steps into a flowchart you can edit and export.",
     "tool": "diagram",
-    "processing": "Local · AI optional"
+    "processing": "Uses AI"
   },
   {
     "slug": "ask-a-webpage",

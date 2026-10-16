@@ -10,9 +10,9 @@ test("task directory tells visitors which tools are local or use AI", async () =
   for (const tool of tools)
     assert.equal(
       tool.processing,
-      ["entities", "qa"].includes(tool.tool)
+      ["entities", "diagram", "qa"].includes(tool.tool)
         ? "Uses AI"
-        : "Local · AI optional",
+        : "In your browser",
     );
   const home = await readFile(
     new URL("../pages/index.astro", import.meta.url),

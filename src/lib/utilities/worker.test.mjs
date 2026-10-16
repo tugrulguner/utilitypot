@@ -246,10 +246,10 @@ const request = (body, headers = {}) =>
     body: JSON.stringify(body),
   });
 const input = {
-  tool: "dates",
+  tool: "qa",
   input: {
-    sample: "03/04/2026",
-    context: "Dates exported by a UK office in day-first order.",
+    text: "The application does not store inputs.",
+    question: "Are inputs stored?",
   },
 };
 const env = {
@@ -257,53 +257,46 @@ const env = {
   UTILITY_RATE_LIMIT: { limit: async () => ({ success: true }) },
   UTILITY_GLOBAL_RATE_LIMIT: { limit: async () => ({ success: true }) },
 };
+function supportedResponse() {
+  return {
+    model: "jev-test",
+    answers: {
+      answerability: {
+        type: "choice",
+        choice: "answered",
+        probabilities: { answered: 1, partial: 0, absent: 0 },
+        confidence: 1,
+      },
+      passage: {
+        type: "choice",
+        choice: "p0",
+        probabilities: { p0: 1, none: 0 },
+        confidence: 1,
+      },
+    },
+    usage: { input_tokens: 100, output_tokens: 20 },
+  };
+}
 test("server supplies its own questions and never returns the provider credential", async () => {
   let calls = 0;
   const r = await handleRequest(request(input), env, async (url, init) => {
     assert.equal(url, "https://api.typesafe.ai/v1/systemone");
     calls++;
     const b = JSON.parse(init.body);
-    assert.equal(url, "https://api.typesafe.ai/v1/systemone");
     assert.equal(init.headers.Authorization, "Bearer test-server-only");
-    assert.equal(b.questions.convention.type, "choice");
-    return Response.json({
-      model: "jev-test",
-      answers: {
-        convention: {
-          type: "choice",
-          choice: "day-first",
-          probabilities: {
-            "day-first": 0.98,
-            "month-first": 0.01,
-            unspecified: 0.01,
-          },
-          confidence: 0.95,
-        },
-      },
-      usage: { input_tokens: 100, output_tokens: 20 },
-    });
+    assert.equal(b.questions.answerability.type, "choice");
+    assert.equal(b.questions.passage.type, "choice");
+    return Response.json(supportedResponse());
   });
   assert.equal(r.status, 200);
   const out = await r.text();
-  assert.equal(JSON.parse(out).plan.convention, "day-first");
+  assert.equal(JSON.parse(out).plan.status, "answered");
   assert(!out.includes("test-server-only"));
   assert.equal(calls, 1);
 });
 test("Worker execution context is not mistaken for an injected fetch function", async () => {
   const original = globalThis.fetch;
-  globalThis.fetch = async () =>
-    Response.json({
-      model: "jev-test",
-      answers: {
-        convention: {
-          type: "choice",
-          choice: "day-first",
-          probabilities: { "day-first": 1, "month-first": 0, unspecified: 0 },
-          confidence: 1,
-        },
-      },
-      usage: { input_tokens: 1, output_tokens: 1 },
-    });
+  globalThis.fetch = async () => Response.json(supportedResponse());
   try {
     const r = await worker.fetch(request(input), env, { waitUntil() {} });
     assert.equal(r.status, 200);
@@ -349,21 +342,24 @@ test("malformed distributions and contradictory choices are rejected without lea
   for (const answer of [
     {
       type: "choice",
-      choice: "day-first",
-      probabilities: { "day-first": 0.1, "month-first": 0.9, unspecified: 0 },
+      choice: "answered",
+      probabilities: { answered: 0.1, partial: 0.9, absent: 0 },
       confidence: 0.8,
     },
     {
       type: "choice",
-      choice: "day-first",
-      probabilities: { "day-first": 1, evil: 0 },
+      choice: "answered",
+      probabilities: { answered: 1, evil: 0 },
       confidence: 1,
     },
   ]) {
     const r = await handleRequest(request(input), env, async () =>
       Response.json({
         model: "jev-test",
-        answers: { convention: answer },
+        answers: {
+          answerability: answer,
+          passage: supportedResponse().answers.passage,
+        },
         usage: { input_tokens: 1, output_tokens: 1 },
         private: "raw-provider-secret",
       }),

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// Real private/manual workflow: this tests presentation, not provider recall.
+// Explicit provider fixture: validates the existing exact-span presentation, not live Jev quality.
 const source =
   "Nora Ivers met Mateo Silva at Willow & Finch.\n\n" +
   "Background context remains readable without adding selected names.\n\n".repeat(
@@ -20,17 +20,24 @@ const mentions = [
   mention("Organization", "Willow & Finch", true),
 ];
 async function showManual(page) {
+  await page.route("**/api/utilities/interpret", (route) =>
+    route.fulfill({
+      json: {
+        source: "jev",
+        model: "TEST FIXTURE — NOT LIVE JEV",
+        confidence: {},
+        needsReview: true,
+        plan: { entities: mentions },
+      },
+    }),
+  );
   await page.goto("/tools/entity-extractor/");
   await page.locator("#source-text").fill(source);
-  await page
-    .getByText("Advanced: import a manual JSON plan", { exact: true })
-    .click();
-  await page.locator("#review-plan").fill(JSON.stringify(mentions));
-  await page.locator("#import-plan").click();
+  await page.locator("#extra-ask").click();
   await expect(page.locator(".entity-workspace")).toBeVisible();
 }
 for (const width of [1280, 390]) {
-  test(`long manual NER source has navigable exact occurrences and no inner scroll at ${width}px`, async ({
+  test(`fixture-validated NER source has navigable exact occurrences and no inner scroll at ${width}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 844 });
@@ -94,7 +101,7 @@ for (const width of [1280, 390]) {
     expect(JSON.parse(await fs.readFile(await file.path(), "utf8"))).toEqual(
       mentions,
     );
-    expect(api).toBe(0);
+    expect(api).toBe(1);
     expect(
       await page.evaluate(() => document.body.scrollWidth <= innerWidth),
     ).toBe(true);
