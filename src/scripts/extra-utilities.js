@@ -63,7 +63,8 @@ if (root) {
     clear();
     if (tool === "jsonCsv") {
       if (e.target.id === "array-policy") manualArrayPolicy = e.target.value;
-      if (e.target.id === "source-text") manualArrayPolicy = null;
+      // Keep an explicit policy while its visible control remains selected.
+      // Editing or uploading source must not silently return authority to AI.
     }
     if (
       ["source-text", "instructions"].includes(e.target.id) &&
@@ -159,7 +160,6 @@ if (root) {
   });
   $("source-file")?.addEventListener("change", async (e) => {
     clear();
-    manualArrayPolicy = null;
     const token = revision,
       file = e.target.files[0];
     if (!file) return;
@@ -623,9 +623,7 @@ if (root) {
       fetchedUrl = data.url;
       fetchedMetadata = {
         truncated: data.truncated === true,
-        ...(Number.isInteger(data.redirects)
-          ? { redirects: data.redirects }
-          : {}),
+        ...(Array.isArray(data.redirects) ? { redirects: data.redirects } : {}),
       };
       $("source-inspection").hidden = false;
       $("fetched-source").textContent = data.text;
@@ -786,7 +784,7 @@ if (root) {
                 ...(fetchedUrl && $("source-mode").value === "url"
                   ? {
                       url: fetchedUrl,
-                      ...(Number.isInteger(fetchedMetadata?.redirects)
+                      ...(Array.isArray(fetchedMetadata?.redirects)
                         ? {
                             retrieval: { redirects: fetchedMetadata.redirects },
                           }

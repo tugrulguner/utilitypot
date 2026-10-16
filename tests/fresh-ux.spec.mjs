@@ -66,6 +66,26 @@ test("UX-01 explicit manual array policy survives a conflicting fixture proposal
   await expect(page.locator("#array-policy")).toHaveValue("join");
   await expect(page.locator("#extra-results")).toBeVisible();
   expect(await downloadText(page, "#extra-download")).toContain("priority");
+  const replacement = { orders: [{ id: "0010", tags: ["replacement"] }] };
+  await page.locator("#source-text").fill(JSON.stringify(replacement));
+  await expect(page.locator("#array-policy")).toHaveValue("join");
+  await page.locator("#extra-ask").click();
+  await expect(page.locator("#array-policy")).toHaveValue("join");
+  await expect(page.locator("#extra-results")).toBeVisible();
+  expect(await downloadText(page, "#extra-download")).toContain("replacement");
+  await page
+    .locator("#source-file")
+    .setInputFiles({
+      name: "replacement.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(orders)),
+    });
+  await expect(page.locator("#source-text")).toHaveValue(
+    JSON.stringify(orders),
+  );
+  await page.locator("#extra-ask").click();
+  await expect(page.locator("#array-policy")).toHaveValue("join");
+  await expect(page.locator("#extra-results")).toBeVisible();
   await page.locator("#array-policy").selectOption("reject");
   await page.locator("#extra-ask").click();
   await expect(page.locator("#extra-results")).toBeHidden();
@@ -139,7 +159,12 @@ for (const mode of ["url", "paste"])
           url: "https://www.mozilla.org/en-US/about/manifesto/",
           text: source,
           truncated: true,
-          redirects: 1,
+          redirects: [
+            {
+              from: "https://mozilla.org/en-US/about/manifesto/",
+              to: "https://www.mozilla.org/en-US/about/manifesto/",
+            },
+          ],
         },
       }),
     );
@@ -190,7 +215,14 @@ for (const mode of ["url", "paste"])
       expect(result.source.url).toBe(
         "https://www.mozilla.org/en-US/about/manifesto/",
       );
-      expect(result.source.retrieval).toEqual({ redirects: 1 });
+      expect(result.source.retrieval).toEqual({
+        redirects: [
+          {
+            from: "https://mozilla.org/en-US/about/manifesto/",
+            to: "https://www.mozilla.org/en-US/about/manifesto/",
+          },
+        ],
+      });
     } else {
       expect(result.source.url).toBeUndefined();
       expect(result.source.retrieval).toBeUndefined();
