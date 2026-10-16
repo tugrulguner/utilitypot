@@ -1,5 +1,7 @@
 // Public fixed constants only; never derive destinations from DOM hrefs or input.
 const destinations = {
+  dexpot: "https://dexpot.modepot.io/",
+  lifepot: "https://lifepot.modepot.io/learn",
   modepot: "https://modepot.io/",
   creator: "https://tugrul.modepot.io/",
   intpot: "https://intpot.modepot.io/",

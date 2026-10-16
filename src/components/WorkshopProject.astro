@@ -1,0 +1,33 @@
+---
+interface Props {
+  project: {
+    name: string;
+    href: string;
+    description: string;
+    reason: string;
+    accent: string;
+    lightAccent: string;
+  };
+  id: string;
+}
+const { project, id } = Astro.props;
+---
+
+<p data-workshop-reason>{project.reason}</p>
+<div
+  class="project-identity"
+  style={`--workshop-accent:${project.lightAccent};--workshop-accent-dark:${project.accent}`}
+>
+  <strong>
+    <span>{project.name.slice(0, -3)}</span>
+    <span class="workshop-pot">{project.name.slice(-3)}</span>
+  </strong>
+  <p>{project.description}</p>
+</div>
+<a
+  class="project-cta ph-no-autocapture"
+  href={project.href}
+  data-discovery-destination={id}
+>
+  Explore {project.name} →
+</a>
