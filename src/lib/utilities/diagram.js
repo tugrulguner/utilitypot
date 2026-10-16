@@ -63,19 +63,19 @@ export function createDiagramInterpretation(input) {
     throw new Error("Use 1–8 steps, each at most 160 characters.");
   const nodes = labels.map((label, i) => ({ id: `n${i}`, label })),
     criteria = Object.fromEntries(
-      nodes.map((n, i) => [n.id, { step: i + 1, label: n.label }]),
+      nodes.map((n, i) => [`step${i + 1}`, { step: i + 1, label: n.label }]),
     );
   criteria.none = "No explicit destination; terminal or unresolved.";
   const questions = {};
   nodes.forEach((n, i) => {
     questions[`next${i}`] = {
       type: "choice",
-      instructions: `Which explicit step follows step ${i + 1} (${n.id})? Human step numbers in instructions are one-based positions in the source list; internal n IDs are zero-based. Match the destination's explicit step number and source label, not a similarly numbered n ID. For a decision, select its affirmative/true branch. Choose none if no relation is supported. Do not assume the next listed line is necessarily the next process step.`,
+      instructions: `Which explicit step follows human step ${i + 1}? Select stepN for the Nth listed source step, using its source label and the relationship instructions. For a decision, select its affirmative/true branch. Choose none if no relation is supported. Do not assume the next listed line is necessarily the next process step.`,
       criteria,
     };
     questions[`else${i}`] = {
       type: "choice",
-      instructions: `Which step is the explicit negative/false alternative of step ${i + 1} (${n.id})? Human step numbers are one-based positions in the source list, not the zero-based n IDs. Match the destination's step number and source label. Choose none if not a decision or no alternative is supported.`,
+      instructions: `Which step is the explicit negative/false alternative of human step ${i + 1}? Select stepN for the Nth listed source step, using its source label and the relationship instructions. Choose none if not a decision or no alternative is supported.`,
       criteria,
     };
   });
@@ -83,6 +83,15 @@ export function createDiagramInterpretation(input) {
     nodes: nodes.map((n, i) => ({ ...n, step: i + 1 })),
     instructions: input.instructions,
   };
+  const destinationIds = new Map(
+    nodes.map((node, i) => [`step${i + 1}`, node.id]),
+  );
+  function destination(choice) {
+    if (choice === "none") return "none";
+    if (!destinationIds.has(choice))
+      throw new Error("Invalid diagram destination.");
+    return destinationIds.get(choice);
+  }
   function decode(a) {
     const typed = nodes.map((n, i) => {
       if (a[`type${i}`].choice === "unknown")
@@ -98,14 +107,14 @@ export function createDiagramInterpretation(input) {
       if (next !== "none")
         edges.push({
           from: n.id,
-          to: next,
+          to: destination(next),
           label: n.type === "decision" ? "yes" : "",
         });
       // Questions run independently: a false-branch answer is relevant only
       // when this node was actually classified as a decision.
       if (n.type === "decision" && alt !== "none") {
         if (alt === next) throw new Error("Inconsistent decision branches.");
-        edges.push({ from: n.id, to: alt, label: "no" });
+        edges.push({ from: n.id, to: destination(alt), label: "no" });
       }
     });
     const graph = { nodes: typed, edges };
@@ -158,8 +167,8 @@ export function createDiagramInterpretation(input) {
           ...state,
           relationships: nodes.map((n, i) => ({
             from: n.id,
-            next: relationships[`next${i}`].choice,
-            negativeIfDecision: relationships[`else${i}`].choice,
+            next: destination(relationships[`next${i}`].choice),
+            negativeIfDecision: destination(relationships[`else${i}`].choice),
           })),
         },
         questions: roleQuestions,

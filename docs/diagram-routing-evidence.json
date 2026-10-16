@@ -1,0 +1,228 @@
+{
+  "scope": "Fixed candidate protocol; no inference retries; not universal semantic accuracy",
+  "sourceCommit": "08db2ccf0a69645d60793528de6cf257d1a12aff",
+  "candidateVersion": "395334c0-de7a-4d09-876c-9f367722b053",
+  "total": 6,
+  "passed": 6,
+  "distinctInputs": 5,
+  "realJevBrowserActions": 6,
+  "localTests": {
+    "unit": 117,
+    "release": 6,
+    "browser": 132,
+    "actualWorker": 1,
+    "extractedReleaseWorker": 1
+  },
+  "noInferenceRetries": true,
+  "consoleAndPageErrors": [],
+  "setupAssetAttempts": 1,
+  "setupConsoleEvents": [],
+  "previewBefore": {
+    "enabled": false,
+    "previews_enabled": false
+  },
+  "previewAfter": {
+    "enabled": false,
+    "previews_enabled": false
+  },
+  "productionUnchanged": true,
+  "earlierAttempt": {
+    "path": "utilitypot-routing-live-395334c0",
+    "outcome": "Initial preview module/static404s; action stayed disabled; zero inference attempts; original receipt retained"
+  },
+  "productionStatus": "Original PR12 production result remains22/23 until separately authorized deployment and verification of this change",
+  "cases": [
+    {
+      "id": "original-onboarding",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "startedAt": "2026-10-16T12:44:07.196Z",
+      "completedAt": "2026-10-16T12:44:10.101Z",
+      "input": {
+        "text": "Submit access request.\nDoes the manager approve?\nIf rejected, notify employee and stop.\nIf approved, create account.\nRequire password reset.\nSend onboarding link.\nRecord the access grant.\nFinish onboarding.",
+        "instructions": "Step 2 is the only decision. Its yes branch goes to step 4. Its no branch goes to step 3 and ends there. After step 4, continue to 5, 6, 7, 8 and stop. Step 1 leads to step 2. Do not connect the rejected branch to account creation."
+      },
+      "expectedEdges": [
+        [0, 1, ""],
+        [1, 3, "yes"],
+        [1, 2, "no"],
+        [3, 4, ""],
+        [4, 5, ""],
+        [5, 6, ""],
+        [6, 7, ""]
+      ],
+      "downloads": [
+        {
+          "kind": "svg",
+          "file": "original-onboarding-utilitypot-flowchart.svg",
+          "bytes": 155393,
+          "sha256": "a70e69f1fd3b935fd04b59b9f240e54504043d73cce0c96b28738c19402c922b"
+        },
+        {
+          "kind": "mermaid",
+          "file": "original-onboarding-utilitypot-flowchart.mmd",
+          "bytes": 352,
+          "sha256": "edbe708cdca5981b6b41456e27024380bfb61c1ce62e80760f5fd2290a066e12"
+        }
+      ]
+    },
+    {
+      "id": "stock-branch-control",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "startedAt": "2026-10-16T12:44:10.102Z",
+      "completedAt": "2026-10-16T12:44:23.661Z",
+      "input": {
+        "text": "Receive order\nStock available?\nShip item\nNotify backorder",
+        "instructions": "Receive the order, then decide whether stock is available. If yes ship the item. If no notify backorder. Both outcomes end the flow; do not connect them to each other."
+      },
+      "expectedEdges": [
+        [0, 1, ""],
+        [1, 2, "yes"],
+        [1, 3, "no"]
+      ],
+      "downloads": [
+        {
+          "kind": "svg",
+          "file": "stock-branch-control-utilitypot-flowchart.svg",
+          "bytes": 145406,
+          "sha256": "ae9cf3b50e004c0095b7f0d1755429d124c6786cf14f6ce64f4fa65948257720"
+        },
+        {
+          "kind": "mermaid",
+          "file": "stock-branch-control-utilitypot-flowchart.mmd",
+          "bytes": 139,
+          "sha256": "8d3909f1dacb7c92b1225a0135b777075ef5f6872a2998aba2a9ee1fd5919500"
+        }
+      ]
+    },
+    {
+      "id": "start-end-control",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "startedAt": "2026-10-16T12:44:23.661Z",
+      "completedAt": "2026-10-16T12:44:36.898Z",
+      "input": {
+        "text": "Start.\nSend the welcome email.\nEnd.",
+        "instructions": "Start then send the welcome email then end. No branches."
+      },
+      "expectedEdges": [
+        [0, 1, ""],
+        [1, 2, ""]
+      ],
+      "downloads": [
+        {
+          "kind": "svg",
+          "file": "start-end-control-utilitypot-flowchart.svg",
+          "bytes": 98916,
+          "sha256": "1a4bae7da57ff9f4641a6366b0b6006a0af8284c0d5cca4de349b2cf93f0e94e"
+        },
+        {
+          "kind": "mermaid",
+          "file": "start-end-control-utilitypot-flowchart.mmd",
+          "bytes": 90,
+          "sha256": "d9e4d5f163b7112adc723607fb72778a63f5e8c9567baeac2518000ee82b2102"
+        }
+      ]
+    },
+    {
+      "id": "fresh-triage",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "startedAt": "2026-10-16T12:44:36.898Z",
+      "completedAt": "2026-10-16T12:44:50.565Z",
+      "input": {
+        "text": "Receive ticket.\nIs the request urgent?\nPut the ticket in the queue.\nPage the on-call engineer.\nFinish triage.",
+        "instructions": "Step 1 leads to step 2, the only decision. Its yes branch goes to step 4 and its no branch goes to step 3. Steps 3 and 4 both lead to step 5, which ends the process."
+      },
+      "expectedEdges": [
+        [0, 1, ""],
+        [1, 3, "yes"],
+        [1, 2, "no"],
+        [2, 4, ""],
+        [3, 4, ""]
+      ],
+      "downloads": [
+        {
+          "kind": "svg",
+          "file": "fresh-triage-utilitypot-flowchart.svg",
+          "bytes": 105070,
+          "sha256": "d12684e7476105091799449732ee0d88366f89e6d89c30cea098f68dc68deb3e"
+        },
+        {
+          "kind": "mermaid",
+          "file": "fresh-triage-utilitypot-flowchart.mmd",
+          "bytes": 215,
+          "sha256": "4edf57b0447bb5b3d6c68f9bcbb131567d6249ebe21dd507f7b1bffe35675e13"
+        }
+      ]
+    },
+    {
+      "id": "fresh-reordered-grant",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "startedAt": "2026-10-16T12:44:50.565Z",
+      "completedAt": "2026-10-16T12:45:03.712Z",
+      "input": {
+        "text": "Receive access request.\nIs access approved?\nIf rejected, record denial and stop.\nNotify the requester.\nRecord the access grant.\nProvision the account.\nFinish onboarding.",
+        "instructions": "Step 1 leads to step 2, the only decision. Its yes branch goes to step 6, not step 4. Its no branch goes to step 3 and ends there. After step 6 go to step 4, then step 5, then step 7 and stop."
+      },
+      "expectedEdges": [
+        [0, 1, ""],
+        [1, 5, "yes"],
+        [1, 2, "no"],
+        [3, 4, ""],
+        [4, 6, ""],
+        [5, 3, ""]
+      ],
+      "downloads": [
+        {
+          "kind": "svg",
+          "file": "fresh-reordered-grant-utilitypot-flowchart.svg",
+          "bytes": 153629,
+          "sha256": "e6f1bb885cad930a19ef512aa1b224be9090f8800cf61fa56969f4d7291af498"
+        },
+        {
+          "kind": "mermaid",
+          "file": "fresh-reordered-grant-utilitypot-flowchart.mmd",
+          "bytes": 299,
+          "sha256": "0d470feccfac22a74b14ac1ff02389fca395cc8d51ffcd5403cde27e530c00a8"
+        }
+      ]
+    },
+    {
+      "id": "predeclared-onboarding-repeat",
+      "status": "passed",
+      "model": "jev-1.13.0",
+      "startedAt": "2026-10-16T12:45:03.712Z",
+      "completedAt": "2026-10-16T12:45:16.726Z",
+      "input": {
+        "text": "Submit access request.\nDoes the manager approve?\nIf rejected, notify employee and stop.\nIf approved, create account.\nRequire password reset.\nSend onboarding link.\nRecord the access grant.\nFinish onboarding.",
+        "instructions": "Step 2 is the only decision. Its yes branch goes to step 4. Its no branch goes to step 3 and ends there. After step 4, continue to 5, 6, 7, 8 and stop. Step 1 leads to step 2. Do not connect the rejected branch to account creation."
+      },
+      "expectedEdges": [
+        [0, 1, ""],
+        [1, 3, "yes"],
+        [1, 2, "no"],
+        [3, 4, ""],
+        [4, 5, ""],
+        [5, 6, ""],
+        [6, 7, ""]
+      ],
+      "downloads": [
+        {
+          "kind": "svg",
+          "file": "predeclared-onboarding-repeat-utilitypot-flowchart.svg",
+          "bytes": 155440,
+          "sha256": "6ec8d173c294c5ddf673dafffe1647f8f0e392c21a502c191e5ec5fc8b5013d2"
+        },
+        {
+          "kind": "mermaid",
+          "file": "predeclared-onboarding-repeat-utilitypot-flowchart.mmd",
+          "bytes": 352,
+          "sha256": "edbe708cdca5981b6b41456e27024380bfb61c1ce62e80760f5fd2290a066e12"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "scope": "Actual production application response, not a full provider probability trace",
+  "sourceCommit": "1dd7b701b153e478e0155ba8d00dff8edec21a28",
+  "case": "readiness-eight-step-onboarding",
+  "response": {
+    "source": "jev",
+    "model": "jev-1.13.0",
+    "plan": {
+      "graph": {
+        "nodes": [
+          {
+            "id": "n0",
+            "label": "Submit access request.",
+            "type": "terminal"
+          },
+          {
+            "id": "n1",
+            "label": "Does the manager approve?",
+            "type": "decision"
+          },
+          {
+            "id": "n2",
+            "label": "If rejected, notify employee and stop.",
+            "type": "terminal"
+          },
+          {
+            "id": "n3",
+            "label": "If approved, create account.",
+            "type": "process"
+          },
+          {
+            "id": "n4",
+            "label": "Require password reset.",
+            "type": "process"
+          },
+          {
+            "id": "n5",
+            "label": "Send onboarding link.",
+            "type": "process"
+          },
+          {
+            "id": "n6",
+            "label": "Record the access grant.",
+            "type": "process"
+          },
+          {
+            "id": "n7",
+            "label": "Finish onboarding.",
+            "type": "terminal"
+          }
+        ],
+        "edges": [
+          {
+            "from": "n0",
+            "to": "n1",
+            "label": ""
+          },
+          {
+            "from": "n1",
+            "to": "n4",
+            "label": "yes"
+          },
+          {
+            "from": "n1",
+            "to": "n2",
+            "label": "no"
+          },
+          {
+            "from": "n3",
+            "to": "n4",
+            "label": ""
+          },
+          {
+            "from": "n4",
+            "to": "n5",
+            "label": ""
+          },
+          {
+            "from": "n5",
+            "to": "n6",
+            "label": ""
+          },
+          {
+            "from": "n6",
+            "to": "n7",
+            "label": ""
+          }
+        ]
+      },
+      "needsReview": true,
+      "reviewIssues": [
+        "Step 4 (n3: If approved, create account.) is not reachable from the first listed step. Review its connections; confirm explicitly if it is an intentional separate entry point. No connection was added automatically."
+      ]
+    },
+    "needsReview": true,
+    "confidence": {
+      "next0": 0.99,
+      "else0": 0.89,
+      "next1": 0.58,
+      "else1": 0.98,
+      "next2": 0.58,
+      "else2": 0.48,
+      "next3": 0.95,
+      "else3": 0.54,
+      "next4": 0.99,
+      "else4": 0.98,
+      "next5": 0.97,
+      "else5": 0.99,
+      "next6": 0.98,
+      "else6": 0.99,
+      "next7": 1,
+      "else7": 0.92,
+      "type0": 0.77,
+      "type1": 1,
+      "type2": 0.87,
+      "type3": 0.8,
+      "type4": 1,
+      "type5": 1,
+      "type6": 1,
+      "type7": 1
+    }
+  }
+}

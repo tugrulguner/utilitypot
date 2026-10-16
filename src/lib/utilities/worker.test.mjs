@@ -434,8 +434,8 @@ test("fresh UX diagram stages preserve the 24-question budget and raw uncertain 
             : id.startsWith("next")
               ? index === 7
                 ? "none"
-                : `n${index + 1}`
-              : "n0";
+                : `step${index + 2}`
+              : "step1";
           // Synthetic envelope: deliberately uncertain, irrelevant negative branches.
           const keys = Object.keys(q.criteria),
             uncertain = id.startsWith("else");
