@@ -148,13 +148,11 @@ test("unsafe numeric IDs stop local and AI conversion, including upload; quoted 
   await expect(page.locator("#extra-status")).toContainText(
     "Quote identifiers",
   );
-  await page
-    .locator("#source-file")
-    .setInputFiles({
-      name: "payments.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(unsafe),
-    });
+  await page.locator("#source-file").setInputFiles({
+    name: "payments.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(unsafe),
+  });
   await page.locator("#extra-run").click();
   await expect(page.locator("#extra-results")).toBeHidden();
   expect(apiCalls).toBe(0);
