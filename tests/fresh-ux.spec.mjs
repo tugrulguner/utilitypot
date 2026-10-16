@@ -73,13 +73,11 @@ test("UX-01 explicit manual array policy survives a conflicting fixture proposal
   await expect(page.locator("#array-policy")).toHaveValue("join");
   await expect(page.locator("#extra-results")).toBeVisible();
   expect(await downloadText(page, "#extra-download")).toContain("replacement");
-  await page
-    .locator("#source-file")
-    .setInputFiles({
-      name: "replacement.json",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(orders)),
-    });
+  await page.locator("#source-file").setInputFiles({
+    name: "replacement.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(orders)),
+  });
   await expect(page.locator("#source-text")).toHaveValue(
     JSON.stringify(orders),
   );
