@@ -120,7 +120,9 @@ test("reviewed Mermaid flowchart renders SVG and downloads valid Mermaid source"
   await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.locator("#graph-panel > summary").click();
   await page.getByRole("button", { name: "Update diagram" }).click();
-  await expect(page.locator("#extra-status")).toContainText("sandboxed");
+  await expect(page.locator("#extra-status")).toContainText(
+    "Flowchart created",
+  );
   await expect(page.getByTitle("Rendered Mermaid flowchart")).toHaveAttribute(
     "sandbox",
     "",

@@ -1,4 +1,8 @@
 import { resultDiscovery } from "../lib/discovery.js";
+import {
+  interpretationReview,
+  appendInterpretationDetails,
+} from "../lib/utilities/interpretation-feedback.js";
 import { exampleReplacementGuard } from "../lib/utilities/example-replacement.js";
 import { groupCsv } from "../lib/utilities/outcome.js";
 import Papa from "papaparse";
@@ -424,7 +428,13 @@ if (root) {
           })),
         };
       button.disabled = true;
-      status("Asking Jev for a proposed interpretation…");
+      status(
+        {
+          csv: "Reading column relationships…",
+          dates: "Checking date formats…",
+          meeting: "Reading availability…",
+        }[tool],
+      );
       const r = await fetch("/api/utilities/interpret", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -456,7 +466,7 @@ if (root) {
         syncAvailability();
         if (data.plan.participants.some((p) => p.scope !== "supported")) {
           status(
-            "Jev flagged unsupported or ambiguous availability. Correct the editable windows manually before reviewing.",
+            "Some availability is unsupported or ambiguous. Correct the editable windows before finding times.",
             true,
           );
           outcome = "rejected";
@@ -467,13 +477,9 @@ if (root) {
         outcome = "rejected";
         return;
       }
-      const weak = Object.values(data.confidence || {}).some(
-        (v) => typeof v !== "number" || v < 0.6,
-      );
-      status(
-        `Jev proposed settings${weak ? " with uncertain selections" : ""}. Review the editable preview. Model: ${data.model}.`,
-        weak,
-      );
+      const review = interpretationReview(tool, data.confidence);
+      if (review) status(`${$("utility-status").textContent} ${review}`);
+      appendInterpretationDetails($("result-view"), data.model);
       outcome = "success";
     } catch (e) {
       if (token !== revision) {

@@ -702,7 +702,7 @@ test("AI request completion distinguishes presented success, client rejection, a
       .toBe(1);
     if (fixture.outcome === "success")
       await expect(page.locator("#utility-status")).toContainText(
-        "Jev proposed settings",
+        "Processed 5 rows locally.",
       );
     const events = decodedEvents(posts);
     const started = events.find((e) => e.event === "utility_action_started");

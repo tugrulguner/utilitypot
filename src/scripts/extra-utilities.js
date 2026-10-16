@@ -1,4 +1,8 @@
 import { resultDiscovery } from "../lib/discovery.js";
+import {
+  interpretationReview,
+  appendInterpretationDetails,
+} from "../lib/utilities/interpretation-feedback.js";
 import { exampleReplacementGuard } from "../lib/utilities/example-replacement.js";
 import Papa from "papaparse";
 import {
@@ -743,7 +747,9 @@ if (root) {
           ? "Finding names and categories…"
           : tool === "qa"
             ? "Finding a relevant passage…"
-            : "Asking Jev for a source-grounded proposal…",
+            : tool === "jsonCsv"
+              ? "Choosing records and array handling…"
+              : "Reading flowchart steps and connections…",
       );
       const r = await fetch("/api/utilities/interpret", {
         method: "POST",
@@ -872,13 +878,9 @@ if (root) {
           `${outcome}${answerUncertain ? " The source may not fully answer your question; review the excerpt." : ""}${passageUncertain ? " Several passages may fit; review the selected excerpt." : ""}`,
         );
       } else if (tool !== "entities") {
-        const weak = Object.values(data.confidence || {}).some(
-          (c) => typeof c !== "number" || c < 0.6,
-        );
-        status(
-          `Jev ${data.model}: proposal ready for review${weak ? "; uncertain selections require care" : ""}.`,
-          weak,
-        );
+        const review = interpretationReview(tool, data.confidence);
+        if (review) status(`${$("extra-status").textContent} ${review}`);
+        appendInterpretationDetails($("extra-visual"), data.model);
       }
       outcome = "success";
     } catch (e) {
@@ -1090,7 +1092,7 @@ if (root) {
           outcome = "rejected";
           return false;
         }
-        status("Validated graph rendered locally in a sandboxed frame.");
+        status("Flowchart created. Review the step types and connections.");
       }
       outcome = "success";
       return true;
