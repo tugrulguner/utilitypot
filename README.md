@@ -1,6 +1,6 @@
 # UtilityPot
 
-<p align="center"><img src="utilitypot.png?v=wordmark-2" alt="UtilityPot — Jev interprets. You review. Code executes." width="600"></p>
+<p align="center"><img src="utilitypot.png?v=flask-rose-1" alt="UtilityPot — Jev interprets. You review. Code executes." width="600"></p>
 
 <p align="center">Part of <a href="https://modepot.io/">ModePot</a>. &nbsp; <a href="https://utilitypot.modepot.io/">Project website</a> &nbsp; <a href="https://tugrul.modepot.io/">Created by Tugrul Guner</a></p>
 

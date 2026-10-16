@@ -21,15 +21,15 @@ test("family overview, assets and creator remain discoverable", async ({
   await expect(page.locator(".creator-credit")).toBeVisible();
   await expect(page.locator(".product-hero img")).toHaveAttribute(
     "src",
-    "/utilitypot-lockup-v1.png?v=wordmark-2",
+    "/utilitypot-lockup-v1.png?v=flask-rose-1",
   );
   await expect(page.locator("link[rel=icon]")).toHaveAttribute(
     "href",
-    "/utilitypot-mark-v1.svg",
+    "/utilitypot-mark-v1.svg?v=flask-rose-1",
   );
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
-    "https://utilitypot.modepot.io/utilitypot-social-v1.png?v=wordmark-2",
+    "https://utilitypot.modepot.io/utilitypot-social-v1.png?v=flask-rose-1",
   );
   await expect(page.locator("#tools article")).toHaveCount(7);
 });

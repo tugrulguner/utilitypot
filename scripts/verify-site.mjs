@@ -43,8 +43,8 @@ for (const file of generated) {
   if (file === "dist/tools/index.html") continue; // Explicit compatibility redirect.
   const html = await fs.readFile(file, "utf8");
   for (const token of [
-    "/utilitypot-mark-v1.svg",
-    "https://utilitypot.modepot.io/utilitypot-social-v1.png?v=wordmark-2",
+    "/utilitypot-mark-v1.svg?v=flask-rose-1",
+    "https://utilitypot.modepot.io/utilitypot-social-v1.png?v=flask-rose-1",
     "Color theme",
     "family-menu",
     "https://modepot.io/",
