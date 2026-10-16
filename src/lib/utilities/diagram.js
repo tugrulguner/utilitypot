@@ -62,22 +62,27 @@ export function createDiagramInterpretation(input) {
   if (!labels.length || labels.length > 8 || labels.some((s) => s.length > 160))
     throw new Error("Use 1–8 steps, each at most 160 characters.");
   const nodes = labels.map((label, i) => ({ id: `n${i}`, label })),
-    criteria = Object.fromEntries(nodes.map((n) => [n.id, n.label]));
+    criteria = Object.fromEntries(
+      nodes.map((n, i) => [n.id, { step: i + 1, label: n.label }]),
+    );
   criteria.none = "No explicit destination; terminal or unresolved.";
   const questions = {};
   nodes.forEach((n, i) => {
     questions[`next${i}`] = {
       type: "choice",
-      instructions: `Which explicit step follows ${n.id}? For a decision, select its affirmative/true branch. Choose none if no relation is supported. Do not assume the next listed line is necessarily the next process step.`,
+      instructions: `Which explicit step follows step ${i + 1} (${n.id})? Human step numbers in instructions are one-based positions in the source list; internal n IDs are zero-based. Match the destination's explicit step number and source label, not a similarly numbered n ID. For a decision, select its affirmative/true branch. Choose none if no relation is supported. Do not assume the next listed line is necessarily the next process step.`,
       criteria,
     };
     questions[`else${i}`] = {
       type: "choice",
-      instructions: `Which step is the explicit negative/false alternative of ${n.id}? Choose none if not a decision or no alternative is supported.`,
+      instructions: `Which step is the explicit negative/false alternative of step ${i + 1} (${n.id})? Human step numbers are one-based positions in the source list, not the zero-based n IDs. Match the destination's step number and source label. Choose none if not a decision or no alternative is supported.`,
       criteria,
     };
   });
-  const state = { nodes, instructions: input.instructions };
+  const state = {
+    nodes: nodes.map((n, i) => ({ ...n, step: i + 1 })),
+    instructions: input.instructions,
+  };
   function decode(a) {
     const typed = nodes.map((n, i) => {
       if (a[`type${i}`].choice === "unknown")
@@ -165,7 +170,7 @@ export function createDiagramInterpretation(input) {
 }
 
 export function graphRoleIssues(graph) {
-  return graph.nodes
+  const issues = graph.nodes
     .filter(
       (n) =>
         n.type === "terminal" &&
@@ -176,4 +181,23 @@ export function graphRoleIssues(graph) {
       (n) =>
         `${n.id} (${n.label}) is marked Start / end but has incoming and outgoing connections. Review its type or destinations; an intermediate action usually needs Process.`,
     );
+  if (!graph.nodes.length) return issues;
+  const reachable = new Set([graph.nodes[0].id]);
+  const queue = [graph.nodes[0].id];
+  for (let i = 0; i < queue.length; i++) {
+    for (const edge of graph.edges) {
+      if (edge.from === queue[i] && !reachable.has(edge.to)) {
+        reachable.add(edge.to);
+        queue.push(edge.to);
+      }
+    }
+  }
+  graph.nodes.forEach((node, i) => {
+    if (!reachable.has(node.id)) {
+      issues.push(
+        `Step ${i + 1} (${node.id}: ${node.label}) is not reachable from the first listed step. Review its connections; confirm explicitly if it is an intentional separate entry point. No connection was added automatically.`,
+      );
+    }
+  });
+  return issues;
 }
