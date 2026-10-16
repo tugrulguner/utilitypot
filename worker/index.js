@@ -200,6 +200,8 @@ export async function handleRequest(request, env, providerFetch = fetch) {
       return json({ error: safe.message, code: safe.code }, status);
     }
   }
+  let failurePhase = "provider_fetch",
+    providerStage = 0;
   try {
     let active = spec,
       model = "",
@@ -209,14 +211,17 @@ export async function handleRequest(request, env, providerFetch = fetch) {
     // Entity ends depend on selected starts; never ask unrelated endpoints
     // independently or spend more than the original per-action question budget.
     for (let stage = 0; stage < 2; stage++) {
+      providerStage = stage + 1;
       const count = Object.keys(active.questions).length;
       if (count === 0) {
+        failurePhase = "decode";
         plan = active.decode({});
         break;
       }
       if (count > remainingQuestions)
         throw new Error("Question budget exceeded");
       remainingQuestions -= count;
+      failurePhase = "provider_fetch";
       const r = await providerFetch("https://api.typesafe.ai/v1/systemone", {
         method: "POST",
         headers: {
@@ -237,7 +242,9 @@ export async function handleRequest(request, env, providerFetch = fetch) {
           503,
         );
       }
+      failurePhase = "provider_body";
       const response = JSON.parse(await boundedText(r.body, 128000));
+      failurePhase = "response_validation";
       const answers = validateAnswers(active.questions, response);
       if (model && model !== response.model)
         throw new Error("Inconsistent models");
@@ -248,9 +255,11 @@ export async function handleRequest(request, env, providerFetch = fetch) {
         mergedAnswers[key] = answers[key];
       }
       if (stage === 0 && typeof active.followup === "function") {
+        failurePhase = "followup";
         active = active.followup(answers);
         continue;
       }
+      failurePhase = "decode";
       plan = active.decode(answers);
       break;
     }
@@ -264,11 +273,27 @@ export async function handleRequest(request, env, providerFetch = fetch) {
         Object.entries(mergedAnswers).map(([k, a]) => [k, a.confidence]),
       ),
     });
-  } catch {
+  } catch (error) {
+    // Only fixed enums leave this boundary; never expose input or exception text.
+    const codes = new Map([
+      ["Inconsistent entity starts.", "entity_starts_invalid"],
+      ["Inconsistent entity boundaries.", "entity_boundaries_invalid"],
+      ["Invalid or overlapping entity span.", "entity_span_invalid"],
+      ["Invalid response", "provider_response_invalid"],
+      ["Invalid keys", "provider_response_invalid"],
+      ["Invalid choices", "provider_choices_invalid"],
+      ["Invalid probabilities", "provider_probabilities_invalid"],
+      ["Invalid usage", "provider_usage_invalid"],
+    ]);
     return json(
       {
         error:
           "The interpretation could not be verified. No result was accepted. Try again later.",
+        code:
+          codes.get(error instanceof Error ? error.message : "") ||
+          "interpretation_unverified",
+        phase: failurePhase,
+        stage: providerStage,
       },
       503,
     );
