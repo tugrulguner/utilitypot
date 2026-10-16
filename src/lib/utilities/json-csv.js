@@ -5,16 +5,14 @@ const unsafeNumberMessage =
 function canonicalDecimal(token) {
   const match = /^(-?)(\d+)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/.exec(token);
   if (!match) return null;
-  const exponent = Number(match[4] || 0) - (match[3]?.length || 0);
-  if (!Number.isSafeInteger(exponent) || Math.abs(exponent) > 100000)
-    return null;
   let digits = (match[2] + (match[3] || "")).replace(/^0+/, "");
   if (!digits) return "0";
-  let scale = exponent;
-  while (digits.endsWith("0")) {
-    digits = digits.slice(0, -1);
-    scale++;
-  }
+  const exponent = Number(match[4] || 0) - (match[3]?.length || 0);
+  if (!Number.isSafeInteger(exponent)) return null;
+  let end = digits.length;
+  while (digits[end - 1] === "0") end--;
+  const scale = exponent + digits.length - end;
+  digits = digits.slice(0, end);
   return `${match[1]}${digits}e${scale}`;
 }
 const jsonNumberPattern = /-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
@@ -38,7 +36,6 @@ export function validateJsonNumberPrecision(raw) {
           number = Number(token);
         if (
           !Number.isFinite(number) ||
-          (number === 0 && /[1-9]/.test(token)) ||
           canonicalDecimal(token) !== canonicalDecimal(number.toString())
         )
           throw new Error(unsafeNumberMessage);

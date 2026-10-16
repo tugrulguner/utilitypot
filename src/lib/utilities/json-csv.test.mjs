@@ -26,6 +26,17 @@ test("raw JSON refuses numeric values that native parsing would round", () => {
   );
 });
 
+test("zero with an exponent is not mistaken for nonzero underflow", () => {
+  for (const token of ["0e12", "-0.000e-999999", "0.10", "1.2300e2"]) {
+    assert.doesNotThrow(() =>
+      createJsonCsvInterpretation({
+        sample: `[{"value":${token}}]`,
+        instructions: "",
+      }),
+    );
+  }
+});
+
 test("single-object AI selection remains a complete server-owned interpretation", () => {
   const spec = createJsonCsvInterpretation({
     sample: '{"id":"001","name":"Ada"}',

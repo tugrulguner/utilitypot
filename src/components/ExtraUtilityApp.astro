@@ -30,7 +30,9 @@ const examples = {
   <section class="panel">
     <div class="workspace-toolbar">
       <h2>Input</h2>
-      <button id="extra-example">{examples[tool][0]}</button>
+      <button disabled data-startup-was-enabled="true" id="extra-example">
+        {examples[tool][0]}
+      </button>
     </div>
     <p id="example-outcome" class="notice">
       {examples[tool][1]}
@@ -40,6 +42,8 @@ const examples = {
         <input id="source-mode" type="hidden" value="paste" />
         <div role="tablist" aria-label="Source type" class="actions">
           <button
+            disabled
+            data-startup-was-enabled="true"
             id="paste-tab"
             role="tab"
             aria-selected="true"
@@ -49,6 +53,8 @@ const examples = {
             Pasted text
           </button>
           <button
+            disabled
+            data-startup-was-enabled="true"
             id="url-tab"
             role="tab"
             aria-selected="false"
@@ -150,7 +156,9 @@ const examples = {
             Convert with Jev sends a reduced sample (five items per array) and
             your instructions to Jev/TypeSafe.
           </p>
-          <button id="extra-ask">Convert with Jev</button>
+          <button disabled data-startup-was-enabled="true" id="extra-ask">
+            Convert with Jev
+          </button>
         </details>
       </>
     )}
@@ -251,22 +259,42 @@ const examples = {
     </p>
     <div class="actions">
       {tool === "jsonCsv" && (
-        <button id="extra-run" class="primary">
+        <button
+          disabled
+          data-startup-was-enabled="true"
+          id="extra-run"
+          class="primary"
+        >
           Convert
         </button>
       )}
       {tool === "entities" && (
-        <button id="extra-ask" class="primary">
+        <button
+          disabled
+          data-startup-was-enabled="true"
+          id="extra-ask"
+          class="primary"
+        >
           Extract with Jev
         </button>
       )}
       {tool === "diagram" && (
-        <button id="create-diagram" class="primary">
+        <button
+          disabled
+          data-startup-was-enabled="true"
+          id="create-diagram"
+          class="primary"
+        >
           Create diagram
         </button>
       )}
       {tool === "qa" && (
-        <button id="extra-ask" class="primary">
+        <button
+          disabled
+          data-startup-was-enabled="true"
+          id="extra-ask"
+          class="primary"
+        >
           Find answer
         </button>
       )}
@@ -284,8 +312,12 @@ const examples = {
         it. Offsets are computed locally.
       </p>
       <div id="entity-editor" />
-      <button id="add-mention">Add mention manually</button>
-      <button id="extra-run">Update preview</button>
+      <button disabled data-startup-was-enabled="true" id="add-mention">
+        Add mention manually
+      </button>
+      <button disabled data-startup-was-enabled="true" id="extra-run">
+        Update preview
+      </button>
     </details>
   )}
   {tool === "diagram" && (
@@ -296,8 +328,12 @@ const examples = {
         Choose each node’s type and destinations. Yes and No apply to decisions.
       </p>
       <div id="graph-editor" />
-      <button id="extra-run">Update diagram</button>
-      <button id="prepare-extra">Start a private sequential diagram</button>
+      <button disabled data-startup-was-enabled="true" id="extra-run">
+        Update diagram
+      </button>
+      <button disabled data-startup-was-enabled="true" id="prepare-extra">
+        Start a private sequential diagram
+      </button>
     </details>
   )}
   {(tool === "entities" || tool === "diagram") && (
@@ -305,7 +341,9 @@ const examples = {
       <summary>Advanced: import a manual JSON plan</summary>
       <label for="review-plan">Manual plan</label>
       <textarea id="review-plan" rows="4" maxlength="20000" />
-      <button id="import-plan">Import plan</button>
+      <button disabled data-startup-was-enabled="true" id="import-plan">
+        Import plan
+      </button>
     </details>
   )}
   <section
@@ -322,18 +360,29 @@ const examples = {
       <pre id="extra-output" />
     </details>
     <div class="actions">
-      <button id="extra-download">Download result</button>
-      <button id="extra-copy">Copy result</button>
+      <button disabled data-startup-was-enabled="true" id="extra-download">
+        Download result
+      </button>
+      <button disabled data-startup-was-enabled="true" id="extra-copy">
+        Copy result
+      </button>
     </div>
   </section>
 </section>
 <p id="utility-startup" class="notice" role="status" aria-live="polite">
-  Loading tool controls. You can paste or type source now; your text stays in
-  this browser.
+  JavaScript is required to run tool actions. Your source stays in this browser.
 </p>
+<noscript>
+  <p class="notice error">
+    Enable JavaScript, then reload to use this tool. You can still copy any
+    source text before reloading.
+  </p>
+</noscript>
 <script is:inline>
   (() => {
     const notice = document.getElementById("utility-startup");
+    notice.textContent =
+      "Loading tool controls. You can paste or type source now; your text stays in this browser.";
     let ready = false;
     document.querySelectorAll(".utility-app button").forEach((button) => {
       if (!button.disabled) {

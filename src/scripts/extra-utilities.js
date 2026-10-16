@@ -420,11 +420,10 @@ if (root) {
     const s = $("source-text").value;
     if (s.length > 2000000) throw new Error("JSON exceeds 2 MB.");
     if (!s.trim()) throw new Error("Enter a JSON document before converting.");
+    validateJsonNumberPrecision(s);
     try {
-      validateJsonNumberPrecision(s);
       return JSON.parse(s);
-    } catch (error) {
-      if (/quote identifiers/.test(error.message)) throw error;
+    } catch {
       throw new Error(
         "Check the JSON document: add matching braces and brackets, commas, and double quotes.",
       );
