@@ -40,6 +40,7 @@ for (const width of [1280, 1050, 390])
         });
       });
       await page.goto(`/tools/${slug}/`);
+      await page.evaluate(() => document.fonts.ready);
       const rail = page.locator(".discovery-rail"),
         app = page.locator(".utility-app");
       const rect = (loc) =>
