@@ -17,7 +17,7 @@ test("UtilityPot wordmark keeps the name white and pot orange in every SVG", asy
 test("UtilityPot identity uses canonical family geometry and a consistent README resource row", async () => {
   const readme = await readFile("README.md", "utf8");
   const firstImage = readme.match(/<img\b[^>]*>/)?.[0] ?? "";
-  assert.match(firstImage, /src="utilitypot\.png\?v=wordmark-2"/);
+  assert.match(firstImage, /src="utilitypot\.png\?v=flask-rose-1"/);
   assert.match(firstImage, /width="600"/);
   const resources =
     readme.match(/<p align="center">Part of[\s\S]*?<\/p>/)?.[0] ?? "";
