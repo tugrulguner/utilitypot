@@ -1,0 +1,235 @@
+{
+  "candidateVersion": "e1f194b6-ef61-4d59-9c48-b689eeb3b440",
+  "runtimeSource": "80e872b190ba3ff34e89ec91ab983b498f7112c6",
+  "origin": "https://e1f194b6-utilitypot-site.tugrul-gunr.workers.dev",
+  "qualification": "Single complete final hosted-candidate run; no mocked interpretation responses or inference retries",
+  "total": 13,
+  "passed": 13,
+  "failed": [],
+  "actualJevBrowserActions": 11,
+  "models": ["jev-1.13.0"],
+  "browserConsoleEventsDuringQualification": [
+    {
+      "type": "console",
+      "message": "Failed to load resource: the server responded with a status of 404 ()"
+    }
+  ],
+  "uncaughtPageErrorCount": 0,
+  "setupAssetAttempts": 4,
+  "setupNavigationFailures": [
+    {
+      "slug": "csv-to-nested-json",
+      "attempt": 0,
+      "status": 404,
+      "ray": "a4b30abe5ba27091-YYZ",
+      "bodyPrefix": "There is nothing here yet\n\nIf you expect something to be here, it may take some time.\nPlease check back again later.\n\nPowered by"
+    }
+  ],
+  "previewFlagsBefore": {
+    "enabled": false,
+    "previews_enabled": false
+  },
+  "previewFlagsAfter": {
+    "enabled": false,
+    "previews_enabled": false
+  },
+  "productionDeploymentBefore": "cfafc8f2-5d2b-4687-8ae5-a99caf473683",
+  "productionDeploymentAfter": "cfafc8f2-5d2b-4687-8ae5-a99caf473683",
+  "productionUnchanged": true,
+  "cases": [
+    {
+      "id": "csv-fresh-custom",
+      "status": "passed",
+      "startedAt": "2026-10-16T00:45:38.913Z",
+      "completedAt": "2026-10-16T00:45:44.904Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "csv-modepot-data.json",
+          "bytes": 384,
+          "sha256": "7e2514173c4536277301fc4d404c7e3f9ae39e4fc9936d443b82afd2b036e725"
+        }
+      ]
+    },
+    {
+      "id": "dates-partial-and-context",
+      "status": "passed",
+      "startedAt": "2026-10-16T00:45:44.904Z",
+      "completedAt": "2026-10-16T00:45:58.573Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "dates-modepot-dates.csv",
+          "bytes": 530,
+          "sha256": "727e33204b3d39cb0c25c8bdb1e40ec2e2f40c56d34a0ea52046fb3d1b56800b"
+        }
+      ]
+    },
+    {
+      "id": "meeting-boston-first-use",
+      "status": "passed",
+      "startedAt": "2026-10-16T00:45:58.574Z",
+      "completedAt": "2026-10-16T00:46:12.035Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "meeting-modepot-meeting.ics",
+          "bytes": 261,
+          "sha256": "7ad36158222bed8575b885dff74e899e0fa9accc73b2e3f627bb091027dc72d7"
+        }
+      ]
+    },
+    {
+      "id": "json-explicit-preserve-first",
+      "status": "passed",
+      "startedAt": "2026-10-16T00:46:12.036Z",
+      "completedAt": "2026-10-16T00:46:25.909Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "json-utilitypot-data.csv",
+          "bytes": 133,
+          "sha256": "e750f83018f6fe32797d007d75a9afe38dc8471981f2869f45d8e498ab932d6e"
+        }
+      ]
+    },
+    {
+      "id": "entities-fresh-unicode",
+      "status": "passed",
+      "startedAt": "2026-10-16T00:46:25.910Z",
+      "completedAt": "2026-10-16T00:46:39.836Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "entities-utilitypot-entities.json",
+          "bytes": 465,
+          "sha256": "35ebe7da4f9af2186d40b7329c7ab1918ee2902aeb122436509984fcdfeb62af"
+        }
+      ]
+    },
+    {
+      "id": "diagram-return-roles-and-branches",
+      "status": "passed",
+      "startedAt": "2026-10-16T00:46:39.836Z",
+      "completedAt": "2026-10-16T00:46:54.008Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "svg",
+          "file": "diagram-svg-utilitypot-flowchart.svg",
+          "bytes": 153517,
+          "sha256": "5119ded1734685df5b8779a7fa446f685c30ebc9567cf778630c2fe45f9bd88c"
+        },
+        {
+          "kind": "mermaid",
+          "file": "diagram-mermaid-utilitypot-flowchart.mmd",
+          "bytes": 301,
+          "sha256": "ea4f189dc87a2bede6a3cac4c55be9e65076182755355d9355c80ade50dc985f"
+        }
+      ]
+    },
+    {
+      "id": "reader-source-provenance-export",
+      "status": "passed",
+      "startedAt": "2026-10-16T00:46:54.009Z",
+      "completedAt": "2026-10-16T00:47:07.778Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "reader-utilitypot-evidence.json",
+          "bytes": 6873,
+          "sha256": "174d00e01e7ee1870b203dcbd92b6eba4ff0add8e2d9ca4dd2ca67ebf8e48dd8"
+        }
+      ]
+    },
+    {
+      "id": "json-explicit-omit-control",
+      "status": "passed",
+      "startedAt": "2026-10-16T00:47:07.779Z",
+      "completedAt": "2026-10-16T00:47:21.140Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "omit-control-utilitypot-data.csv",
+          "bytes": 23,
+          "sha256": "aa1e40e23cb22de83e2f22e61374a7f2bd0672c59d8956d781c29c09dc34e854"
+        }
+      ]
+    },
+    {
+      "id": "json-unspecified-policy-stop-control",
+      "status": "passed",
+      "startedAt": "2026-10-16T00:47:21.141Z",
+      "completedAt": "2026-10-16T00:47:34.204Z",
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "diagram-start-end-control",
+      "status": "passed",
+      "startedAt": "2026-10-16T00:47:34.205Z",
+      "completedAt": "2026-10-16T00:47:48.734Z",
+      "model": "jev-1.13.0"
+    },
+    {
+      "id": "reader-pasted-provenance-control",
+      "status": "passed",
+      "startedAt": "2026-10-16T00:47:48.735Z",
+      "completedAt": "2026-10-16T00:48:01.701Z",
+      "model": "jev-1.13.0",
+      "downloads": [
+        {
+          "kind": "download",
+          "file": "pasted-provenance-utilitypot-evidence.json",
+          "bytes": 495,
+          "sha256": "f17358ddfce6ba9c165402e947e908bde1d4a4309536514a843ee5da16d1bc31"
+        }
+      ]
+    },
+    {
+      "id": "missing-fields-no-requests",
+      "status": "passed",
+      "startedAt": "2026-10-16T00:48:01.702Z",
+      "completedAt": "2026-10-16T00:48:04.258Z"
+    },
+    {
+      "id": "discovery-copy",
+      "status": "passed",
+      "startedAt": "2026-10-16T00:48:04.259Z",
+      "completedAt": "2026-10-16T00:48:04.519Z"
+    }
+  ],
+  "retainedEarlierAttempts": [
+    {
+      "name": "initial Python probe",
+      "outcome": "Readiness failed before QA; later diagnosed HTTP403 Cloudflare1010; settings restored"
+    },
+    {
+      "name": "client-check",
+      "outcome": "Preview HTML/module readiness failures; one real JSON preservation success; remaining cases aborted after browser close; retained, not application successes"
+    },
+    {
+      "name": "readiness",
+      "outcome": "12 passed; meeting harness blocked on collapsed optional name field before interpretation"
+    },
+    {
+      "name": "meeting-visible-controls",
+      "outcome": "Preview HTML404 before application action"
+    },
+    {
+      "name": "meeting-route-ready",
+      "outcome": "Corrected visible-control interaction passed with real Jev, Boston retained and selected ICS verified"
+    }
+  ],
+  "limits": [
+    "Hosted candidate, not deployed production UI",
+    "Agent-led desktop/mobile emulation, not human research or universal model-quality certification",
+    "Preview routing/static readiness failures remain separately recorded; no Cloudflare security settings were weakened"
+  ]
+}
