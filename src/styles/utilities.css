@@ -583,6 +583,14 @@
 [data-theme="dark"] .discovery-brand strong {
   background-image: linear-gradient(105deg, #66d9ff, #a987ff 52%, #77e5bd);
 }
+@media (forced-colors: active) {
+  .discovery-brand strong,
+  [data-theme] .discovery-brand strong {
+    color: CanvasText;
+    -webkit-text-fill-color: CanvasText;
+    background: none;
+  }
+}
 .project-identity {
   margin-block: 0.5rem;
 }

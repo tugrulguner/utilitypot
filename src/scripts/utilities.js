@@ -387,12 +387,26 @@ if (root) {
         if (empty >= 0) {
           field = $(`p${empty}-zone`);
           message = `Enter a city or timezone for participant ${empty + 1}. Search Supported cities below.`;
+        } else {
+          field = [
+            ...root.querySelectorAll(
+              '.participant [data-field="start"], .participant [data-field="end"]',
+            ),
+          ].find((input) => !input.value);
+          if (field)
+            message = `Choose an available ${field.dataset.field} time for person ${Number(field.closest(".participant").dataset.index) + 1}.`;
         }
       }
     }
     if (!field) return true;
     invalidate();
     status(message, true);
+    for (
+      let parent = field.parentElement;
+      parent && parent !== root;
+      parent = parent.parentElement
+    )
+      if (parent.tagName === "DETAILS") parent.open = true;
     field.focus();
     return false;
   }

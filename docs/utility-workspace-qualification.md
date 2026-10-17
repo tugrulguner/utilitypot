@@ -27,4 +27,8 @@ The actual built candidate UI was served on isolated loopback and its normal API
 - Actual desktop/mobile result screenshots inspected.
 - Local evidence: `test-results-live/page-evidence-current/{ledger.json,evidence.json,answer-desktop.png,answer-mobile.png}`. The ledger distinguishes the genuine response from browser fixtures. Local evidence is not a remotely published artifact.
 
+## Review corrections
+
+Confirmed and fixed two review findings: a cleared meeting-hours input hidden inside a collapsed disclosure now reopens and receives focus, and ModePot gradient lettering has a visible system-colour fallback under forced colours. Both regressions failed before the fixes and passed afterward. Eight focused browser checks and the unit/check/build gates passed on the corrected source. A fresh 12-repeat mobile entity-navigation run also passed; it is not a demonstrated repair of the earlier intermittent scroll failure.
+
 Independent review, current remote CI, and authorized deployment/public readback remain separate acceptance steps. Full-text entity extraction still needs its separate core/browser integration and actual candidate Worker qualification; the old production API cannot establish the new extraction contract.
