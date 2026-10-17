@@ -50,7 +50,7 @@ test("mobile default meeting action precedes secondary controls and optional nam
     add = await page.locator("#add-person").boundingBox();
   expect(run.y).toBeLessThan(add.y);
   const summary = await page
-    .locator(".participant-name > summary")
+    .locator(".participant-hours > summary")
     .first()
     .boundingBox();
   expect(summary.height).toBeGreaterThanOrEqual(44);

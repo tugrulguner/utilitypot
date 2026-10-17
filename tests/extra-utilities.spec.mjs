@@ -180,11 +180,11 @@ test("captured ModePot answer stays successful when passage confidence is low", 
   await expect(page.locator("#extra-visual blockquote")).toHaveText(
     "ModePot is an open-source workshop for modernizing software foundations—and inventing what comes next. AI-native and agent-friendly where they add real value.",
   );
-  await expect(page.locator("#extra-status")).toContainText(
-    "Answer found in the source.",
-  );
-  await expect(page.locator("#extra-status")).toContainText(
-    "Several passages may fit; review the selected excerpt.",
+  await expect(
+    page.locator("#extra-visual [data-evidence-outcome]"),
+  ).toContainText("Answer found in the source.");
+  await expect(page.locator(".evidence-selection-note")).toContainText(
+    "Several passages may fit; review the selected exact excerpt.",
   );
   await expect(page.locator("#extra-status")).not.toHaveClass(/error/);
   await expect(page.locator("#extra-status")).not.toContainText("jev-1.13.0");
@@ -207,9 +207,9 @@ test("captured ModePot answer stays successful when passage confidence is low", 
   await expect(
     page.locator("#extra-visual [data-evidence-outcome]"),
   ).toHaveText("No answer found in the supplied source.");
-  await expect(page.locator("#extra-status")).toContainText(
-    "No answer found in the supplied source.",
-  );
+  await expect(
+    page.locator("#extra-visual [data-evidence-outcome]"),
+  ).toContainText("No answer found in the supplied source.");
   await expect(page.locator("#extra-status")).not.toContainText(
     "Several passages may fit",
   );
@@ -240,11 +240,11 @@ test("partial reader results state partial evidence without error styling", asyn
   await expect(page.locator("#extra-visual blockquote")).toHaveText(
     "A relevant passage.",
   );
-  await expect(page.locator("#extra-status")).toContainText(
-    "Partial evidence found in the source.",
-  );
-  await expect(page.locator("#extra-status")).toContainText(
-    "Several passages may fit; review the selected excerpt.",
+  await expect(
+    page.locator("#extra-visual [data-evidence-outcome]"),
+  ).toContainText("Partial evidence found in the source.");
+  await expect(page.locator(".evidence-selection-note")).toContainText(
+    "Several passages may fit; review the selected exact excerpt.",
   );
   await expect(page.locator("#extra-status")).not.toHaveClass(/error/);
 });
@@ -289,12 +289,12 @@ test("uncertain answerability is disclosed without calling a valid response an e
   await page.locator("#source-text").fill("A relevant passage.");
   await page.locator("#instructions").fill("What happened?");
   await page.getByRole("button", { name: "Find answer", exact: true }).click();
-  await expect(page.locator("#extra-status")).toContainText(
-    "Possible answer found in the source.",
-  );
-  await expect(page.locator("#extra-status")).toContainText(
-    "The source may not fully answer your question; review the excerpt.",
-  );
+  await expect(
+    page.locator("#extra-visual [data-evidence-outcome]"),
+  ).toContainText("Possible answer — review this source evidence.");
+  await expect(
+    page.locator("#extra-visual [data-evidence-outcome]"),
+  ).toBeVisible();
   await expect(page.locator("#extra-status")).not.toHaveClass(/error/);
   await expect(page.locator("#extra-visual blockquote")).toHaveText(
     "A relevant passage.",

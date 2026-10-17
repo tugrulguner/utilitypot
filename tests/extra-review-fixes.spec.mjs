@@ -78,9 +78,10 @@ test("single JSON object offers an explicit one-row conversion", async ({
     .locator("#source-text")
     .fill('{"id":"001","customer":{"name":"Ada"}}');
   await expect(page.locator("#row-path")).toContainText(
-    "Single object — 1 row",
+    "The whole object · 1 row",
   );
-  await page.locator("#row-path").selectOption("$object");
+  await expect(page.locator("#row-path")).toHaveValue("$object");
+  await expect(page.locator("#row-path")).toBeHidden();
   await page.getByRole("button", { name: "Convert", exact: true }).click();
   await expect(page.locator("#extra-output")).toContainText("001,Ada");
 });

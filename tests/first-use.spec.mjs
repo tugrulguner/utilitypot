@@ -25,8 +25,11 @@ for (const [slug, label, input, result] of tools) {
     await page.goto(`/tools/${slug}/`);
     const button = page.locator("#load-example, #extra-example");
     await expect(button).toContainText(label);
-    await expect(page.locator("#example-outcome")).toBeVisible();
+    if (slug === "meeting-time-finder")
+      await expect(page.locator("#example-outcome")).toBeHidden();
+    else await expect(page.locator("#example-outcome")).toBeVisible();
     await button.click();
+    await expect(page.locator("#example-outcome")).toBeVisible();
     await expect(page.locator(result)).toBeHidden();
     const sample = await page.locator(input).inputValue();
     expect(sample.length).toBeGreaterThan(0);
@@ -95,7 +98,7 @@ test("mobile meetings hide optional names including cloned participants; sample 
   await page.goto("/tools/meeting-time-finder/");
   await expect(page.locator(".participant")).toHaveCount(2);
   await expect(page.locator("#p0-name")).toBeHidden();
-  await page.locator(".participant-name > summary").first().click();
+  await page.locator(".participant-hours > summary").first().click();
   await expect(page.locator("#p0-name")).toBeVisible();
   await page.locator("#add-person").click();
   await expect(page.locator("#p2-name")).toBeHidden();

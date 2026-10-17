@@ -217,7 +217,7 @@ test("all seven tool handlers emit no initial example action and bounded complet
     } else if (action === "manual" && slug === "meeting-time-finder") {
       await page.getByRole("button", { name: "Find times" }).click();
     } else if (action === "manual" && slug === "json-to-csv") {
-      await page.locator("#row-path").selectOption("orders");
+      await expect(page.locator("#row-path")).toHaveValue("orders");
       await page.getByRole("button", { name: "Convert", exact: true }).click();
     } else if (action === "manual" && slug === "entity-extractor") {
       await exampleInterpretation(page, slug);
@@ -711,9 +711,9 @@ test("AI request completion distinguishes presented success, client rejection, a
       )
       .toBe(1);
     if (fixture.outcome === "success")
-      await expect(page.locator("#extra-status")).toContainText(
-        "Answer found in the source.",
-      );
+      await expect(
+        page.locator("#extra-visual [data-evidence-outcome]"),
+      ).toContainText("Answer found in the source.");
     const events = decodedEvents(posts);
     const started = events.find((e) => e.event === "utility_action_started");
     const completed = events.find(

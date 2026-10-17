@@ -64,12 +64,12 @@ export const guides = {
     reason: "Exploring Python storage after preparing records?",
   },
   "json-to-csv": {
-    title: "JSON to CSV converter — flatten records locally",
+    title: "JSON to CSV converter — spreadsheet rows in your browser",
     description:
-      "Convert JSON records to CSV in your browser. Select an array, flatten nested objects and review array handling before spreadsheet export.",
+      "Convert JSON to CSV in your browser. Preview sample rows and choose between lists only when needed before spreadsheet export.",
     steps: [
-      "Paste JSON or load the orders example. Select the record array to export.",
-      "Choose how to handle other arrays: reject, omit or keep as JSON text in one cell.",
+      "Paste JSON or load the example. A single object or list is selected for you; choose between lists only if there is more than one.",
+      "If a row contains another list, choose whether to stop, leave that list out or keep it as JSON text in one cell.",
       "Convert, review the column preview, then copy or download the CSV.",
     ],
     example:

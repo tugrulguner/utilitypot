@@ -10,6 +10,13 @@ test("changing the selected meeting preserves results and exports that exact slo
     [1, "New York"],
   ]) {
     await page.locator(`#p${i}-zone`).fill(city);
+    if (
+      !(await page
+        .locator(".participant-hours")
+        .nth(i)
+        .evaluate((el) => el.open))
+    )
+      await page.locator(".participant-hours > summary").nth(i).click();
     await page.locator(`#p${i}-start`).fill("09:00");
     await page.locator(`#p${i}-end`).fill("17:00");
   }
@@ -33,6 +40,13 @@ test("meeting finder accepts city labels, rejects ambiguity, and renders readabl
   await page.goto("/tools/meeting-time-finder/");
   await page.locator("#meeting-date").fill("2026-11-03");
   for (const i of [0, 1]) {
+    if (
+      !(await page
+        .locator(".participant-hours")
+        .nth(i)
+        .evaluate((el) => el.open))
+    )
+      await page.locator(".participant-hours > summary").nth(i).click();
     await page.locator(`#p${i}-start`).fill("09:00");
     await page.locator(`#p${i}-end`).fill("17:00");
   }

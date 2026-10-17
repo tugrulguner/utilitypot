@@ -398,6 +398,11 @@ if (root) {
     }
   }
   function paths(selected) {
+    $("record-sample").replaceChildren();
+    $("record-sample-panel").hidden = true;
+    $("row-summary").textContent = "";
+    $("row-choice-control").hidden = true;
+    $("nested-list-options").hidden = true;
     const data = jsonData();
     const choices = recordChoices(data);
     if (
@@ -445,7 +450,13 @@ if (root) {
     $("row-path").value =
       selected ?? (choices.length === 1 ? choices[0].path : "");
     $("row-path").dispatchEvent(new Event("change", { bubbles: true }));
-    if (!choices.length) throw Error("No supported array of objects found.");
+    if (!choices.length) {
+      $("row-summary").textContent =
+        "Add a JSON object or a list of objects to make rows.";
+      throw Error(
+        "Use a JSON object or a list of objects, each containing named fields.",
+      );
+    }
   }
   function showNestedPaths() {
     const path = $("row-path").value;
@@ -520,15 +531,6 @@ if (root) {
   }
   $("row-path")?.addEventListener("change", showNestedPaths);
   $("array-policy")?.addEventListener("change", showNestedPaths);
-  function sample(v, depth = 0) {
-    if (depth > 6) throw new Error("Use a shallower sample.");
-    if (Array.isArray(v)) return v.slice(0, 5).map((x) => sample(x, depth + 1));
-    if (v && typeof v === "object")
-      return Object.fromEntries(
-        Object.entries(v).map(([k, x]) => [k, sample(x, depth + 1)]),
-      );
-    return v;
-  }
   $("extra-example").addEventListener("click", () => {
     if (!allowExampleReplacement()) return;
     clear();
@@ -735,7 +737,7 @@ if (root) {
           button.setAttribute("aria-pressed", String(n === index));
         });
       };
-      result.excerpts.forEach((excerpt, index) => {
+      result.excerpts.forEach((_, index) => {
         const button = document.createElement("button");
         button.type = "button";
         button.textContent = `Passage ${index + 1}`;
@@ -1012,8 +1014,15 @@ if (root) {
       const token = revision;
       if (tool === "jsonCsv") {
         if (!$("row-path").options.length) paths();
+        const data = jsonData();
+        if (!$("row-path").value)
+          throw Error(
+            recordChoices(data).length > 1
+              ? "Choose which list should become spreadsheet rows."
+              : "Use a JSON object or a list of objects containing named fields.",
+          );
         const result = jsonToCsv(
-          jsonData(),
+          data,
           $("row-path").value,
           $("array-policy").value,
         );
@@ -1436,7 +1445,7 @@ if (root) {
   if (tool === "jsonCsv" && $("source-text").value.trim()) {
     try {
       paths();
-      status("Source loaded. Review the record array before converting.");
+      status("Source loaded. Review the sample rows before converting.");
     } catch (error) {
       status(error.message, true);
     }

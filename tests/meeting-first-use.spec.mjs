@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { readFile } from "node:fs/promises";
 for (const width of [1280, 390, 320])
   test(`meeting starts with cities, not a wall of availability fields at ${width}px`, async ({
     page,
@@ -23,6 +22,10 @@ for (const width of [1280, 390, 320])
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
+    await page.screenshot({
+      path: info.outputPath(`meeting-input-${width}.png`),
+      fullPage: true,
+    });
     await page.locator("#meeting-date").fill("2026-10-29");
     await page.locator("#p0-zone").fill("London");
     await page.locator("#p1-zone").fill("New York");

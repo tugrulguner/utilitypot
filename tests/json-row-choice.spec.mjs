@@ -27,6 +27,11 @@ for (const width of [1280, 390])
       path: info.outputPath(`json-rows-${width}.png`),
       fullPage: true,
     });
+    await page.locator("#source-text").fill("{");
+    await expect(page.locator("#record-sample-panel")).toBeHidden();
+    await expect(page.locator("#record-sample")).toBeEmpty();
+    await expect(page.locator("#row-summary")).toBeEmpty();
+    await expect(page.locator(".row-choice-control")).toBeHidden();
   });
 test("multiple lists have meaningful names, counts, sample values and exact chosen CSV", async ({
   page,
