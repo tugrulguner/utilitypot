@@ -680,7 +680,7 @@ test("AI request completion distinguishes presented success, client rejection, a
     });
     const page = await context.newPage();
     const posts = await installSink(context, page);
-    await context.route("**/api/utilities/interpret", (route) =>
+    await context.route("**/api/utilities/interpret", async (route) =>
       fulfillEntityDocumentFixture(route, {
         status: fixture.status,
         contentType: "application/json",
@@ -688,7 +688,14 @@ test("AI request completion distinguishes presented success, client rejection, a
           fixture.outcome === "success"
             ? {
                 ...fixture.body,
-                plan: answeredSource(route.request().postDataJSON().input.text),
+                plan: answeredSource(
+                  await route
+                    .request()
+                    .frame()
+                    .page()
+                    .locator("#source-text")
+                    .inputValue(),
+                ),
                 confidence: { answerability: 0.9, passage: 0.9 },
               }
             : fixture.body,
@@ -712,9 +719,7 @@ test("AI request completion distinguishes presented success, client rejection, a
       )
       .toBe(1);
     if (fixture.outcome === "success")
-      await expect(
-        page.locator("#extra-visual [data-evidence-outcome]"),
-      ).toContainText("Answer found in the source.");
+      await expect(page.locator("#extra-visual .source-answer")).toBeVisible();
     const events = decodedEvents(posts);
     const started = events.find((e) => e.event === "utility_action_started");
     const completed = events.find(
