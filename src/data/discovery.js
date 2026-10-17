@@ -110,16 +110,16 @@ export const guides = {
       "Interested in making your own Python tools available through several interfaces?",
   },
   "entity-extractor": {
-    title: "Extract named entities — Named Entity Recognition (NER)",
+    title: "Extract names from text",
     description:
-      "Extract people, organizations or custom categories from short text with Named Entity Recognition (NER). Review exact source mentions, correct them and export JSON. Bounded AI extraction.",
+      "Extract people, organizations or custom categories from text. Review exact source mentions, make corrections and export JSON.",
     steps: [
-      "Paste short text and choose people, companies or a custom category.",
-      "Extract entities, then review grouped names, categories and each exact source occurrence.",
+      "Paste text and choose people, companies or a custom category.",
+      "Extract names, then review grouped names, categories and each exact source occurrence.",
       "Validate the reviewed mentions, then copy or download JSON with source offsets.",
     ],
     example:
-      "In “Ada joined Acme Labs”, Ada can be a Person and Acme Labs an Organization. Repeated names need separate occurrence review; extraction is not exhaustive.",
+      "In “Ada joined Acme Labs”, Ada can be a Person and Acme Labs an Organization. Review repeated names separately; extraction can miss names.",
     related: ["ask-a-webpage", "json-to-csv"],
     project: "summonpot",
     reason: "Exploring bounded agent decisions in your own Python APIs?",

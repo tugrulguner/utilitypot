@@ -116,7 +116,7 @@ export async function handleRequest(request, env, providerFetch = fetch) {
     return json({ error: "Same-origin requests only." }, 403);
   if (!request.headers.get("content-type")?.startsWith("application/json"))
     return json({ error: "Use JSON." }, 415);
-  let spec, pageUrl;
+  let spec, pageUrl, entityInput;
   try {
     const body = JSON.parse(await boundedText(request.body, 16000));
     if (readPage) {
@@ -136,6 +136,8 @@ export async function handleRequest(request, env, providerFetch = fetch) {
       )
         return json({ error: "Invalid utility request." }, 400);
       spec = builders[body.tool](body.input);
+      if (body.tool === "entities" && body.input.range)
+        entityInput = body.input;
       if (Object.keys(spec.questions).length > 24)
         throw new Error("Question budget exceeded");
     }
@@ -200,68 +202,139 @@ export async function handleRequest(request, env, providerFetch = fetch) {
       return json({ error: safe.message, code: safe.code }, status);
     }
   }
+  const providerUnavailable = Symbol("provider unavailable");
   let failurePhase = "provider_fetch",
     providerStage = 0;
   try {
-    let active = spec,
-      model = "",
+    let model = "",
       plan;
     let remainingQuestions = 24;
     const mergedAnswers = {};
-    // Entity ends depend on selected starts; never ask unrelated endpoints
-    // independently or spend more than the original per-action question budget.
-    for (let stage = 0; stage < 2; stage++) {
-      providerStage = stage + 1;
-      const count = Object.keys(active.questions).length;
-      if (count === 0) {
+    const deadline = Date.now() + 30000;
+    async function evaluate(initial, prefix = "") {
+      let active = initial;
+      for (let stage = 0; stage < 2; stage++) {
+        providerStage = stage + 1;
+        if (entityInput) request.signal.throwIfAborted();
+        const count = Object.keys(active.questions).length;
+        if (!count) {
+          failurePhase = "decode";
+          return active.decode({});
+        }
+        if (count > remainingQuestions) throw Error("Question budget exceeded");
+        remainingQuestions -= count;
+        const timeout = entityInput
+          ? Math.min(15000, deadline - Date.now())
+          : 15000;
+        if (timeout <= 0) throw Error("Entity window deadline exceeded.");
+        failurePhase = "provider_fetch";
+        const r = await providerFetch("https://api.typesafe.ai/v1/systemone", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${env.TYPESAFE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "jev-latest",
+            state: active.state,
+            questions: active.questions,
+          }),
+          signal: entityInput
+            ? AbortSignal.any([request.signal, AbortSignal.timeout(timeout)])
+            : AbortSignal.timeout(timeout),
+        });
+        if (!r.ok) {
+          await r.body?.cancel();
+          throw providerUnavailable;
+        }
+        failurePhase = "provider_body";
+        const response = JSON.parse(await boundedText(r.body, 128000));
+        failurePhase = "response_validation";
+        const answers = validateAnswers(active.questions, response);
+        if (model && model !== response.model)
+          throw Error("Inconsistent models");
+        model = response.model;
+        for (const key of Object.keys(answers)) {
+          const index = /^t(\d+)_/.exec(key)?.[1];
+          const category =
+            prefix && index !== undefined
+              ? `${encodeURIComponent(active.state.types[Number(index)].name)}.`
+              : "";
+          const id = prefix + category + key;
+          if (Object.hasOwn(mergedAnswers, id))
+            throw Error("Duplicate question");
+          mergedAnswers[id] = answers[key];
+        }
+        if (stage === 0 && typeof active.followup === "function") {
+          failurePhase = "followup";
+          active = active.followup(answers);
+          continue;
+        }
         failurePhase = "decode";
-        plan = active.decode({});
-        break;
+        return active.decode(answers);
       }
-      if (count > remainingQuestions)
-        throw new Error("Question budget exceeded");
-      remainingQuestions -= count;
-      failurePhase = "provider_fetch";
-      const r = await providerFetch("https://api.typesafe.ai/v1/systemone", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${env.TYPESAFE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "jev-latest",
-          state: active.state,
-          questions: active.questions,
-        }),
-        signal: AbortSignal.timeout(15000),
-      });
-      if (!r.ok) {
-        await r.body?.cancel();
-        return json(
-          { error: "Processing is unavailable. Try again later." },
-          503,
+      throw Error("Incomplete interpretation");
+    }
+    if (!entityInput) plan = await evaluate(spec);
+    else {
+      // One causal next-start judgment per category; only subsequent, genuinely
+      // unprocessed candidates are asked in later rounds. No inference retries.
+      const types = spec.state.types,
+        tokens = spec.state.tokens;
+      const cursors = new Map(
+        types.map((t) => [
+          t.name,
+          Math.max(
+            entityInput.range.start,
+            Object.hasOwn(entityInput.after ?? {}, t.name)
+              ? entityInput.after[t.name]
+              : 0,
+          ),
+        ]),
+      );
+      const nominations = new Map(types.map((t) => [t.name, []]));
+      const entities = [],
+        finished = new Set();
+      for (let round = 0; round < 3; round++) {
+        const active = types.filter(
+          (t) =>
+            !finished.has(t.name) &&
+            tokens.some(
+              (token) =>
+                token.start >= cursors.get(t.name) &&
+                token.start < entityInput.range.end,
+            ),
         );
+        if (!active.length) break;
+        const step = createEntitiesInterpretation({
+          text: entityInput.text,
+          definitions: active
+            .map((t) => `${t.name}: ${t.definition}`)
+            .join("\n"),
+          range: entityInput.range,
+          after: Object.fromEntries(
+            active.map((t) => [t.name, cursors.get(t.name)]),
+          ),
+        });
+        const result = await evaluate(step, `round${round}.`);
+        entities.push(...result.entities);
+        for (const c of result.continuation) {
+          nominations.get(c.type).push(...c.starts);
+          cursors.set(c.type, c.after);
+          if (c.exhausted) finished.add(c.type);
+        }
       }
-      failurePhase = "provider_body";
-      const response = JSON.parse(await boundedText(r.body, 128000));
-      failurePhase = "response_validation";
-      const answers = validateAnswers(active.questions, response);
-      if (model && model !== response.model)
-        throw new Error("Inconsistent models");
-      model = response.model;
-      for (const key of Object.keys(answers)) {
-        if (Object.hasOwn(mergedAnswers, key))
-          throw new Error("Duplicate question");
-        mergedAnswers[key] = answers[key];
-      }
-      if (stage === 0 && typeof active.followup === "function") {
-        failurePhase = "followup";
-        active = active.followup(answers);
-        continue;
-      }
-      failurePhase = "decode";
-      plan = active.decode(answers);
-      break;
+      plan = {
+        entities,
+        needsReview: true,
+        continuation: types.map((t) => ({
+          type: t.name,
+          starts: nominations.get(t.name),
+          after: cursors.get(t.name),
+          exhausted: nominations.get(t.name).length < 3,
+          batchSize: 3,
+        })),
+      };
     }
     if (!plan || !model) throw new Error("Incomplete interpretation");
     return json({
@@ -274,6 +347,11 @@ export async function handleRequest(request, env, providerFetch = fetch) {
       ),
     });
   } catch (error) {
+    if (error === providerUnavailable)
+      return json(
+        { error: "Processing is unavailable. Try again later." },
+        503,
+      );
     // Only fixed enums leave this boundary; never expose input or exception text.
     const codes = new Map([
       ["Inconsistent entity starts.", "entity_starts_invalid"],

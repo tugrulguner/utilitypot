@@ -29,8 +29,8 @@
   },
   {
     "slug": "entity-extractor",
-    "title": "Extract named entities",
-    "description": "Named Entity Recognition (NER): extract people, organizations and custom entity types from short text, then review exact source mentions.",
+    "title": "Extract names from text",
+    "description": "Extract people, organizations and custom categories from text, then review exact source mentions and export JSON.",
     "tool": "entities",
     "processing": "Uses AI"
   },

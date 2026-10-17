@@ -1,6 +1,6 @@
 # Complete-source entity extraction core
 
-Status: internal core implemented; browser wiring, visitor-copy migration and real-provider qualification are still outstanding. This change alone does **not** enable document extraction in the public interface.
+Status: browser integration and genuine candidate qualification are now implemented; see [complete-source qualification](entity-document-qualification.md). Production deployment remains a separate authorization and verification step.
 
 ## Contract
 
@@ -17,9 +17,9 @@ A payload contains:
 
 The existing Worker delegates to `createEntitiesInterpretation`, which now validates these optional fields and builds its own questions. Only eligible, owned starts are offered to the model. Ends remain conditioned on validated starts. Existing bounded requests without these fields preserve their response contract.
 
-New window requests return `plan.continuation`, one entry per active category: `{ type, starts, after, exhausted }`. The server derives this from nominated starts, including nominations with abstaining endpoints. Consequently a rejected endpoint does not hide later source text. The client validates metadata, exact source spans, cursor progress and same-category non-overlap before advancing. A full batch continues over new, unprocessed candidates; this is not an inference retry.
+New window requests return `plan.continuation`, one entry per active category: `{ type, starts, after, exhausted, batchSize }`. The server derives this from nominated starts, including nominations with abstaining endpoints. Consequently a rejected endpoint does not hide later source text. The client validates metadata, exact source spans, cursor progress and same-category non-overlap before advancing. A full batch continues over new, unprocessed candidates; this is not an inference retry.
 
-Sections run serially so a boundary-crossing mention's same-category interior is excluded from the next section. Different-category overlaps remain valid. Full-source offsets are translated without changing source text. A failure, cancellation, malformed continuation or model-version change rejects the whole document; no partial plan is returned. Raw confidence values are namespaced by section/batch without normalization. The provider's actual model version is preserved.
+Sections run serially so a boundary-crossing mention's same-category interior is excluded from the next section. Different-category overlaps remain valid. Full-source offsets are translated without changing source text. A failure, cancellation, malformed continuation or model-version change rejects the whole document; no partial plan is returned. Raw confidence values are namespaced by section/batch/round/category without normalization. The provider's actual model version is preserved.
 
 Progress callbacks receive `{ completed, total, batch }`, without partial extracted results. No inferred names or partial exports are emitted through progress.
 
@@ -30,7 +30,7 @@ Progress callbacks receive `{ completed, total, batch }`, without partial extrac
 - Sections shrink when necessary to stay within 5,000 UTF-16 code units and 10,000 UTF-8 bytes. Unusually large words/context that cannot fit are refused, never truncated.
 - Every serialized API request stays within the existing 16,000-byte body limit.
 - At most four categories and the current maximum 12-token mention span are retained. Three nominations are a **batch size**, not a document-wide or category-wide output ceiling.
-- Each API request still uses server-owned questions, at most two provider stages and the existing 24-question budget. Existing abuse/capacity guards are unchanged and can reject a request. A 2 MiB resource ceiling is not a promise of unlimited provider throughput or completion latency.
+- Each API request uses server-owned questions: at most three causal next-start → conditioned-end units per category (six provider stages), within the unchanged 24-question budget and a 30-second total section deadline. Existing abuse/capacity guards are unchanged and can reject a request. A 2 MiB resource ceiling is not a promise of unlimited provider throughput or completion latency.
 - The infer callback owns its network deadline and must honor the supplied AbortSignal. The server retains its existing bounded provider deadlines.
 
 ## Parent browser integration
@@ -43,4 +43,4 @@ A new client requires a Worker containing the owned-range/continuation implement
 
 The previously failing five structural regressions now pass: owned candidates, late/dense mentions beyond 120 tokens and three mentions per category, Unicode/exact offsets and cross-category overlap, boundary-spanning names, failure/cancellation rejection and nonredundant empty-window processing. Additional tests exercise the actual Worker handler with a deterministic provider transport oracle, including 54 mentions in 160 tokens, and reject invalid ownership/cursors before provider access. Model-version changes reject the entire document.
 
-These tests are structural/oracle tests, **not** real-provider semantic-quality evidence. Genuine Jev document qualification and rendered browser integration remain required before public readiness.
+These tests are structural/oracle tests, **not** real-provider semantic-quality evidence. The subsequent browser integration and genuine hosted Jev cases are recorded separately in [complete-source qualification](entity-document-qualification.md).

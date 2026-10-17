@@ -58,19 +58,22 @@ import UtilityLayout from "../layouts/UtilityLayout.astro";
     <p>
       TYPESAFE_API_KEY is a server-side Worker secret. The browser never
       receives it. Requests are limited to 16 KB and a bounded set of
-      server-authored questions; inference has a 15-second timeout and no
-      automatic retries. Client and aggregate limits are 6 and 30 requests per
-      minute per Cloudflare location. These limits are eventually consistent and
-      are not a strict global billing cap. Provider-side spend limits are
-      required before public AI launch.
+      server-authored questions. Each provider request has a 15-second timeout;
+      an entity section has a 30-second total deadline. Documents up to 2 MiB
+      run in complete-source sections, paced to respect the existing request
+      limits. A failed section rejects the whole result; there are no automatic
+      retries. Client and aggregate limits are 6 and 30 requests per minute per
+      Cloudflare location. These limits are eventually consistent and are not a
+      strict global billing cap. Provider-side spend limits are required before
+      public AI launch.
     </p>
     <h2>Output boundaries</h2>
     <p>
-      Typed choices and confidence do not guarantee correctness. Review
-      proposals. Entity extraction is capped and may omit mentions. Source
-      excerpts are not independent fact verification. Missing credentials,
-      protection or valid output produce an explicit failure, not fake model
-      results.
+      Typed choices and confidence do not guarantee correctness. Review results.
+      Entity extraction can miss or mislabel mentions despite processing every
+      section. Source excerpts are not independent fact verification. Missing
+      credentials, protection or valid output produce an explicit failure, not
+      fake model results.
     </p>
   </section>
 </UtilityLayout>
