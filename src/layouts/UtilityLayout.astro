@@ -21,6 +21,9 @@ const { title, description, slug } = Astro.props;
 const seoDescription = Astro.props.seoDescription ?? description;
 const searchTitle = Astro.props.searchTitle ?? title;
 const canonical = `https://utilitypot.modepot.io${Astro.props.canonicalPath ?? "/" + (slug ? "tools/" + slug + "/" : "")}`;
+const toolName =
+  tools.find((tool) => tool.slug === slug)?.title ?? "UtilityPot";
+const issueUrl = `https://github.com/tugrulguner/utilitypot/issues/new?title=${encodeURIComponent(`[${toolName}] Feedback`)}&body=${encodeURIComponent(`Tool: ${toolName}\nPage: ${canonical.replace(/[?#].*$/, "")}\n\nPlease avoid including private data.`)}`;
 const schema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
@@ -127,6 +130,22 @@ const schema = {
           ModePot
         </a>
         <a href="https://github.com/tugrulguner/utilitypot">GitHub</a>
+        <a
+          href="https://www.linkedin.com/in/tugrulguner/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="LinkedIn (opens in a new tab)"
+        >
+          LinkedIn
+        </a>
+        <a
+          href="https://x.com/Tugrul_Guner"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="X (opens in a new tab)"
+        >
+          X
+        </a>
         <a href="https://discord.gg/u3AANZr6RG">Community</a>
         <a
           href="https://tugrul.modepot.io/"
@@ -158,6 +177,22 @@ const schema = {
           ModePot
         </a>
         <a href="https://github.com/tugrulguner/utilitypot">GitHub</a>
+        <a
+          href="https://www.linkedin.com/in/tugrulguner/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="LinkedIn (opens in a new tab)"
+        >
+          LinkedIn
+        </a>
+        <a
+          href="https://x.com/Tugrul_Guner"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="X (opens in a new tab)"
+        >
+          X
+        </a>
         <a href="https://discord.gg/u3AANZr6RG">Community</a>
         <a
           href="https://tugrul.modepot.io/"
@@ -183,6 +218,17 @@ const schema = {
         </>
       )}
       <slot />
+      <p class="feedback-link">
+        <a
+          href={issueUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ph-no-autocapture"
+        >
+          Feedback / issue for {toolName} ↗
+        </a>{" "}
+        <span>GitHub opens in a new tab. Avoid private data.</span>
+      </p>
     </main>
     <footer class="utility-footer" data-discovery-surface="footer">
       <p>
@@ -205,6 +251,17 @@ const schema = {
           Tugrul Guner
         </a>{" "}
         · <a href="/">Free tools</a> · <a href="/privacy/">Privacy & limits</a>
+      </p>
+      <p>
+        <a
+          href="https://github.com/tugrulguner/utilitypot/issues/new?title=UtilityPot%20feedback&body=Page%3A%20https%3A%2F%2Futilitypot.modepot.io%2F%20%0A%0APlease%20avoid%20including%20private%20data."
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ph-no-autocapture"
+        >
+          UtilityPot site feedback / issue ↗
+        </a>{" "}
+        <span>GitHub opens in a new tab. Avoid private data.</span>
       </p>
       <p class="next-link">
         <a href="/#tools">Next — Browse tools →</a>

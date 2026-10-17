@@ -297,3 +297,46 @@ body.utility-page {
     padding: 0.65rem 0.85rem;
   }
 }
+
+/* Family/social controls remain readable and comfortably targetable. */
+.family-nav a,
+#family-menu a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding-inline: 10px;
+}
+.feedback-link {
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+.feedback-link a,
+.utility-footer > p a[href*="issues/new"] {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.feedback-link span,
+.utility-footer > p span {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+/* Attribution belongs to the family, not the semantic gold/accent state. */
+.utility-page .utility-header .brand strong,
+.utility-page .utility-main .coordinate,
+.utility-page .utility-footer a[href^="https://modepot.io"] {
+  color: var(--cyan);
+}
+.utility-page .family-nav a,
+#family-menu a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding-inline: 10px;
+}
+.utility-page .family-nav a {
+  font-size: 0.92rem;
+}
