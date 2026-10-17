@@ -67,3 +67,34 @@ for (const width of [1280, 1050, 390, 320])
     await page.locator("#source-text").fill("Changed");
     await expect(page.locator(".entity-workspace")).toHaveCount(0);
   });
+
+test("rejected entity starts preserve input and accept no output or automatic retry", async ({
+  page,
+}) => {
+  let calls = 0;
+  await page.route("**/api/utilities/interpret", (route) => {
+    calls++;
+    return route.fulfill({
+      status: 503,
+      json: {
+        error:
+          "The interpretation could not be verified. No result was accepted. Try again later.",
+        code: "entity_starts_invalid",
+        phase: "followup",
+        stage: 1,
+      },
+    });
+  });
+  await page.goto("/tools/entity-extractor/");
+  await page.locator("#source-text").fill(source);
+  await page.locator("#extra-ask").click();
+  await expect(page.locator("#extra-status")).toContainText(
+    "No result was accepted",
+  );
+  await expect(page.locator("#source-text")).toHaveValue(source);
+  await expect(page.locator(".entity-workspace")).toHaveCount(0);
+  await expect(page.locator("#extra-results")).toBeHidden();
+  await expect(page.locator("#extra-download")).not.toBeVisible();
+  await expect(page.locator("#extra-ask")).toBeEnabled();
+  expect(calls).toBe(1);
+});

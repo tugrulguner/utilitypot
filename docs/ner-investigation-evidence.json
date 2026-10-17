@@ -1,0 +1,408 @@
+{
+  "scope": "Candidate UI against actual production API; no deployment or inference retry",
+  "uiSource": "4a50d77d1604f61eb7382a83aadb129e859d1ccb",
+  "finalDistManifestSHA256": "e6ddd225373e984800debe568bebe82d2c83f3b8a1c9dc1ab7cf97f9e6b7be51",
+  "batches": [
+    {
+      "stage": "earlier presentation build",
+      "localLedger": "test-results-live/ner-investigation-candidate/ledger.json",
+      "rawLedgerSHA256": "8b515a7a2f6147d5794850f53669bd542713f6a7c04f0600d7d7d05070fda08f",
+      "pageErrors": [],
+      "gapsSeconds": [20.534, 13.501],
+      "cases": [
+        {
+          "id": "repeated",
+          "status": "passed",
+          "error": null,
+          "source": "Leila Moreno met Tomas Reed at Harbor Labs. Leila Moreno called Harbor Labs.",
+          "actionAt": "2026-10-17T15:44:56.211Z",
+          "paidActions": 1,
+          "keyboardNavigation": true,
+          "needsReview": true,
+          "downloads": [
+            {
+              "path": "test-results-live/ner-investigation-candidate/repeated-original.json",
+              "bytes": 459,
+              "sha256": "6e1485f5be11b60fb6234251a4ed5447a5ab611a27dbf93eaeb01c37632c76f2",
+              "manualCorrection": false
+            },
+            {
+              "path": "test-results-live/ner-investigation-candidate/repeated-corrected.json",
+              "bytes": 364,
+              "sha256": "abd87770e9f6b6ecc6ec8278c7dedb42693c1e065c9633798b5c82c81a0e44ee",
+              "manualCorrection": true
+            }
+          ],
+          "network": [
+            {
+              "url": "https://utilitypot.modepot.io/api/utilities/interpret",
+              "status": 200,
+              "cfRay": "a4c06dd8afb5e21a-YYZ",
+              "body": {
+                "source": "jev",
+                "model": "jev-1.13.0",
+                "plan": {
+                  "entities": [
+                    {
+                      "type": "Person",
+                      "text": "Leila Moreno",
+                      "start": 0,
+                      "end": 12
+                    },
+                    {
+                      "type": "Person",
+                      "text": "Tomas Reed",
+                      "start": 17,
+                      "end": 27
+                    },
+                    {
+                      "type": "Person",
+                      "text": "Leila Moreno",
+                      "start": 44,
+                      "end": 56
+                    },
+                    {
+                      "type": "Organization",
+                      "text": "Harbor Labs",
+                      "start": 31,
+                      "end": 42
+                    },
+                    {
+                      "type": "Organization",
+                      "text": "Harbor Labs",
+                      "start": 64,
+                      "end": 75
+                    }
+                  ],
+                  "needsReview": true,
+                  "limit": "At most three mentions per type; additional mentions may be omitted."
+                },
+                "needsReview": true,
+                "confidence": {
+                  "t0_m0_start": 1,
+                  "t0_m1_start": 0.47,
+                  "t0_m2_start": 0.42,
+                  "t1_m0_start": 1,
+                  "t1_m1_start": 0.97,
+                  "t1_m2_start": 0.61,
+                  "t0_m0_end": 0.95,
+                  "t0_m1_end": 0.96,
+                  "t0_m2_end": 0.92,
+                  "t1_m0_end": 0.99,
+                  "t1_m1_end": 0.94
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "distinct",
+          "status": "passed",
+          "error": null,
+          "source": "Maya Chen at Quartz Labs met Elias Stone from Birch Systems.",
+          "actionAt": "2026-10-17T15:45:16.745Z",
+          "paidActions": 1,
+          "keyboardNavigation": true,
+          "needsReview": true,
+          "downloads": [
+            {
+              "path": "test-results-live/ner-investigation-candidate/distinct-original.json",
+              "bytes": 368,
+              "sha256": "4c82c874d1edc01197a67135ec8b0ec38006aa5959d4840924056494ad6738bc",
+              "manualCorrection": false
+            }
+          ],
+          "network": [
+            {
+              "url": "https://utilitypot.modepot.io/api/utilities/interpret",
+              "status": 200,
+              "cfRay": "a4c06df48ea7e21a-YYZ",
+              "body": {
+                "source": "jev",
+                "model": "jev-1.13.0",
+                "plan": {
+                  "entities": [
+                    {
+                      "type": "Person",
+                      "text": "Maya Chen",
+                      "start": 0,
+                      "end": 9
+                    },
+                    {
+                      "type": "Person",
+                      "text": "Elias Stone",
+                      "start": 29,
+                      "end": 40
+                    },
+                    {
+                      "type": "Organization",
+                      "text": "Quartz Labs",
+                      "start": 13,
+                      "end": 24
+                    },
+                    {
+                      "type": "Organization",
+                      "text": "Birch Systems",
+                      "start": 46,
+                      "end": 59
+                    }
+                  ],
+                  "needsReview": true,
+                  "limit": "At most three mentions per type; additional mentions may be omitted."
+                },
+                "needsReview": true,
+                "confidence": {
+                  "t0_m0_start": 0.98,
+                  "t0_m1_start": 0.86,
+                  "t0_m2_start": 0.98,
+                  "t1_m0_start": 1,
+                  "t1_m1_start": 0.97,
+                  "t1_m2_start": 0.96,
+                  "t0_m0_end": 0.88,
+                  "t0_m1_end": 0.98,
+                  "t1_m0_end": 0.84,
+                  "t1_m1_end": 0.56
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "absent-category",
+          "status": "passed",
+          "error": null,
+          "source": "Rina Shah met Omar Vega. Rina Shah waved goodbye.",
+          "actionAt": "2026-10-17T15:45:30.246Z",
+          "paidActions": 1,
+          "keyboardNavigation": true,
+          "needsReview": true,
+          "downloads": [
+            {
+              "path": "test-results-live/ner-investigation-candidate/absent-category-original.json",
+              "bytes": 261,
+              "sha256": "0b7045fbb951fd42f2389c575403cc5d5e8f239ffafda59c2a91cde3f93ef2fb",
+              "manualCorrection": false
+            }
+          ],
+          "network": [
+            {
+              "url": "https://utilitypot.modepot.io/api/utilities/interpret",
+              "status": 200,
+              "cfRay": "a4c06e467816e21a-YYZ",
+              "body": {
+                "source": "jev",
+                "model": "jev-1.13.0",
+                "plan": {
+                  "entities": [
+                    {
+                      "type": "Person",
+                      "text": "Rina Shah",
+                      "start": 0,
+                      "end": 9
+                    },
+                    {
+                      "type": "Person",
+                      "text": "Omar Vega",
+                      "start": 14,
+                      "end": 23
+                    },
+                    {
+                      "type": "Person",
+                      "text": "Rina Shah",
+                      "start": 25,
+                      "end": 34
+                    }
+                  ],
+                  "needsReview": true,
+                  "limit": "At most three mentions per type; additional mentions may be omitted."
+                },
+                "needsReview": true,
+                "confidence": {
+                  "t0_m0_start": 0.98,
+                  "t0_m1_start": 0.6,
+                  "t0_m2_start": 0.49,
+                  "t1_m0_start": 1,
+                  "t1_m1_start": 1,
+                  "t1_m2_start": 1,
+                  "t0_m0_end": 0.95,
+                  "t0_m1_end": 0.94,
+                  "t0_m2_end": 0.86
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "final UI source4a50d77",
+      "localLedger": "test-results-live/ner-investigation-final/ledger.json",
+      "rawLedgerSHA256": "203b7a3fc38b4a5416f21447990ff29203ca8839f7e85fca24a83d7b3a3356ca",
+      "pageErrors": [],
+      "gapsSeconds": [13.5, 13.502],
+      "cases": [
+        {
+          "id": "repeated",
+          "status": "failed",
+          "error": "Expected values to be strictly equal:\n\n503 !== 200\n",
+          "source": "Leila Moreno met Tomas Reed at Harbor Labs. Leila Moreno called Harbor Labs.",
+          "actionAt": "2026-10-17T15:55:58.994Z",
+          "paidActions": 1,
+          "keyboardNavigation": null,
+          "needsReview": null,
+          "downloads": [],
+          "network": [
+            {
+              "url": "https://utilitypot.modepot.io/api/utilities/interpret",
+              "status": 503,
+              "cfRay": "a4c07d9fddeeab28-YYZ",
+              "body": {
+                "error": "The interpretation could not be verified. No result was accepted. Try again later.",
+                "code": "entity_starts_invalid",
+                "phase": "followup",
+                "stage": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "distinct",
+          "status": "passed",
+          "error": null,
+          "source": "Maya Chen at Quartz Labs met Elias Stone from Birch Systems.",
+          "actionAt": "2026-10-17T15:56:12.494Z",
+          "paidActions": 1,
+          "keyboardNavigation": true,
+          "needsReview": true,
+          "downloads": [
+            {
+              "path": "test-results-live/ner-investigation-final/distinct-original.json",
+              "bytes": 368,
+              "sha256": "4c82c874d1edc01197a67135ec8b0ec38006aa5959d4840924056494ad6738bc",
+              "manualCorrection": false
+            }
+          ],
+          "network": [
+            {
+              "url": "https://utilitypot.modepot.io/api/utilities/interpret",
+              "status": 200,
+              "cfRay": "a4c07df5588bab28-YYZ",
+              "body": {
+                "source": "jev",
+                "model": "jev-1.13.0",
+                "plan": {
+                  "entities": [
+                    {
+                      "type": "Person",
+                      "text": "Maya Chen",
+                      "start": 0,
+                      "end": 9
+                    },
+                    {
+                      "type": "Person",
+                      "text": "Elias Stone",
+                      "start": 29,
+                      "end": 40
+                    },
+                    {
+                      "type": "Organization",
+                      "text": "Quartz Labs",
+                      "start": 13,
+                      "end": 24
+                    },
+                    {
+                      "type": "Organization",
+                      "text": "Birch Systems",
+                      "start": 46,
+                      "end": 59
+                    }
+                  ],
+                  "needsReview": true,
+                  "limit": "At most three mentions per type; additional mentions may be omitted."
+                },
+                "needsReview": true,
+                "confidence": {
+                  "t0_m0_start": 0.97,
+                  "t0_m1_start": 0.87,
+                  "t0_m2_start": 0.98,
+                  "t1_m0_start": 1,
+                  "t1_m1_start": 0.97,
+                  "t1_m2_start": 0.96,
+                  "t0_m0_end": 0.82,
+                  "t0_m1_end": 0.93,
+                  "t1_m0_end": 0.77,
+                  "t1_m1_end": 0.55
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "absent-category",
+          "status": "passed",
+          "error": null,
+          "source": "Rina Shah met Omar Vega. Rina Shah waved goodbye.",
+          "actionAt": "2026-10-17T15:56:25.996Z",
+          "paidActions": 1,
+          "keyboardNavigation": true,
+          "needsReview": true,
+          "downloads": [
+            {
+              "path": "test-results-live/ner-investigation-final/absent-category-original.json",
+              "bytes": 261,
+              "sha256": "0b7045fbb951fd42f2389c575403cc5d5e8f239ffafda59c2a91cde3f93ef2fb",
+              "manualCorrection": false
+            }
+          ],
+          "network": [
+            {
+              "url": "https://utilitypot.modepot.io/api/utilities/interpret",
+              "status": 200,
+              "cfRay": "a4c07e46b88fab28-YYZ",
+              "body": {
+                "source": "jev",
+                "model": "jev-1.13.0",
+                "plan": {
+                  "entities": [
+                    {
+                      "type": "Person",
+                      "text": "Rina Shah",
+                      "start": 0,
+                      "end": 9
+                    },
+                    {
+                      "type": "Person",
+                      "text": "Omar Vega",
+                      "start": 14,
+                      "end": 23
+                    },
+                    {
+                      "type": "Person",
+                      "text": "Rina Shah",
+                      "start": 25,
+                      "end": 34
+                    }
+                  ],
+                  "needsReview": true,
+                  "limit": "At most three mentions per type; additional mentions may be omitted."
+                },
+                "needsReview": true,
+                "confidence": {
+                  "t0_m0_start": 0.98,
+                  "t0_m1_start": 0.53,
+                  "t0_m2_start": 0.52,
+                  "t1_m0_start": 1,
+                  "t1_m1_start": 1,
+                  "t1_m2_start": 1,
+                  "t0_m0_end": 0.91,
+                  "t0_m1_end": 0.95,
+                  "t0_m2_end": 0.95
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
