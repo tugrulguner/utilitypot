@@ -10,10 +10,10 @@ const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ deviceScaleFactor: 1 });
   for (const [source, target, width, height] of [
-    ["docs/assets/utilitypot-lockup-v1.svg", "utilitypot.png", 1200, 900],
+    ["docs/assets/utilitypot-lockup-v2.svg", "utilitypot.png", 1200, 900],
     [
-      "public/utilitypot-social-v1.svg",
-      "public/utilitypot-social-v1.png",
+      "public/utilitypot-social-v2.svg",
+      "public/utilitypot-social-v2.png",
       1200,
       630,
     ],
@@ -30,7 +30,7 @@ try {
     await page.screenshot({ path: target });
   }
   await writeFile(
-    "public/utilitypot-lockup-v1.png",
+    "public/utilitypot-lockup-v2.png",
     await readFile("utilitypot.png"),
   );
   console.log(

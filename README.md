@@ -1,12 +1,12 @@
 # UtilityPot
 
-<p align="center"><img src="utilitypot.png?v=wordmark-accent-1" alt="UtilityPot — Jev interprets. You review. Code executes." width="600"></p>
+<p align="center"><img src="utilitypot.png?v=public-positioning-2" alt="UtilityPot — Focused browser tools for data, text, diagrams and planning. Review AI-assisted results; no arbitrary generated code." width="600"></p>
 
 <p align="center">Part of <a href="https://modepot.io/">ModePot</a>. &nbsp; <a href="https://utilitypot.modepot.io/">Project website</a> &nbsp; <a href="https://tugrul.modepot.io/">Created by Tugrul Guner</a></p>
 
-<p align="center"><strong>Jev interprets. You review. Code executes.</strong></p>
+<p align="center"><strong>Focused browser tools for data, text, diagrams and planning.</strong></p>
 
-<p align="center">Open-source utilities for messy data, shared text, diagrams and planning. Bounded AI proposals become inspectable settings and exact operations—not arbitrary generated code.</p>
+<p align="center">Four tools work in your browser; three use bounded AI only after you ask. Review AI-assisted results; no arbitrary generated code.</p>
 
 <p align="center"><a href="https://github.com/tugrulguner/utilitypot/actions/workflows/ci.yml"><img src="https://github.com/tugrulguner/utilitypot/actions/workflows/ci.yml/badge.svg" alt="CI"></a> <a href="https://discord.gg/u3AANZr6RG"><img src="https://img.shields.io/badge/Discord-ModePot-5865F2?logo=discord&logoColor=white" alt="ModePot Discord"></a> <a href="LICENSE"><img src="https://img.shields.io/github/license/tugrulguner/utilitypot" alt="MIT license"></a> <a href="https://github.com/tugrulguner/utilitypot"><img src="https://img.shields.io/github/stars/tugrulguner/utilitypot?style=flat" alt="GitHub stars"></a></p>
 
@@ -20,7 +20,7 @@
 - JSON to CSV: select a record array, flatten objects, explicitly omit/join/reject other arrays; escape spreadsheet formulas. Numeric values that would be rounded are refused; quote long identifiers and high-precision values to preserve them.
 - Mixed spreadsheet dates: preserve original values, flag ambiguous dates and retain partial precision.
 - Meeting time finder: reviewed one-off windows, exclusions, timezone-aware overlap and calendar export.
-- Custom entity extraction: up to four definitions, three mentions per type and 120 source tokens. Exact offsets are validated; not exhaustive NER.
+- Named Entity Recognition (NER), “Extract named entities”: up to four definitions, three mentions per type and 120 source tokens. Exact offsets are validated; not exhaustive NER.
 - Text to Mermaid: up to eight listed steps, reviewable graph, local flowchart rendering and Mermaid/SVG downloads. Not arbitrary code generation.
 - Ask a webpage: exact supporting paragraphs with separate answer-presence judgment. Read public HTTP/HTTPS pages by hostname, or paste text. Access-blocked, JavaScript-only, large or unsupported pages require pasted text. Not generated essays or independent fact verification.
 

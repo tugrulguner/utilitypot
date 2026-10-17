@@ -573,8 +573,11 @@
   padding: 3px;
 }
 .discovery-brand strong {
-  color: var(--gold);
+  color: #303238;
   font-weight: inherit;
+}
+[data-theme="dark"] .discovery-brand strong {
+  color: #f4f2ea;
 }
 .project-identity {
   margin-block: 0.5rem;

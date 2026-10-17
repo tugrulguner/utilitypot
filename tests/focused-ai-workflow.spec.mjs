@@ -48,7 +48,7 @@ test("AI tools expose one disclosed Jev action and no alternate execution path",
       page.locator("#import-plan, #prepare-extra, #review-plan"),
     ).toHaveCount(0);
     if (tool === "entities") {
-      await expect(page.locator("#extra-ask")).toHaveText("Find matches");
+      await expect(page.locator("#extra-ask")).toHaveText("Extract entities");
       await expect(page.locator("#source-text")).toHaveAttribute(
         "maxlength",
         "5000",
@@ -139,7 +139,7 @@ test("AI transmission requires the primary action with visible, programmatically
     "processing-disclosure",
   );
   await expect(page.locator("#processing-disclosure")).toContainText(
-    "Selecting Find matches sends text",
+    "Selecting Extract entities sends text",
   );
   expect(calls).toBe(0);
   await action.click();

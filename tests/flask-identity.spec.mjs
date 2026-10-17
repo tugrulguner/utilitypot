@@ -5,9 +5,9 @@ test("UtilityPot flask and pot suffix are rose while the prefix stays off-white"
 }) => {
   await page.goto("/");
   for (const path of [
-    "/utilitypot-mark-v1.svg",
-    "/utilitypot-lockup-v1.png",
-    "/utilitypot-social-v1.png",
+    "/utilitypot-mark-v2.svg",
+    "/utilitypot-lockup-v2.png",
+    "/utilitypot-social-v2.png",
   ]) {
     const result = await page.evaluate(async (path) => {
       const im = new Image();

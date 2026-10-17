@@ -29,8 +29,8 @@
   },
   {
     "slug": "entity-extractor",
-    "title": "Find people and companies",
-    "description": "Highlight people, companies or your own categories in short text.",
+    "title": "Extract named entities",
+    "description": "Named Entity Recognition (NER): extract people, organizations and custom entity types from short text, then review exact source mentions.",
     "tool": "entities",
     "processing": "Uses AI"
   },
