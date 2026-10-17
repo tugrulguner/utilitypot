@@ -7,7 +7,7 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
 
 <UtilityLayout
   title="JSON to CSV"
-  description="Turn JSON records into a spreadsheet-ready CSV."
+  description="Turn your JSON into spreadsheet rows and columns."
   seoDescription={guides["json-to-csv"].description}
   searchTitle={guides["json-to-csv"].title}
   slug="json-to-csv"
@@ -18,10 +18,11 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
     <summary>How this tool works &amp; limits</summary>
     <h2>What this tool does</h2>
     <p>
-      Select the record array before exporting. Nested objects become
-      dot-separated columns. Other arrays must be explicitly rejected, omitted,
-      or stored in one JSON-text cell. This version does not explode nested
-      arrays or join parent context automatically. Formula-like cells are
+      A single object or list is selected for you. If your JSON contains several
+      lists, choose which one should become spreadsheet rows. Nested objects
+      become dot-separated columns. Other arrays must be explicitly rejected,
+      omitted, or stored in one JSON-text cell. This version does not explode
+      nested arrays or join parent context automatically. Formula-like cells are
       escaped before spreadsheet import.
     </p>
     <h2>Privacy and uncertainty</h2>

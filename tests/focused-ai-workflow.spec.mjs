@@ -21,7 +21,8 @@ test("JSON to CSV is a fixed local workflow with inspectable selections", async 
     "local",
   );
   await page.locator("#source-text").fill('[{"id":"001","items":[{"x":2}]}]');
-  await expect(page.locator("#row-path")).toBeVisible();
+  await expect(page.locator("#row-path")).toBeHidden();
+  await expect(page.locator("#row-summary")).toContainText("1 spreadsheet row");
   await expect(page.locator("#array-policy")).toBeVisible();
   await page.locator("#array-policy").selectOption("join");
   await page.locator("#extra-run").click();

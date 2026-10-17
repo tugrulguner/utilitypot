@@ -1,0 +1,97 @@
+.utility-app[data-extra-utility="qa"] .evidence-question {
+  margin: 0 0 0.55rem;
+  font-size: clamp(1.05rem, 2vw, 1.3rem);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.utility-app[data-extra-utility="qa"] .evidence-outcome {
+  margin: 0.5rem 0 1rem;
+  color: var(--ink);
+  font-weight: 700;
+}
+.utility-app[data-extra-utility="qa"] .evidence-passage-nav {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.utility-app[data-extra-utility="qa"] .evidence-passage-nav button {
+  min-height: 44px;
+  padding: 0.4rem 0.75rem;
+}
+.utility-app[data-extra-utility="qa"]
+  .evidence-passage-nav
+  button[aria-pressed="true"] {
+  border-color: var(--gold);
+  box-shadow: inset 0 -3px var(--gold);
+}
+.utility-app[data-extra-utility="qa"] .evidence-passage-count {
+  margin: 0.65rem 0 0.25rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.utility-app[data-extra-utility="qa"] blockquote.evidence-passage {
+  margin: 0;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid var(--line);
+  border-inline-start: 4px solid var(--gold);
+  border-radius: 0 10px 10px 0;
+  background: var(--control);
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+  font-weight: 500;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.utility-app[data-extra-utility="qa"] .evidence-citation {
+  margin: 0.8rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.utility-app[data-extra-utility="qa"] .evidence-provenance {
+  margin-top: 0.9rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.25rem;
+}
+.utility-app[data-extra-utility="qa"] .evidence-provenance > summary {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.utility-app[data-extra-utility="qa"] .evidence-metadata {
+  display: grid;
+  grid-template-columns: minmax(9rem, 0.4fr) minmax(0, 1fr);
+  gap: 0.35rem 1rem;
+  margin: 0.5rem 0 1rem;
+  font-size: 0.85rem;
+}
+.utility-app[data-extra-utility="qa"] .evidence-metadata dt {
+  color: var(--muted);
+}
+.utility-app[data-extra-utility="qa"] .evidence-metadata dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+.utility-app[data-extra-utility="qa"] .evidence-provenance details {
+  border: 0;
+  padding: 0;
+}
+.utility-app[data-extra-utility="qa"] .evidence-provenance pre {
+  max-height: 24rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 480px) {
+  .utility-app[data-extra-utility="qa"] .evidence-metadata {
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+  }
+  .utility-app[data-extra-utility="qa"] .evidence-metadata dd {
+    margin-bottom: 0.5rem;
+  }
+}

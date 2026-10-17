@@ -11,6 +11,13 @@ test("mobile meeting options show both city times without clipping the text", as
     [1, "New York"],
   ]) {
     await page.locator(`#p${i}-zone`).fill(city);
+    if (
+      !(await page
+        .locator(".participant-hours")
+        .nth(i)
+        .evaluate((el) => el.open))
+    )
+      await page.locator(".participant-hours > summary").nth(i).click();
     await page.locator(`#p${i}-start`).fill("09:00");
     await page.locator(`#p${i}-end`).fill("17:00");
   }
@@ -97,25 +104,26 @@ test("new JSON record choices never retain helper claims about the previous sour
 }) => {
   await page.goto("/tools/json-to-csv/");
   await page.locator("#source-text").fill('{"id":"001"}');
-  await page.locator("#row-path").selectOption("$object");
+  await expect(page.locator("#row-path")).toHaveValue("$object");
   await expect(page.locator("#nested-array-help")).toContainText(
-    "No nested arrays",
+    "No lists inside these rows",
   );
   await page
     .locator("#source-text")
     .fill('{"orders":[{"id":"002","tags":["x"]}],"people":[{"name":"Noah"}]}');
   await expect(page.locator("#row-path")).toHaveValue("");
   await expect(page.locator("#nested-array-help")).toContainText(
-    "Choose records",
+    "Choose a list above",
   );
   await expect(page.locator("#nested-array-help")).not.toContainText(
-    "No nested arrays",
+    "No lists inside these rows",
   );
-  await page.locator("#array-policy").selectOption("join");
-  await expect(page.locator("#nested-array-help")).toContainText(
-    "Choose records",
+  await expect(page.locator("#array-policy")).toBeHidden();
+  await expect(page.locator("#row-summary")).toContainText(
+    "Choose a list above",
   );
   await page.locator("#row-path").selectOption("orders");
+  await page.locator("#array-policy").selectOption("join");
   await expect(page.locator("#nested-array-help")).toContainText("tags");
   await page.locator("#array-policy").selectOption("reject");
   await page.locator("#extra-run").click();

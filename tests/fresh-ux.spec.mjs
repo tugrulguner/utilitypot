@@ -60,7 +60,7 @@ test("UX-01 explicit array policy persists across local recomputation, source ed
   );
   await page.goto("/tools/json-to-csv/");
   await page.locator("#source-text").fill(JSON.stringify(orders));
-  await page.locator("#row-path").selectOption("orders");
+  await expect(page.locator("#row-path")).toHaveValue("orders");
   await page.locator("#array-policy").selectOption("join");
   await page.locator("#extra-run").click();
   await expect(page.locator("#array-policy")).toHaveValue("join");
@@ -409,6 +409,13 @@ test("UX-05 Boston is discoverable on mobile and keeps its city label when expli
     [1, "Boston", "08:00", "12:00"],
   ]) {
     await page.locator(`#p${i}-zone`).fill(city);
+    if (
+      !(await page
+        .locator(".participant-hours")
+        .nth(i)
+        .evaluate((el) => el.open))
+    )
+      await page.locator(".participant-hours > summary").nth(i).click();
     await page.locator(`#p${i}-start`).fill(start);
     await page.locator(`#p${i}-end`).fill(end);
   }

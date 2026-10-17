@@ -23,7 +23,7 @@
   {
     "slug": "json-to-csv",
     "title": "JSON to CSV",
-    "description": "Turn JSON records or one object into CSV for a spreadsheet.",
+    "description": "Turn a JSON file into spreadsheet rows and columns.",
     "tool": "jsonCsv",
     "processing": "In your browser"
   },

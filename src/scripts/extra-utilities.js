@@ -1,4 +1,5 @@
 import "../styles/entity-results.css";
+import "../styles/page-evidence.css";
 import { resultDiscovery } from "../lib/discovery.js";
 import {
   interpretationReview,
@@ -70,6 +71,7 @@ if (root) {
     );
   };
   const status = (s, error = false) => {
+    $("extra-status").hidden = false;
     $("extra-status").textContent = s;
     $("extra-status").classList.toggle("error", error);
   };
@@ -77,6 +79,7 @@ if (root) {
     discovery.reset();
     revision++;
     output = "";
+    $("extra-status").hidden = false;
     $("extra-results").hidden = true;
     if (tool === "entities") $("extra-visual").replaceChildren();
   }
@@ -103,7 +106,7 @@ if (root) {
         try {
           paths();
           status(
-            "Choose the records to convert. Review any nested-array paths before converting.",
+            "Each selected item becomes one spreadsheet row. Review the sample and nested-array handling, then convert.",
           );
         } catch {
           /* Incomplete JSON is reported when the user converts. */
@@ -395,6 +398,11 @@ if (root) {
     }
   }
   function paths(selected) {
+    $("record-sample").replaceChildren();
+    $("record-sample-panel").hidden = true;
+    $("row-summary").textContent = "";
+    $("row-choice-control").hidden = true;
+    $("nested-list-options").hidden = true;
     const data = jsonData();
     const choices = recordChoices(data);
     if (
@@ -406,35 +414,59 @@ if (root) {
       choices.push({
         path: "$object",
         count: 1,
-        label: "Single object — 1 row",
+        label: "The whole object — 1 spreadsheet row",
       });
     $("array-options").hidden = false;
+    root.querySelector(".row-choice-control").hidden = choices.length <= 1;
+    const describe = (choice) => {
+      const rows =
+        choice.path === "$object"
+          ? [data]
+          : choice.path === "$"
+            ? data
+            : choice.path.split(".").reduce((value, key) => value[key], data);
+      const first = rows?.[0];
+      const fields =
+        first && typeof first === "object"
+          ? Object.keys(first).slice(0, 4)
+          : [];
+      const name =
+        choice.path === "$object"
+          ? "The whole object"
+          : choice.path === "$"
+            ? "The top-level list"
+            : `“${choice.path.split(".").at(-1)}”${choice.path.includes(".") ? ` inside “${choice.path.split(".").slice(0, -1).join(" → ")}”` : ""}`;
+      return `${name} · ${choice.count} ${choice.count === 1 ? "row" : "rows"}${fields.length ? ` · fields: ${fields.join(", ")}` : ""}`;
+    };
     $("row-path").replaceChildren(
-      new Option("Choose records", ""),
-      ...choices.map(
-        (v) =>
-          new Option(
-            v.label ||
-              `${v.path === "$" ? "Top-level records" : v.path} — ${v.count} rows`,
-            v.path,
-          ),
+      new Option(
+        choices.length > 1
+          ? "Choose which data becomes rows"
+          : "Rows to convert",
+        "",
       ),
+      ...choices.map((choice) => new Option(describe(choice), choice.path)),
     );
     $("row-path").value =
-      selected ??
-      (choices.length === 1 && choices[0].path !== "$object"
-        ? choices[0].path
-        : "");
+      selected ?? (choices.length === 1 ? choices[0].path : "");
     $("row-path").dispatchEvent(new Event("change", { bubbles: true }));
-    if (!choices.length) throw Error("No supported array of objects found.");
+    if (!choices.length) {
+      $("row-summary").textContent =
+        "Add a JSON object or a list of objects to make rows.";
+      throw Error(
+        "Use a JSON object or a list of objects, each containing named fields.",
+      );
+    }
   }
   function showNestedPaths() {
     const path = $("row-path").value;
     $("record-sample").textContent = "";
     $("record-sample-panel").hidden = true;
     if (!path) {
+      $("row-summary").textContent = "Choose a list above to see its rows.";
+      $("nested-list-options").hidden = true;
       $("nested-array-help").textContent =
-        "Choose records to inspect nested arrays before conversion.";
+        "Choose a list above to inspect its data before conversion.";
       return;
     }
     const data = jsonData();
@@ -445,10 +477,40 @@ if (root) {
           ? data
           : path.split(".").reduce((v, k) => v[k], data);
     $("record-sample-panel").hidden = !records?.length;
-    const recordText = JSON.stringify(records?.[0] ?? null, null, 2);
-    $("record-sample").textContent =
-      recordText.slice(0, 1000) +
-      (recordText.length > 1000 ? "… (truncated)" : "");
+    const count = records?.length ?? 0;
+    $("row-summary").textContent =
+      `${count} spreadsheet ${count === 1 ? "row" : "rows"}${path === "$object" ? " from this object" : path === "$" ? " from your list" : ` from “${path.split(".").at(-1)}”`}.`;
+    const examples = records.slice(0, 2);
+    const keys = [
+      ...new Set(examples.flatMap((row) => Object.keys(row))),
+    ].slice(0, 4);
+    const table = document.createElement("table");
+    const head = document.createElement("tr");
+    for (const key of keys) {
+      const th = document.createElement("th");
+      th.scope = "col";
+      th.textContent = key;
+      head.append(th);
+    }
+    table.append(head);
+    for (const row of examples) {
+      const tr = document.createElement("tr");
+      for (const key of keys) {
+        const td = document.createElement("td");
+        const value = row[key];
+        const text =
+          value == null
+            ? ""
+            : typeof value === "object"
+              ? JSON.stringify(value)
+              : String(value);
+        td.textContent = text.length > 160 ? text.slice(0, 160) + "…" : text;
+        td.title = text;
+        tr.append(td);
+      }
+      table.append(tr);
+    }
+    $("record-sample").append(table);
     const found = new Set();
     const walk = (value, prefix = "", depth = 0) => {
       if (depth > 6)
@@ -462,21 +524,13 @@ if (root) {
           walk(child, prefix ? `${prefix}.${key}` : key, depth + 1);
     };
     for (const row of records || []) walk(row);
+    $("nested-list-options").hidden = !found.size;
     $("nested-array-help").textContent = found.size
-      ? `Nested arrays found in selected records (${path}): ${[...found].join(", ")}. Choose “Keep as JSON text” to preserve them, “Omit” to explicitly remove those fields, or “Stop” to make no CSV. Omission is never automatic.`
-      : "No nested arrays found in these records.";
+      ? `Lists found inside these rows (${path}): ${[...found].join(", ")}. Choose “Keep as JSON text” to preserve them, “Omit” to explicitly remove those fields, or “Stop” to make no CSV. Omission is never automatic.`
+      : "No lists inside these rows.";
   }
   $("row-path")?.addEventListener("change", showNestedPaths);
   $("array-policy")?.addEventListener("change", showNestedPaths);
-  function sample(v, depth = 0) {
-    if (depth > 6) throw new Error("Use a shallower sample.");
-    if (Array.isArray(v)) return v.slice(0, 5).map((x) => sample(x, depth + 1));
-    if (v && typeof v === "object")
-      return Object.fromEntries(
-        Object.entries(v).map(([k, x]) => [k, sample(x, depth + 1)]),
-      );
-    return v;
-  }
   $("extra-example").addEventListener("click", () => {
     if (!allowExampleReplacement()) return;
     clear();
@@ -602,6 +656,166 @@ if (root) {
         );
     }
     return true;
+  }
+  function renderPageEvidence(result, confidence, question, sourceText, model) {
+    const visual = $("extra-visual");
+    const heading = document.createElement("h3");
+    heading.className = "evidence-question";
+    heading.textContent = question;
+    visual.append(heading);
+
+    const outcome = document.createElement("p");
+    outcome.dataset.evidenceOutcome = "";
+    outcome.className = "evidence-outcome";
+    const uncertain =
+      result.status === "answered" &&
+      typeof confidence?.answerability === "number" &&
+      confidence.answerability < 0.6;
+    outcome.textContent =
+      result.status === "not-answered"
+        ? "No answer found in the supplied source."
+        : result.status === "partial"
+          ? "Partial evidence found in the source."
+          : uncertain
+            ? "Possible answer — review this source evidence."
+            : "Answer found in the source.";
+    visual.append(outcome);
+    if (
+      result.status !== "not-answered" &&
+      typeof confidence?.passage === "number" &&
+      confidence.passage < 0.6
+    ) {
+      const selectionNote = document.createElement("p");
+      selectionNote.className = "evidence-selection-note";
+      selectionNote.textContent =
+        "Several passages may fit; review the selected exact excerpt.";
+      visual.append(selectionNote);
+    }
+    if (fetchedMetadata?.truncated) {
+      const coverageNote = document.createElement("p");
+      coverageNote.className = "evidence-coverage-note";
+      coverageNote.textContent =
+        "This page was truncated; results cover only the portion read.";
+      visual.append(coverageNote);
+    }
+
+    if (result.excerpts.length) {
+      const nav = document.createElement("nav");
+      nav.dataset.passageNav = "";
+      nav.className = "evidence-passage-nav";
+      nav.setAttribute("aria-label", "Evidence passages for this question");
+      nav.hidden = result.excerpts.length < 2;
+      const passage = document.createElement("blockquote");
+      passage.className = "evidence-passage";
+      passage.dataset.passageText = "";
+      passage.tabIndex = 0;
+      const count = document.createElement("p");
+      count.className = "evidence-passage-count";
+      count.setAttribute("aria-live", "polite");
+      const copyQuote = document.createElement("button");
+      copyQuote.type = "button";
+      copyQuote.className = "evidence-copy-quote";
+      copyQuote.textContent = "Copy quote";
+      copyQuote.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(passage.textContent);
+          copyQuote.textContent = "Quote copied";
+        } catch {
+          copyQuote.textContent = "Select the quote to copy";
+        }
+      });
+      const select = (index) => {
+        copyQuote.textContent = "Copy quote";
+        const excerpt = result.excerpts[index];
+        passage.textContent = excerpt.text;
+        passage.dataset.passageId = excerpt.id;
+        count.textContent =
+          result.excerpts.length === 1
+            ? "Exact quote"
+            : `Passage ${index + 1} of ${result.excerpts.length}`;
+        [...nav.querySelectorAll("button")].forEach((button, n) => {
+          button.setAttribute("aria-pressed", String(n === index));
+        });
+      };
+      result.excerpts.forEach((_, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = `Passage ${index + 1}`;
+        button.setAttribute("aria-label", `Show passage ${index + 1}`);
+        button.addEventListener("click", () => select(index));
+        nav.append(button);
+      });
+      visual.append(nav, count, passage, copyQuote);
+      select(0);
+    } else {
+      const empty = document.createElement("p");
+      empty.className = "evidence-no-passage";
+      empty.textContent = "No supporting passage was selected.";
+      visual.append(empty);
+    }
+
+    const citation = document.createElement("p");
+    citation.dataset.evidenceSource = "";
+    citation.className = "evidence-citation";
+    const isUrl = fetchedUrl && $("source-mode").value === "url";
+    if (isUrl) {
+      const link = document.createElement("a");
+      link.href = fetchedUrl;
+      link.textContent = new URL(fetchedUrl).hostname;
+      link.title = fetchedUrl;
+      link.target = "_blank";
+      link.setAttribute(
+        "aria-label",
+        `Open source at ${new URL(fetchedUrl).hostname} (opens in a new tab)`,
+      );
+      link.className = "ph-no-autocapture";
+      link.rel = "noopener noreferrer";
+      citation.append("Source · ", link);
+    } else citation.textContent = "Source · Pasted text";
+    visual.append(citation);
+
+    const provenance = document.createElement("details");
+    provenance.className = "evidence-provenance";
+    const summary = document.createElement("summary");
+    summary.textContent = "Source and processing details";
+    provenance.append(summary);
+    const meta = document.createElement("dl");
+    meta.className = "evidence-metadata";
+    const fields = [
+      [
+        "Source version",
+        `Submitted snapshot · ${sourceText.length} characters`,
+      ],
+      [
+        "Coverage",
+        `${sourceText.length} characters · ${sourceText.split(/\n\s*\n/).filter((s) => s.trim()).length} paragraphs${fetchedMetadata?.truncated ? " · truncated to reader coverage" : ""}`,
+      ],
+      ["Answerability score", confidence?.answerability],
+      ["Passage-selection score", confidence?.passage],
+      ["Interpretation version", model ?? "Jev typed interpretation"],
+    ];
+    if (
+      Array.isArray(fetchedMetadata?.redirects) &&
+      fetchedMetadata.redirects.length
+    )
+      fields.push(["Redirects", fetchedMetadata.redirects.join(" → ")]);
+    for (const [label, value] of fields) {
+      if (value === undefined || value === null) continue;
+      const dt = document.createElement("dt");
+      dt.textContent = label;
+      const dd = document.createElement("dd");
+      dd.textContent = String(value);
+      meta.append(dt, dd);
+    }
+    provenance.append(meta);
+    const fullSource = document.createElement("details");
+    const sourceSummary = document.createElement("summary");
+    sourceSummary.textContent = "Inspect full source snapshot";
+    const pre = document.createElement("pre");
+    pre.textContent = sourceText;
+    fullSource.append(sourceSummary, pre);
+    provenance.append(fullSource);
+    visual.append(provenance);
   }
   async function askJev() {
     if (!requiredAiFields()) return;
@@ -734,50 +948,24 @@ if (root) {
           "utilitypot-evidence.json",
           "application/json",
         );
-        $("extra-visual").textContent =
-          result.status === "not-answered"
-            ? "Not answered by the supplied source."
-            : `${result.status === "partial" ? "Partial evidence" : "Selected source evidence"} — review the exact excerpt below. This is not independent fact verification.`;
+        renderPageEvidence(
+          result,
+          data.confidence,
+          input.question,
+          input.text,
+          data.model,
+        );
       }
       if (tool === "qa") {
-        for (const e of data.plan.excerpts) {
-          const quote = document.createElement("blockquote");
-          quote.textContent = e.text;
-          $("extra-visual").append(quote);
-        }
-        if (fetchedUrl && $("source-mode").value === "url") {
-          const link = document.createElement("a");
-          link.href = fetchedUrl;
-          link.textContent = `Source: ${fetchedUrl}`;
-          link.rel = "noopener noreferrer";
-          $("extra-visual").append(link);
-        }
+        // renderPageEvidence owns the visible evidence workspace; provenance and
+        // the original typed response remain in the downloadable JSON.
       } else if (!(await runLocal(false))) {
         outcome = token !== revision ? "cancelled" : "rejected";
         return;
       }
       if (tool === "qa") {
-        const result = data.plan;
-        const passageUncertain =
-          result.status !== "not-answered" &&
-          result.excerpts.length > 0 &&
-          typeof data.confidence?.passage === "number" &&
-          data.confidence.passage < 0.6;
-        const answerUncertain =
-          result.status === "answered" &&
-          typeof data.confidence?.answerability === "number" &&
-          data.confidence.answerability < 0.6;
-        const outcome =
-          result.status === "answered"
-            ? answerUncertain
-              ? "Possible answer found in the source."
-              : "Answer found in the source."
-            : result.status === "partial"
-              ? "Partial evidence found in the source."
-              : "No answer found in the supplied source.";
-        status(
-          `${outcome}${answerUncertain ? " The source may not fully answer your question; review the excerpt." : ""}${passageUncertain ? " Several passages may fit; review the selected excerpt." : ""}`,
-        );
+        $("extra-status").textContent = "";
+        $("extra-status").hidden = true;
       } else if (tool !== "entities") {
         const review = interpretationReview(tool, data.confidence);
         if (review) status(`${$("extra-status").textContent} ${review}`);
@@ -826,8 +1014,15 @@ if (root) {
       const token = revision;
       if (tool === "jsonCsv") {
         if (!$("row-path").options.length) paths();
+        const data = jsonData();
+        if (!$("row-path").value)
+          throw Error(
+            recordChoices(data).length > 1
+              ? "Choose which list should become spreadsheet rows."
+              : "Use a JSON object or a list of objects containing named fields.",
+          );
         const result = jsonToCsv(
-          jsonData(),
+          data,
           $("row-path").value,
           $("array-policy").value,
         );
@@ -1250,7 +1445,7 @@ if (root) {
   if (tool === "jsonCsv" && $("source-text").value.trim()) {
     try {
       paths();
-      status("Source loaded. Review the record array before converting.");
+      status("Source loaded. Review the sample rows before converting.");
     } catch (error) {
       status(error.message, true);
     }
