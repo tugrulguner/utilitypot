@@ -63,6 +63,6 @@ for (const [slug, guide] of Object.entries(guides)) {
 const home = await readFile("dist/index.html", "utf8");
 assert.ok(
   home.includes("creator-credit") &&
-    home.includes("/utilitypot-lockup-v1.png?v=flask-rose-1"),
+    home.includes("/utilitypot-lockup-v1.png?v=wordmark-accent-1"),
 );
 console.log("PASS homepage art and creator credit retained");

@@ -582,6 +582,18 @@
 .project-identity strong {
   font-size: 1.1rem;
 }
+.workshop-pot {
+  color: var(--workshop-accent);
+}
+[data-theme="dark"] .workshop-pot {
+  color: var(--workshop-accent-dark);
+}
+.utility-header .brand strong {
+  color: #8f2861;
+}
+[data-theme="dark"] .utility-header .brand strong {
+  color: #f28cbe;
+}
 .discovery-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -649,14 +661,6 @@
   .utility-main > .tool-guide,
   .utility-main > .tool-help {
     grid-column: 1 / -1;
-  }
-  .utility-main > .utility-app:has(#extra-results:not([hidden])),
-  .utility-main > .utility-app:has(#results:not([hidden])) {
-    grid-column: 1 / -1;
-  }
-  .utility-app:has(#extra-results:not([hidden])) ~ .discovery-rail,
-  .utility-app:has(#results:not([hidden])) ~ .discovery-rail {
-    grid-row: auto;
   }
 }
 @media (max-width: 1049px) {

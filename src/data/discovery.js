@@ -2,19 +2,46 @@
 // in docs/public-usability-final-evidence.json (runtime cf82c14). These are
 // sibling projects, not claims about UtilityPot's implementation dependencies.
 export const projects = {
+  dexpot: {
+    name: "Dexpot",
+    href: "https://dexpot.modepot.io/",
+    description:
+      "Synchronous Python HTTP APIs with adaptive execution for GIL and free-threaded CPython.",
+    reason: "Exploring synchronous Python HTTP APIs?",
+    accent: "#66D9FF",
+    lightAccent: "#07617C",
+  },
+  lifepot: {
+    name: "LifePot",
+    href: "https://lifepot.modepot.io/learn",
+    description:
+      "Create and replay artificial-life worlds with validated simulation rules.",
+    reason: "Curious about artificial-life simulations?",
+    accent: "#77E5BD",
+    lightAccent: "#16634B",
+  },
   refpot: {
     name: "RefPot",
+    reason: "Exploring Python storage for structured records?",
+    accent: "#F4F2EA",
+    lightAccent: "#303238",
     href: "https://refpot.modepot.io/",
     description:
       "An experimental embedded database for Python, with CRUD and explicit transactions. Qualification remains limited.",
   },
   intpot: {
     name: "Intpot",
+    reason: "Building your own reusable Python tools?",
+    accent: "#F2B84B",
+    lightAccent: "#795711",
     href: "https://intpot.modepot.io/",
     description: "Define typed Python tools for CLI, HTTP and MCP interfaces.",
   },
   summonpot: {
     name: "Summonpot",
+    reason: "Exploring bounded agent decisions in Python APIs?",
+    accent: "#A987FF",
+    lightAccent: "#6740AD",
     href: "https://summonpot.modepot.io/",
     description:
       "Contract-first Python APIs with bounded agent decisions and application-owned operations.",

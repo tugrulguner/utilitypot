@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test("UtilityPot flask is rose while its wordmark remains off-white and amber", async ({
+test("UtilityPot flask and pot suffix are rose while the prefix stays off-white", async ({
   page,
 }) => {
   await page.goto("/");
@@ -21,7 +21,7 @@ test("UtilityPot flask is rose while its wordmark remains off-white and amber", 
       const { data } = ctx.getImageData(0, 0, c.width, c.height);
       let rose = 0,
         white = 0,
-        gold = 0;
+        suffix = 0;
       const shift = c.height === 630 ? 135 : 0;
       const near = (k, col) =>
         col.every((v, i) => Math.abs(data[k + i] - v) < 12);
@@ -32,19 +32,20 @@ test("UtilityPot flask is rose while its wordmark remains off-white and amber", 
           if (x < 450 && near(k, [242, 140, 190])) rose++;
           if (c.width === 1200 && y >= 330 - shift && y < 470 - shift) {
             if (x >= 510 && x < 610 && near(k, [244, 240, 231])) white++;
-            if (x > 780 && x < 1100 && near(k, [242, 184, 75])) gold++;
+            if (x > 780 && x < 1100 && near(k, [242, 140, 190])) suffix++;
           }
         }
-      return { width: c.width, rose, white, gold };
+      return { width: c.width, rose, white, suffix };
     }, path);
     expect(result.rose, `${path}: actual flask pixels`).toBeGreaterThan(100);
     if (result.width === 1200) {
       expect(result.white, `${path}: off-white utility prefix`).toBeGreaterThan(
         100,
       );
-      expect(result.gold, `${path}: shared amber pot suffix`).toBeGreaterThan(
-        100,
-      );
+      expect(
+        result.suffix,
+        `${path}: rose pot suffix matching flask`,
+      ).toBeGreaterThan(100);
     }
   }
 });

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { projects } from "../src/data/discovery.js";
 
 for (const width of [1280, 1050]) {
   test(`discovery is beside inputs, not above the task, at ${width}px`, async ({
@@ -34,9 +35,16 @@ for (const width of [1280, 1050]) {
         exact: true,
       }),
     ).toBeVisible();
+    const selected = await page
+      .locator("[data-project-showcase]")
+      .getAttribute("data-workshop-selected");
+    expect(Object.keys(projects)).toContain(selected);
     await expect(page.locator(".project-cta")).toHaveAttribute(
       "href",
-      "https://summonpot.modepot.io/",
+      projects[selected].href,
+    );
+    await expect(page.locator(".project-identity strong")).toHaveText(
+      projects[selected].name,
     );
     await expect(page.locator(".partner-card")).toHaveCount(0);
     await expect(page.locator('a[href*="circlesandcookies"]')).toHaveCount(0);
