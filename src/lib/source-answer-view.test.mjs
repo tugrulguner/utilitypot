@@ -1,6 +1,49 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { sourceAnswerMarkdown } from "./utilities/source-answer-view.js";
+import {
+  sourceAnswerMarkdown,
+  sourceAnswerData,
+} from "./utilities/source-answer-view.js";
+test("source data export preserves retrieval coverage, redirects and unmodified raw model evidence", () => {
+  const result = {
+      source: "jev",
+      model: "fixture",
+      confidence: { "window0.complete": 0.49 },
+      plan: { excerpts: [] },
+    },
+    text = "First paragraph.\n\nSecond paragraph.",
+    redirects = [
+      { from: "https://example.org/", to: "https://www.example.org/" },
+    ];
+  const data = sourceAnswerData(result, {
+    question: "What happened?",
+    text,
+    url: "https://www.example.org/",
+    truncated: true,
+    retrieval: { redirects },
+  });
+  assert.equal(data.provider, "jev");
+  assert.equal(data.source.kind, "fetched-url");
+  assert.equal(data.source.text, text);
+  assert.deepEqual(data.source.coverage, {
+    characters: text.length,
+    paragraphs: 2,
+    truncated: true,
+  });
+  assert.deepEqual(data.source.retrieval, { redirects });
+  assert.equal(data.confidence, result.confidence);
+  assert.equal(result.source, "jev");
+});
+test("pasted source exports no fabricated URL or retrieval history", () => {
+  const data = sourceAnswerData(
+    { source: "jev", model: "fixture", confidence: {} },
+    { question: "What?", text: "Source." },
+  );
+  assert.equal(data.source.kind, "pasted-text");
+  assert.equal(data.source.coverage.truncated, false);
+  assert.equal(data.source.url, undefined);
+  assert.equal(data.source.retrieval, undefined);
+});
 test("source-answer Markdown retains main answer and every supporting detail without a global excerpt cap", () => {
   const lead = { text: "Inputs are not stored.", start: 0, end: 22 };
   const items = Array.from({ length: 8 }, (_, i) => ({

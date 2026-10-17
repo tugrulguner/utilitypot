@@ -48,7 +48,7 @@ test("family overview, assets and creator remain discoverable", async ({
     "Turn a JSON file into spreadsheet rows and columns",
     "Extract people, organizations and custom categories from text",
     "Turn up to eight listed steps into a flowchart",
-    "Find exact passages in pasted text or public HTTP/HTTPS pages",
+    "Ask questions about a webpage or text and explore source-backed answers",
   ])
     expect(cards.some((card) => card.includes(description))).toBe(true);
   expect(cards.filter((card) => card.includes("In your browser"))).toHaveLength(

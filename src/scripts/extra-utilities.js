@@ -835,6 +835,9 @@ if (root) {
             text: input.text,
             url: sourceUrl,
             truncated: fetchedMetadata?.truncated === true,
+            retrieval: sourceUrl
+              ? { redirects: fetchedMetadata?.redirects ?? [] }
+              : undefined,
             onChangeQuestion: () => {
               $("instructions").focus();
               $("instructions").scrollIntoView({ block: "center" });

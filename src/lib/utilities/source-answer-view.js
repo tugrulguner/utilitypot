@@ -118,9 +118,31 @@ function sourceBlocks(parent, text, role) {
   }
   if (code) parent.append(code);
 }
+export function sourceAnswerData(
+  result,
+  { question, text, url = "", truncated = false, retrieval },
+) {
+  return {
+    ...result,
+    provider: result.source,
+    question,
+    source: {
+      kind: url ? "fetched-url" : "pasted-text",
+      text,
+      coverage: {
+        characters: text.length,
+        paragraphs: text.trim() ? text.trim().split(/\n\s*\n/).length : 0,
+        truncated,
+      },
+      ...(url
+        ? { url, retrieval: { redirects: retrieval?.redirects ?? [] } }
+        : {}),
+    },
+  };
+}
 export function createSourceAnswerView(
   result,
-  { question, text, url = "", truncated = false, onChangeQuestion },
+  { question, text, url = "", truncated = false, retrieval, onChangeQuestion },
 ) {
   const { plan } = result;
   if (!plan?.answer || !Array.isArray(plan.excerpts))
@@ -314,7 +336,13 @@ export function createSourceAnswerView(
     const blob = new Blob(
       [
         JSON.stringify(
-          { ...result, question, source: { text, ...(url ? { url } : {}) } },
+          sourceAnswerData(result, {
+            question,
+            text,
+            url,
+            truncated,
+            retrieval,
+          }),
           null,
           2,
         ),

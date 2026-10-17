@@ -78,3 +78,40 @@ export function sourceAnswerFixture(input, legacy, sourceText) {
     },
   };
 }
+
+/** Adapt declared legacy QA spans on the real flat source-answer route only. */
+export async function fulfillSourceAnswerFixture(
+  route,
+  options = {},
+  getSource,
+) {
+  let json = options.json;
+  if (
+    json === undefined &&
+    options.contentType === "application/json" &&
+    typeof options.body === "string"
+  ) {
+    try {
+      json = JSON.parse(options.body);
+    } catch {}
+  }
+  try {
+    const request = route.request().postDataJSON();
+    if (
+      request?.input?.mode === "source-answer" &&
+      Array.isArray(request.input.passages)
+    ) {
+      const source = await (typeof getSource === "function"
+        ? getSource()
+        : (getSource ??
+          route.request().frame().page().locator("#source-text").inputValue()));
+      const adapted = sourceAnswerFixture(request.input, json, source);
+      if (adapted !== json) json = adapted;
+    }
+  } catch {
+    // Preserve malformed and unrelated fixture responses unchanged.
+  }
+  return route.fulfill(
+    json === undefined ? options : { ...options, body: undefined, json },
+  );
+}

@@ -4,6 +4,7 @@ import {
   exampleEntities,
 } from "./workflow-fixtures.mjs";
 import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
+import { fulfillSourceAnswerFixture } from "./helpers/source-answer-fixture.mjs";
 import { test, expect } from "@playwright/test";
 import fs from "node:fs/promises";
 for (const width of [1280, 390]) {
@@ -26,6 +27,10 @@ for (const width of [1280, 390]) {
       await page.route("**/api/utilities/interpret", async (route) => {
         calls++;
         const { tool, input } = route.request().postDataJSON();
+        const text =
+          tool === "qa"
+            ? await page.locator("#source-text").inputValue()
+            : input.text;
         const plan =
           tool === "entities"
             ? { entities: [{ type: "Person", text: "Ada", start: 0, end: 3 }] }
@@ -33,18 +38,24 @@ for (const width of [1280, 390]) {
               ? { graph: approvalGraph }
               : {
                   status: "answered",
-                  excerpts: [
-                    { text: input.text, start: 0, end: input.text.length },
-                  ],
+                  excerpts: [{ text, start: 0, end: text.length }],
                 };
-        await fulfillEntityDocumentFixture(route, {
-          json: {
-            source: "jev",
-            model: "regression-fixture",
-            plan,
-            confidence: {},
+        await (
+          tool === "qa"
+            ? fulfillSourceAnswerFixture
+            : fulfillEntityDocumentFixture
+        )(
+          route,
+          {
+            json: {
+              source: "jev",
+              model: "regression-fixture",
+              plan,
+              confidence: {},
+            },
           },
-        });
+          () => page.locator("#source-text").inputValue(),
+        );
       });
       await page.goto(`/tools/${slug}/`);
       await page.getByRole("button", { name: /^Load example:/ }).click();
@@ -58,7 +69,11 @@ for (const width of [1280, 390]) {
       );
       const pending = page.waitForEvent("download");
       await page
-        .getByRole("button", { name: "Download result", exact: true })
+        .getByRole("button", {
+          name:
+            slug === "ask-a-webpage" ? "Download answer" : "Download result",
+          exact: true,
+        })
         .click();
       const file = await pending;
       expect(
@@ -193,18 +208,28 @@ test("URL action reads then interprets once and preserves truncated coverage and
   });
   await page.route("**/api/utilities/interpret", (route) => {
     calls.push("interpret");
-    expect(route.request().postDataJSON().input.text).toBe(source);
-    return fulfillEntityDocumentFixture(route, {
-      json: {
-        source: "jev",
-        model: "fixture",
-        confidence: {},
-        plan: {
-          status: "answered",
-          excerpts: [{ text: source, start: 0, end: source.length }],
+    expect(
+      route
+        .request()
+        .postDataJSON()
+        .input.passages.map((p) => p.text)
+        .join(""),
+    ).toBe(source);
+    return fulfillSourceAnswerFixture(
+      route,
+      {
+        json: {
+          source: "jev",
+          model: "fixture",
+          confidence: {},
+          plan: {
+            status: "answered",
+            excerpts: [{ text: source, start: 0, end: source.length }],
+          },
         },
       },
-    });
+      source,
+    );
   });
   await page.goto("/tools/ask-a-webpage/");
   await page.getByRole("tab", { name: "Public URL", exact: true }).click();
@@ -214,10 +239,14 @@ test("URL action reads then interprets once and preserves truncated coverage and
   await page.locator("#instructions").fill("What does Python support?");
   expect(calls).toEqual([]);
   await page.locator("#extra-ask").click();
-  await expect(page.locator("#extra-visual blockquote")).toHaveText(source);
+  await expect(page.locator(".answer-lead .answer-paragraph")).toHaveText(
+    source,
+  );
   expect(calls).toEqual(["read", "interpret"]);
-  await expect(page.locator("#source-coverage")).toContainText("truncated");
-  await expect(page.locator("#extra-visual a")).toHaveAttribute(
+  await expect(page.locator("#source-coverage")).toContainText(
+    /only part|truncated/i,
+  );
+  await expect(page.locator("#extra-visual .answer-original")).toHaveAttribute(
     "href",
     "https://docs.python.org/3/library/asyncio.html",
   );

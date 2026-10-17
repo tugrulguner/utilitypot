@@ -1,4 +1,5 @@
 import { entityWindows } from "../../src/lib/utilities/entity-document.js";
+import { fulfillSourceAnswerFixture } from "./source-answer-fixture.mjs";
 
 /** Adapt legacy global-offset entity fixtures to the current window protocol. */
 export function adaptEntityDocumentFixture(
@@ -104,6 +105,10 @@ export async function fulfillEntityDocumentFixture(
   options = {},
   source,
 ) {
+  try {
+    if (route.request().postDataJSON()?.tool === "qa")
+      return fulfillSourceAnswerFixture(route, options, source);
+  } catch {}
   let json = options.json;
   if (
     json === undefined &&

@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { readFile } from "node:fs/promises";
+import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
 
 async function downloadText(page, button) {
   const pending = page.waitForEvent("download");
@@ -15,7 +16,7 @@ test("UX-06 homepage discovers the guarded public reader", async ({ page }) => {
   const card = page
     .locator("article")
     .filter({ has: page.locator('a[href="/tools/ask-a-webpage/"]') });
-  await expect(card).toContainText("public HTTP/HTTPS");
+  await expect(card).toContainText("source-backed answers");
   await expect(card).not.toContainText("supported documentation site");
   const text = await (await page.request.get("/llms.txt")).text();
   expect(text).toContain("redirect");
@@ -169,7 +170,7 @@ for (const mode of ["url", "paste"])
       }),
     );
     await page.route("**/api/utilities/interpret", (route) =>
-      route.fulfill({
+      fulfillEntityDocumentFixture(route, {
         json: {
           source: "jev",
           model: "LOCAL FIXTURE — NOT LIVE QUALITY",
@@ -200,7 +201,14 @@ for (const mode of ["url", "paste"])
     await page.locator("#extra-ask").click();
     await expect(page.locator("#extra-results")).toBeVisible();
     const raw = await downloadText(page, "#extra-download");
-    const result = JSON.parse(raw);
+    expect(raw).toContain(source.slice(18));
+    await page.locator(".answer-processing > summary").click();
+    const jsonDownload = page.waitForEvent("download");
+    await page
+      .getByRole("button", { name: "Download source data (JSON)", exact: true })
+      .click();
+    const jsonFile = await jsonDownload;
+    const result = JSON.parse(await readFile(await jsonFile.path(), "utf8"));
     expect(result.question).toBe(question);
     expect(result.source.kind).toBe(
       mode === "url" ? "fetched-url" : "pasted-text",
@@ -227,8 +235,8 @@ for (const mode of ["url", "paste"])
       expect(result.source.url).toBeUndefined();
       expect(result.source.retrieval).toBeUndefined();
     }
-    expect(raw).not.toMatch(/retrievedAt|timestamp/);
-    for (const e of result.excerpts)
+    expect(JSON.stringify(result)).not.toMatch(/retrievedAt|timestamp/);
+    for (const e of result.plan.excerpts)
       expect(result.source.text.slice(e.start, e.end)).toBe(e.text);
     await page.evaluate(() =>
       Object.defineProperty(navigator, "clipboard", {
@@ -242,7 +250,7 @@ for (const mode of ["url", "paste"])
     );
     await page.locator("#extra-copy").click();
     expect(await page.evaluate(() => window.copied)).toBe(raw);
-    await expect(page.locator("#extra-visual blockquote")).toHaveText(
+    await expect(page.locator(".answer-lead .answer-paragraph")).toHaveText(
       source.slice(18),
     );
     await page.locator("#instructions").fill("A changed question");
