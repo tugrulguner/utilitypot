@@ -408,7 +408,8 @@ export async function answerSourceDocument(
     confidence = {},
     models = new Set();
   let anyComplete = false,
-    answerIntent;
+    answerIntent,
+    bestLead;
   onProgress?.({ completed: 0, total: spec.windows.length });
   for (let wi = 0; wi < spec.windows.length; wi++) {
     signal?.throwIfAborted();
@@ -504,6 +505,23 @@ export async function answerSourceDocument(
         throw Error("Invalid source confidence.");
       confidence[`window${wi}.${key}`] = value;
     }
+    const windowLead = leadFor(current, c.intent),
+      answered = plan.status === "answered";
+    if (
+      windowLead.length &&
+      (!bestLead ||
+        Number(answered) > Number(bestLead.answered) ||
+        (answered === bestLead.answered &&
+          c.completeProbability > bestLead.probability))
+    ) {
+      bestLead = {
+        items: windowLead,
+        answered,
+        probability: c.completeProbability,
+        window: wi,
+        intent: c.intent,
+      };
+    }
     all.push(...current);
     contexts.push(...windowContexts);
     anyComplete ||=
@@ -514,7 +532,8 @@ export async function answerSourceDocument(
   }
   signal?.throwIfAborted();
   all.sort((a, b) => a.start - b.start || a.end - b.end);
-  const lead = leadFor(all, answerIntent);
+  const resolvedIntent = bestLead?.intent ?? answerIntent;
+  const lead = bestLead?.items ?? [];
   const status = !all.length
     ? "not-answered"
     : anyComplete
@@ -530,8 +549,8 @@ export async function answerSourceDocument(
       contexts,
       answer: {
         lead,
-        sections: sectionsFor(all, answerIntent),
-        intent: answerIntent,
+        sections: sectionsFor(all, resolvedIntent),
+        intent: resolvedIntent,
       },
       coverage: {
         complete: true,
@@ -540,6 +559,14 @@ export async function answerSourceDocument(
         windows: spec.windows.length,
         unitsJudged: spec.units.length,
         semanticExhaustiveness: false,
+        leadSelection: bestLead
+          ? {
+              window: bestLead.window,
+              completeProbability: bestLead.probability,
+              method:
+                "highest whole-question completeness among supported windows",
+            }
+          : null,
         limitations: [
           "Every source section was processed; this does not prove that every relevant point was identified.",
           "Completeness is conservative when evidence is spread across several sections. Review the source; no outside facts or generated prose are added.",

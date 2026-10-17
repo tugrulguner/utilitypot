@@ -1,0 +1,2060 @@
+{
+  "kind": "Captured genuine Jev 1.13.0 public-source responses; deterministic replay, not fresh inference",
+  "text": "OPEN SOURCE / BUILT FOR THE NEXT ERA\n\nmodepot\n\nWe simplify, modernize, and performance-optimize the software people build on.\n\nModePot is an open-source workshop for modernizing software foundations—and inventing what comes next. AI-native and agent-friendly where they add real value.\n\nExplore the work \n\nCreated by Tugrul Guner\n\nGitHub \n\nLinkedIn \n\nX \n\nThe ModePot flask reformulates existing frameworks and packages, traditional software patterns, outdated runtime assumptions, accumulated complexity, fragmented interfaces, performance bottlenecks, human-only workflows, and difficult technical or creative challenges. Inside the transparent open-source vessel, four shared principles work together: modernize, simplify, optimize, and invent. The outcomes are modern frameworks and packages, optimized high-performance systems, AI-native and agent-friendly tools where valuable, innovative engines, and experimental games.\n\nWhich ModePot project should you use?\n\nIf you need to…\n\nUse\n\nBuild a synchronous Python HTTP API that adapts to GIL and free-threaded CPython.\ndexpot\n\nServe typed Python tools as a CLI, HTTP API, or MCP server—or convert between them.\nintpot\n\nExpose typed endpoints that combine exact operations with bounded agent-owned decisions.\nsummonpot\n\nCreate and replay a world where agent proposals become bounded simulation rules.\nlifepot\n\nA native C++ embedded engine with a small Python Database/Row API for fixed-schema CRUD and explicit transactions; SQL and ORM remain planned.\nrefpot\n\nFour local converters and calculators, three AI-assisted text tools. One fixed workflow per tool.\nutilitypot\n\nMode 01 / execution\n\ndexpot\n\nSynchronous Python API framework\n\nPlain handlers. Adaptive execution.\n\nDexpot keeps handlers synchronous across standard-GIL and free-threaded CPython. response=T validates and projects public output; invalid output becomes a sanitized 500 before success bytes, response=None uses generic output, and RawResponse is unchecked. Any is not a privacy filter.\n\nresponse=T contract · v0.7.0 published on PyPI\n\nIllustrative animation · not a live run\n\nTyped input is bound before a synchronous handler builds a checked public response.\n\nOpen project playground \n\nExplore Dexpot \n\nDocs \n\nSource snapshot · aaacb62 \n\nREADME · 8ec15d14f4d2 \n\nRoadmap · 5939a02b69ed \n\nLatest recorded release · v0.7.0 \n\nGitHub checked 2026-10-17 UTC\n\nGitHub \n\nMode 02 / interface\n\nintpot\n\nOne definition, three interfaces\n\nDefine once. Serve in every direction.\n\nIntpot turns typed Python tools into Typer CLIs, FastAPI apps, or FastMCP servers—and can inspect an existing app and convert it into either of the others.\n\nv0.11.0 published: bounded helper recovery and before-write missing-binding refusal. v0.10.0 published: callback refusal and missing-body diagnostics with explicit scaffold opt-in.\n\nIllustrative animation · not a live run\n\nOne typed function branches into CLI, HTTP, and MCP interfaces.\n\nOpen project playground \n\nExplore Intpot \n\nDocs \n\nSource snapshot · 01faf02 \n\nREADME · be3d10873ce2 \n\nRoadmap · 79c360513e93 \n\nLatest recorded release · v0.11.0 \n\nGitHub checked 2026-10-17 UTC\n\nGitHub \n\nMode 03 / decision\n\nsummonpot\n\nContract-first agent-owned endpoints\n\nDeclare the contract. Bound the authority.\n\nSummonpot combines typed API contracts, deterministic application operations, and explicitly bounded agent-owned decisions behind one executable endpoint declaration.\n\nIllustrative animation · not a live run\n\nFixed request-owned values, bounded agent choice, application result.\n\nOpen project playground \n\nExplore Summonpot \n\nDocs \n\nSource snapshot · af2b522 \n\nREADME · 98185f43c452 \n\nRoadmap · 4d651f1d74e2 \n\nLatest recorded release · v0.10.0 \n\nGitHub checked 2026-10-17 UTC\n\nGitHub \n\nMode 04 / life\n\nlifepot\n\nBounded artificial-life game\n\nDescribe a world. Watch deterministic life adapt.\n\nLifePot is an open-source artificial-life game where Jev proposes typed ecology, deterministic code runs the world, and a validated ledger makes every accepted change inspectable and replayable.\n\nIllustrative animation · not a live run\n\nIllustrative Conway’s Game of Life: each frame follows the same neighbor-count birth and survival rules; live cells appear, disappear, and move.\n\nPlay the game \n\nExplore LifePot \n\nDocs \n\nSource snapshot · 82e6578 \n\nREADME · 84026ca00ffa \n\nRoadmap · 775c8cefb58f \n\nLatest recorded release · v0.8.0 \n\nGitHub checked 2026-10-17 UTC\n\nGitHub \n\nMode 05 / engine\n\nrefpot\n\nEmbedded database · experimental alpha\n\nOwn the engine. Keep the usage simple.\n\nRefPot v0.1.1 is a publicly released experimental alpha. Its native C++ engine and small Python Database/Row API provide fixed-schema CRUD and explicit transactions. SQL and ORM remain planned, not shipped. Qualification is limited; there is no broad performance result or production-durability claim.\n\nIllustrative animation · proposed architecture, not a live run\n\nIllustration of two proposed entry paths: direct SQL statements and structured Python ORM operations converge on one shared relational execution core. This is a proposed architecture, not a live run.\n\nExplore RefPot \n\nDocs \n\nSource snapshot · 4741eb4 \n\nREADME · 3ba385bab828 \n\nRoadmap · bde8911c1fa1 \n\nLatest recorded release · v0.1.1 \n\nGitHub checked 2026-10-17 UTC\n\nGitHub \n\nMode 06 / utility\n\nutilitypot\n\nSeven tools · four local, three AI-assisted\n\nOne task. One action. Inspect the result.\n\nFour browser-local utilities handle CSV/JSON conversion, dates and meeting calculations. Three AI-assisted tools use Jev for entities, flowcharts and webpage evidence after disclosed submission. Inspect results, then copy or download.\n\nIllustrative mechanism · not a live run\n\nFour fixed browser-local workflows perform conversions and calculations without API calls. Three fixed AI-assisted workflows use disclosed Jev interpretation. All seven provide inspectable results and exports. Illustration only, not a live run.\n\nExplore UtilityPot \n\nDocs \n\nSource snapshot · 9077d4c \n\nREADME · 7fb7e4692ea5 \n\nRoadmap · not publishedNo release recordedGitHub checked 2026-10-17 UTC\n\nGitHub \n\nOPEN SOURCE / PARTICIPATE\n\nBuild with us.\n\nStart with the project’s contribution guide; discuss a change before taking on substantial work, then use its issue tracker to propose or report it.\n\nDexpot contribution guide ↗\n\nIntpot contribution guide ↗\n\nSummonpot contribution guide ↗\n\nLifePot contribution guide ↗\n\nPropose Dexpot work ↗\n\nPropose Intpot work ↗\n\nPropose Summonpot work ↗\n\nPropose LifePot work ↗\n\nDiscord · project questions and community discussion ↗\n\nWHAT IS MODEPOT?\n\nSimpler software.\n\nBigger possibilities.\n\nModePot exists to remove accumulated complexity. We simplify how frameworks are used, modernize how they are built, and optimize the paths that matter without passing the machinery on to developers.\n\nWe are building an open-source family of fast, approachable frameworks, tools, engines, and games, with AI-native and agent-friendly approaches where they add value. Dexpot, Intpot, Summonpot, LifePot, RefPot, and UtilityPot are only the beginning. ModePot was created by Tugrul Guner.\n\nPartner\n\nMaking math fun and thinking a habit.\n\nStory games and puzzles that build analytical thinking and math skills for kids ages 5–10.\n\nExplore Circles & Cookies",
+  "question": "Which software projects belong to the ModePot family?",
+  "expectedLead": "Dexpot, Intpot, Summonpot, LifePot, RefPot, and UtilityPot are only the beginning.",
+  "windows": [
+    {
+      "input": {
+        "mode": "source-answer",
+        "question": "Which software projects belong to the ModePot family?",
+        "passages": [
+          {
+            "id": "u0",
+            "text": "OPEN SOURCE / BUILT FOR THE NEXT ERA\n",
+            "start": 0,
+            "end": 37
+          },
+          {
+            "id": "u1",
+            "text": "\nmodepot\n",
+            "start": 37,
+            "end": 46
+          },
+          {
+            "id": "u2",
+            "text": "\nWe simplify, modernize, and performance-optimize the software people build on.\n",
+            "start": 46,
+            "end": 126
+          },
+          {
+            "id": "u3",
+            "text": "\nModePot is an open-source workshop for modernizing software foundations—and inventing what comes next. AI-native and agent-friendly where they add real value.\n",
+            "start": 126,
+            "end": 286
+          },
+          {
+            "id": "u4",
+            "text": "\nExplore the work \n",
+            "start": 286,
+            "end": 305
+          },
+          {
+            "id": "u5",
+            "text": "\nCreated by Tugrul Guner\n",
+            "start": 305,
+            "end": 330
+          },
+          {
+            "id": "u6",
+            "text": "\nGitHub \n",
+            "start": 330,
+            "end": 339
+          },
+          {
+            "id": "u7",
+            "text": "\nLinkedIn \n",
+            "start": 339,
+            "end": 350
+          },
+          {
+            "id": "u8",
+            "text": "\nX \n",
+            "start": 350,
+            "end": 354
+          },
+          {
+            "id": "u9",
+            "text": "\nThe ModePot flask reformulates existing frameworks and packages, traditional software patterns, outdated runtime assumptions, accumulated complexity, fragmented interfaces, performance bottlenecks, human-only workflows, and difficult technical or creative challenges. Inside the transparent open-source vessel, four shared principles work together: modernize, simplify, optimize, and invent. The outcomes are modern frameworks and packages, optimized high-performance systems, AI-native and agent-friendly tools where valuable, innovative engines, and experimental games.\n",
+            "start": 354,
+            "end": 927
+          }
+        ]
+      },
+      "response": {
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "plan": {
+          "status": "not-answered",
+          "excerpts": [],
+          "contexts": [],
+          "answer": {
+            "lead": [],
+            "sections": [],
+            "intent": "fact"
+          },
+          "coverage": {
+            "protocol": "source-answer-v1",
+            "passageIds": [
+              "u0",
+              "u1",
+              "u2",
+              "u3",
+              "u4",
+              "u5",
+              "u6",
+              "u7",
+              "u8",
+              "u9"
+            ],
+            "processed": 10,
+            "completeProbability": 0.15,
+            "intent": "fact"
+          }
+        },
+        "needsReview": true,
+        "confidence": {
+          "u0_relevant": 0.03,
+          "u0_role": 1,
+          "u1_relevant": 0.06,
+          "u1_role": 0.96,
+          "u2_relevant": 0.05,
+          "u2_role": 0.98,
+          "u3_relevant": 0.17,
+          "u3_role": 0.85,
+          "u4_relevant": 0.03,
+          "u4_role": 0.99,
+          "u5_relevant": 0.04,
+          "u5_role": 1,
+          "u6_relevant": 0.03,
+          "u6_role": 1,
+          "u7_relevant": 0.02,
+          "u7_role": 1,
+          "u8_relevant": 0.03,
+          "u8_role": 1,
+          "u9_relevant": 0.5,
+          "u9_role": 0.32,
+          "answer_complete": 0.15,
+          "intent": 0.99
+        }
+      }
+    },
+    {
+      "input": {
+        "mode": "source-answer",
+        "question": "Which software projects belong to the ModePot family?",
+        "passages": [
+          {
+            "id": "u0",
+            "text": "\nWhich ModePot project should you use?\n",
+            "start": 927,
+            "end": 966
+          },
+          {
+            "id": "u1",
+            "text": "\nIf you need to…\n",
+            "start": 966,
+            "end": 983
+          },
+          {
+            "id": "u2",
+            "text": "\nUse\n",
+            "start": 983,
+            "end": 988
+          },
+          {
+            "id": "u3",
+            "text": "\nBuild a synchronous Python HTTP API that adapts to GIL and free-threaded CPython.\ndexpot\n",
+            "start": 988,
+            "end": 1078
+          },
+          {
+            "id": "u4",
+            "text": "\nServe typed Python tools as a CLI, HTTP API, or MCP server—or convert between them.\nintpot\n",
+            "start": 1078,
+            "end": 1170
+          },
+          {
+            "id": "u5",
+            "text": "\nExpose typed endpoints that combine exact operations with bounded agent-owned decisions.\nsummonpot\n",
+            "start": 1170,
+            "end": 1270
+          },
+          {
+            "id": "u6",
+            "text": "\nCreate and replay a world where agent proposals become bounded simulation rules.\nlifepot\n",
+            "start": 1270,
+            "end": 1360
+          },
+          {
+            "id": "u7",
+            "text": "\nA native C++ embedded engine with a small Python Database/Row API for fixed-schema CRUD and explicit transactions; SQL and ORM remain planned.\nrefpot\n",
+            "start": 1360,
+            "end": 1511
+          },
+          {
+            "id": "u8",
+            "text": "\nFour local converters and calculators, three AI-assisted text tools. One fixed workflow per tool.\nutilitypot\n",
+            "start": 1511,
+            "end": 1621
+          },
+          {
+            "id": "u9",
+            "text": "\nMode 01 / execution\n",
+            "start": 1621,
+            "end": 1642
+          }
+        ]
+      },
+      "response": {
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "plan": {
+          "status": "answered",
+          "excerpts": [
+            {
+              "start": 989,
+              "end": 1077,
+              "text": "Build a synchronous Python HTTP API that adapts to GIL and free-threaded CPython.\ndexpot",
+              "sourceId": "source-988-1078",
+              "id": "source-989-1077",
+              "role": "direct",
+              "relevance": 0.88
+            },
+            {
+              "start": 1163,
+              "end": 1169,
+              "text": "intpot",
+              "sourceId": "source-1078-1170",
+              "id": "source-1163-1169",
+              "role": "direct",
+              "relevance": 0.9
+            },
+            {
+              "start": 1171,
+              "end": 1269,
+              "text": "Expose typed endpoints that combine exact operations with bounded agent-owned decisions.\nsummonpot",
+              "sourceId": "source-1170-1270",
+              "id": "source-1171-1269",
+              "role": "direct",
+              "relevance": 0.87
+            },
+            {
+              "start": 1271,
+              "end": 1359,
+              "text": "Create and replay a world where agent proposals become bounded simulation rules.\nlifepot",
+              "sourceId": "source-1270-1360",
+              "id": "source-1271-1359",
+              "role": "direct",
+              "relevance": 0.86
+            },
+            {
+              "start": 1361,
+              "end": 1510,
+              "text": "A native C++ embedded engine with a small Python Database/Row API for fixed-schema CRUD and explicit transactions; SQL and ORM remain planned.\nrefpot",
+              "sourceId": "source-1360-1511",
+              "id": "source-1361-1510",
+              "role": "direct",
+              "relevance": 0.87
+            },
+            {
+              "start": 1610,
+              "end": 1620,
+              "text": "utilitypot",
+              "sourceId": "source-1511-1621",
+              "id": "source-1610-1620",
+              "role": "direct",
+              "relevance": 0.83
+            }
+          ],
+          "contexts": [
+            {
+              "id": "source-988-1078",
+              "text": "\nBuild a synchronous Python HTTP API that adapts to GIL and free-threaded CPython.\ndexpot\n",
+              "start": 988,
+              "end": 1078,
+              "role": "direct",
+              "relevance": 0.88
+            },
+            {
+              "id": "source-1078-1170",
+              "text": "\nServe typed Python tools as a CLI, HTTP API, or MCP server—or convert between them.\nintpot\n",
+              "start": 1078,
+              "end": 1170,
+              "role": "direct",
+              "relevance": 0.9
+            },
+            {
+              "id": "source-1170-1270",
+              "text": "\nExpose typed endpoints that combine exact operations with bounded agent-owned decisions.\nsummonpot\n",
+              "start": 1170,
+              "end": 1270,
+              "role": "direct",
+              "relevance": 0.87
+            },
+            {
+              "id": "source-1270-1360",
+              "text": "\nCreate and replay a world where agent proposals become bounded simulation rules.\nlifepot\n",
+              "start": 1270,
+              "end": 1360,
+              "role": "direct",
+              "relevance": 0.86
+            },
+            {
+              "id": "source-1360-1511",
+              "text": "\nA native C++ embedded engine with a small Python Database/Row API for fixed-schema CRUD and explicit transactions; SQL and ORM remain planned.\nrefpot\n",
+              "start": 1360,
+              "end": 1511,
+              "role": "direct",
+              "relevance": 0.87
+            },
+            {
+              "id": "source-1511-1621",
+              "text": "\nFour local converters and calculators, three AI-assisted text tools. One fixed workflow per tool.\nutilitypot\n",
+              "start": 1511,
+              "end": 1621,
+              "role": "direct",
+              "relevance": 0.83
+            }
+          ],
+          "answer": {
+            "lead": [
+              {
+                "start": 989,
+                "end": 1077,
+                "text": "Build a synchronous Python HTTP API that adapts to GIL and free-threaded CPython.\ndexpot",
+                "sourceId": "source-988-1078",
+                "id": "source-989-1077",
+                "role": "direct",
+                "relevance": 0.88
+              },
+              {
+                "start": 1163,
+                "end": 1169,
+                "text": "intpot",
+                "sourceId": "source-1078-1170",
+                "id": "source-1163-1169",
+                "role": "direct",
+                "relevance": 0.9
+              },
+              {
+                "start": 1171,
+                "end": 1269,
+                "text": "Expose typed endpoints that combine exact operations with bounded agent-owned decisions.\nsummonpot",
+                "sourceId": "source-1170-1270",
+                "id": "source-1171-1269",
+                "role": "direct",
+                "relevance": 0.87
+              }
+            ],
+            "sections": [
+              {
+                "kind": "direct",
+                "title": "Supporting details",
+                "items": [
+                  {
+                    "start": 989,
+                    "end": 1077,
+                    "text": "Build a synchronous Python HTTP API that adapts to GIL and free-threaded CPython.\ndexpot",
+                    "sourceId": "source-988-1078",
+                    "id": "source-989-1077",
+                    "role": "direct",
+                    "relevance": 0.88
+                  },
+                  {
+                    "start": 1163,
+                    "end": 1169,
+                    "text": "intpot",
+                    "sourceId": "source-1078-1170",
+                    "id": "source-1163-1169",
+                    "role": "direct",
+                    "relevance": 0.9
+                  },
+                  {
+                    "start": 1171,
+                    "end": 1269,
+                    "text": "Expose typed endpoints that combine exact operations with bounded agent-owned decisions.\nsummonpot",
+                    "sourceId": "source-1170-1270",
+                    "id": "source-1171-1269",
+                    "role": "direct",
+                    "relevance": 0.87
+                  },
+                  {
+                    "start": 1271,
+                    "end": 1359,
+                    "text": "Create and replay a world where agent proposals become bounded simulation rules.\nlifepot",
+                    "sourceId": "source-1270-1360",
+                    "id": "source-1271-1359",
+                    "role": "direct",
+                    "relevance": 0.86
+                  },
+                  {
+                    "start": 1361,
+                    "end": 1510,
+                    "text": "A native C++ embedded engine with a small Python Database/Row API for fixed-schema CRUD and explicit transactions; SQL and ORM remain planned.\nrefpot",
+                    "sourceId": "source-1360-1511",
+                    "id": "source-1361-1510",
+                    "role": "direct",
+                    "relevance": 0.87
+                  },
+                  {
+                    "start": 1610,
+                    "end": 1620,
+                    "text": "utilitypot",
+                    "sourceId": "source-1511-1621",
+                    "id": "source-1610-1620",
+                    "role": "direct",
+                    "relevance": 0.83
+                  }
+                ]
+              }
+            ],
+            "intent": "fact"
+          },
+          "coverage": {
+            "protocol": "source-answer-v1",
+            "passageIds": [
+              "u0",
+              "u1",
+              "u2",
+              "u3",
+              "u4",
+              "u5",
+              "u6",
+              "u7",
+              "u8",
+              "u9"
+            ],
+            "processed": 10,
+            "completeProbability": 0.86,
+            "intent": "fact"
+          }
+        },
+        "needsReview": true,
+        "confidence": {
+          "u0_relevant": 0.06,
+          "u0_role": 0.98,
+          "u1_relevant": 0.04,
+          "u1_role": 0.98,
+          "u2_relevant": 0.03,
+          "u2_role": 0.99,
+          "u3_relevant": 0.88,
+          "u3_role": 0.99,
+          "u4_relevant": 0.9,
+          "u4_role": 1,
+          "u5_relevant": 0.87,
+          "u5_role": 0.99,
+          "u6_relevant": 0.86,
+          "u6_role": 0.99,
+          "u7_relevant": 0.87,
+          "u7_role": 0.99,
+          "u8_relevant": 0.83,
+          "u8_role": 0.98,
+          "u9_relevant": 0.06,
+          "u9_role": 0.99,
+          "answer_complete": 0.86,
+          "intent": 1,
+          "u3_span": 0.32,
+          "u4_span": 0.31,
+          "u5_span": 0.36,
+          "u6_span": 0.35,
+          "u7_span": 0.35,
+          "u8_span": 0.43
+        }
+      }
+    },
+    {
+      "input": {
+        "mode": "source-answer",
+        "question": "Which software projects belong to the ModePot family?",
+        "passages": [
+          {
+            "id": "u0",
+            "text": "\ndexpot\n",
+            "start": 1642,
+            "end": 1650
+          },
+          {
+            "id": "u1",
+            "text": "\nSynchronous Python API framework\n",
+            "start": 1650,
+            "end": 1684
+          },
+          {
+            "id": "u2",
+            "text": "\nPlain handlers. Adaptive execution.\n",
+            "start": 1684,
+            "end": 1721
+          },
+          {
+            "id": "u3",
+            "text": "\nDexpot keeps handlers synchronous across standard-GIL and free-threaded CPython. response=T validates and projects public output; invalid output becomes a sanitized 500 before success bytes, response=None uses generic output, and RawResponse is unchecked. Any is not a privacy filter.\n",
+            "start": 1721,
+            "end": 2007
+          },
+          {
+            "id": "u4",
+            "text": "\nresponse=T contract · v0.7.0 published on PyPI\n",
+            "start": 2007,
+            "end": 2055
+          },
+          {
+            "id": "u5",
+            "text": "\nIllustrative animation · not a live run\n",
+            "start": 2055,
+            "end": 2096
+          },
+          {
+            "id": "u6",
+            "text": "\nTyped input is bound before a synchronous handler builds a checked public response.\n",
+            "start": 2096,
+            "end": 2181
+          },
+          {
+            "id": "u7",
+            "text": "\nOpen project playground \n",
+            "start": 2181,
+            "end": 2207
+          },
+          {
+            "id": "u8",
+            "text": "\nExplore Dexpot \n",
+            "start": 2207,
+            "end": 2224
+          },
+          {
+            "id": "u9",
+            "text": "\nDocs \n",
+            "start": 2224,
+            "end": 2231
+          }
+        ]
+      },
+      "response": {
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "plan": {
+          "status": "not-answered",
+          "excerpts": [],
+          "contexts": [],
+          "answer": {
+            "lead": [],
+            "sections": [],
+            "intent": "fact"
+          },
+          "coverage": {
+            "protocol": "source-answer-v1",
+            "passageIds": [
+              "u0",
+              "u1",
+              "u2",
+              "u3",
+              "u4",
+              "u5",
+              "u6",
+              "u7",
+              "u8",
+              "u9"
+            ],
+            "processed": 10,
+            "completeProbability": 0.07,
+            "intent": "fact"
+          }
+        },
+        "needsReview": true,
+        "confidence": {
+          "u0_relevant": 0.19,
+          "u0_role": 0.5,
+          "u1_relevant": 0.22,
+          "u1_role": 0.65,
+          "u2_relevant": 0.08,
+          "u2_role": 0.95,
+          "u3_relevant": 0.24,
+          "u3_role": 0.7,
+          "u4_relevant": 0.16,
+          "u4_role": 0.92,
+          "u5_relevant": 0.03,
+          "u5_role": 0.98,
+          "u6_relevant": 0.12,
+          "u6_role": 0.85,
+          "u7_relevant": 0.03,
+          "u7_role": 1,
+          "u8_relevant": 0.04,
+          "u8_role": 0.99,
+          "u9_relevant": 0.03,
+          "u9_role": 1,
+          "answer_complete": 0.07,
+          "intent": 1
+        }
+      }
+    },
+    {
+      "input": {
+        "mode": "source-answer",
+        "question": "Which software projects belong to the ModePot family?",
+        "passages": [
+          {
+            "id": "u0",
+            "text": "\nSource snapshot · aaacb62 \n",
+            "start": 2231,
+            "end": 2259
+          },
+          {
+            "id": "u1",
+            "text": "\nREADME · 8ec15d14f4d2 \n",
+            "start": 2259,
+            "end": 2283
+          },
+          {
+            "id": "u2",
+            "text": "\nRoadmap · 5939a02b69ed \n",
+            "start": 2283,
+            "end": 2308
+          },
+          {
+            "id": "u3",
+            "text": "\nLatest recorded release · v0.7.0 \n",
+            "start": 2308,
+            "end": 2343
+          },
+          {
+            "id": "u4",
+            "text": "\nGitHub checked 2026-10-17 UTC\n",
+            "start": 2343,
+            "end": 2374
+          },
+          {
+            "id": "u5",
+            "text": "\nGitHub \n",
+            "start": 2374,
+            "end": 2383
+          },
+          {
+            "id": "u6",
+            "text": "\nMode 02 / interface\n",
+            "start": 2383,
+            "end": 2404
+          },
+          {
+            "id": "u7",
+            "text": "\nintpot\n",
+            "start": 2404,
+            "end": 2412
+          },
+          {
+            "id": "u8",
+            "text": "\nOne definition, three interfaces\n",
+            "start": 2412,
+            "end": 2446
+          },
+          {
+            "id": "u9",
+            "text": "\nDefine once. Serve in every direction.\n",
+            "start": 2446,
+            "end": 2486
+          }
+        ]
+      },
+      "response": {
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "plan": {
+          "status": "not-answered",
+          "excerpts": [],
+          "contexts": [],
+          "answer": {
+            "lead": [],
+            "sections": [],
+            "intent": "fact"
+          },
+          "coverage": {
+            "protocol": "source-answer-v1",
+            "passageIds": [
+              "u0",
+              "u1",
+              "u2",
+              "u3",
+              "u4",
+              "u5",
+              "u6",
+              "u7",
+              "u8",
+              "u9"
+            ],
+            "processed": 10,
+            "completeProbability": 0.16,
+            "intent": "fact"
+          }
+        },
+        "needsReview": true,
+        "confidence": {
+          "u0_relevant": 0.04,
+          "u0_role": 0.99,
+          "u1_relevant": 0.13,
+          "u1_role": 0.92,
+          "u2_relevant": 0.06,
+          "u2_role": 0.99,
+          "u3_relevant": 0.08,
+          "u3_role": 0.99,
+          "u4_relevant": 0.04,
+          "u4_role": 0.99,
+          "u5_relevant": 0.04,
+          "u5_role": 0.99,
+          "u6_relevant": 0.43,
+          "u6_role": 0.63,
+          "u7_relevant": 0.58,
+          "u7_role": 0.76,
+          "u8_relevant": 0.21,
+          "u8_role": 0.63,
+          "u9_relevant": 0.09,
+          "u9_role": 0.93,
+          "answer_complete": 0.16,
+          "intent": 1
+        }
+      }
+    },
+    {
+      "input": {
+        "mode": "source-answer",
+        "question": "Which software projects belong to the ModePot family?",
+        "passages": [
+          {
+            "id": "u0",
+            "text": "\nIntpot turns typed Python tools into Typer CLIs, FastAPI apps, or FastMCP servers—and can inspect an existing app and convert it into either of the others.\n",
+            "start": 2486,
+            "end": 2643
+          },
+          {
+            "id": "u1",
+            "text": "\nv0.11.0 published: bounded helper recovery and before-write missing-binding refusal. v0.10.0 published: callback refusal and missing-body diagnostics with explicit scaffold opt-in.\n",
+            "start": 2643,
+            "end": 2825
+          },
+          {
+            "id": "u2",
+            "text": "\nIllustrative animation · not a live run\n",
+            "start": 2825,
+            "end": 2866
+          },
+          {
+            "id": "u3",
+            "text": "\nOne typed function branches into CLI, HTTP, and MCP interfaces.\n",
+            "start": 2866,
+            "end": 2931
+          },
+          {
+            "id": "u4",
+            "text": "\nOpen project playground \n",
+            "start": 2931,
+            "end": 2957
+          },
+          {
+            "id": "u5",
+            "text": "\nExplore Intpot \n",
+            "start": 2957,
+            "end": 2974
+          },
+          {
+            "id": "u6",
+            "text": "\nDocs \n",
+            "start": 2974,
+            "end": 2981
+          },
+          {
+            "id": "u7",
+            "text": "\nSource snapshot · 01faf02 \n",
+            "start": 2981,
+            "end": 3009
+          },
+          {
+            "id": "u8",
+            "text": "\nREADME · be3d10873ce2 \n",
+            "start": 3009,
+            "end": 3033
+          },
+          {
+            "id": "u9",
+            "text": "\nRoadmap · 79c360513e93 \n",
+            "start": 3033,
+            "end": 3058
+          }
+        ]
+      },
+      "response": {
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "plan": {
+          "status": "not-answered",
+          "excerpts": [],
+          "contexts": [],
+          "answer": {
+            "lead": [],
+            "sections": [],
+            "intent": "fact"
+          },
+          "coverage": {
+            "protocol": "source-answer-v1",
+            "passageIds": [
+              "u0",
+              "u1",
+              "u2",
+              "u3",
+              "u4",
+              "u5",
+              "u6",
+              "u7",
+              "u8",
+              "u9"
+            ],
+            "processed": 10,
+            "completeProbability": 0.05,
+            "intent": "fact"
+          }
+        },
+        "needsReview": true,
+        "confidence": {
+          "u0_relevant": 0.3,
+          "u0_role": 0.65,
+          "u1_relevant": 0.1,
+          "u1_role": 0.99,
+          "u2_relevant": 0.02,
+          "u2_role": 1,
+          "u3_relevant": 0.2,
+          "u3_role": 0.72,
+          "u4_relevant": 0.03,
+          "u4_role": 1,
+          "u5_relevant": 0.04,
+          "u5_role": 0.98,
+          "u6_relevant": 0.03,
+          "u6_role": 1,
+          "u7_relevant": 0.04,
+          "u7_role": 1,
+          "u8_relevant": 0.04,
+          "u8_role": 1,
+          "u9_relevant": 0.03,
+          "u9_role": 1,
+          "answer_complete": 0.05,
+          "intent": 1
+        }
+      }
+    },
+    {
+      "input": {
+        "mode": "source-answer",
+        "question": "Which software projects belong to the ModePot family?",
+        "passages": [
+          {
+            "id": "u0",
+            "text": "\nLatest recorded release · v0.11.0 \n",
+            "start": 3058,
+            "end": 3094
+          },
+          {
+            "id": "u1",
+            "text": "\nGitHub checked 2026-10-17 UTC\n",
+            "start": 3094,
+            "end": 3125
+          },
+          {
+            "id": "u2",
+            "text": "\nGitHub \n",
+            "start": 3125,
+            "end": 3134
+          },
+          {
+            "id": "u3",
+            "text": "\nMode 03 / decision\n",
+            "start": 3134,
+            "end": 3154
+          },
+          {
+            "id": "u4",
+            "text": "\nsummonpot\n",
+            "start": 3154,
+            "end": 3165
+          },
+          {
+            "id": "u5",
+            "text": "\nContract-first agent-owned endpoints\n",
+            "start": 3165,
+            "end": 3203
+          },
+          {
+            "id": "u6",
+            "text": "\nDeclare the contract. Bound the authority.\n",
+            "start": 3203,
+            "end": 3247
+          },
+          {
+            "id": "u7",
+            "text": "\nSummonpot combines typed API contracts, deterministic application operations, and explicitly bounded agent-owned decisions behind one executable endpoint declaration.\n",
+            "start": 3247,
+            "end": 3415
+          },
+          {
+            "id": "u8",
+            "text": "\nIllustrative animation · not a live run\n",
+            "start": 3415,
+            "end": 3456
+          },
+          {
+            "id": "u9",
+            "text": "\nFixed request-owned values, bounded agent choice, application result.\n",
+            "start": 3456,
+            "end": 3527
+          }
+        ]
+      },
+      "response": {
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "plan": {
+          "status": "not-answered",
+          "excerpts": [],
+          "contexts": [],
+          "answer": {
+            "lead": [],
+            "sections": [],
+            "intent": "fact"
+          },
+          "coverage": {
+            "protocol": "source-answer-v1",
+            "passageIds": [
+              "u0",
+              "u1",
+              "u2",
+              "u3",
+              "u4",
+              "u5",
+              "u6",
+              "u7",
+              "u8",
+              "u9"
+            ],
+            "processed": 10,
+            "completeProbability": 0.11,
+            "intent": "fact"
+          }
+        },
+        "needsReview": true,
+        "confidence": {
+          "u0_relevant": 0.05,
+          "u0_role": 1,
+          "u1_relevant": 0.03,
+          "u1_role": 1,
+          "u2_relevant": 0.03,
+          "u2_role": 0.99,
+          "u3_relevant": 0.09,
+          "u3_role": 0.95,
+          "u4_relevant": 0.55,
+          "u4_role": 0.84,
+          "u5_relevant": 0.12,
+          "u5_role": 0.88,
+          "u6_relevant": 0.09,
+          "u6_role": 0.92,
+          "u7_relevant": 0.43,
+          "u7_role": 0.28,
+          "u8_relevant": 0.03,
+          "u8_role": 0.88,
+          "u9_relevant": 0.11,
+          "u9_role": 0.86,
+          "answer_complete": 0.11,
+          "intent": 1
+        }
+      }
+    },
+    {
+      "input": {
+        "mode": "source-answer",
+        "question": "Which software projects belong to the ModePot family?",
+        "passages": [
+          {
+            "id": "u0",
+            "text": "\nOpen project playground \n",
+            "start": 3527,
+            "end": 3553
+          },
+          {
+            "id": "u1",
+            "text": "\nExplore Summonpot \n",
+            "start": 3553,
+            "end": 3573
+          },
+          {
+            "id": "u2",
+            "text": "\nDocs \n",
+            "start": 3573,
+            "end": 3580
+          },
+          {
+            "id": "u3",
+            "text": "\nSource snapshot · af2b522 \n",
+            "start": 3580,
+            "end": 3608
+          },
+          {
+            "id": "u4",
+            "text": "\nREADME · 98185f43c452 \n",
+            "start": 3608,
+            "end": 3632
+          },
+          {
+            "id": "u5",
+            "text": "\nRoadmap · 4d651f1d74e2 \n",
+            "start": 3632,
+            "end": 3657
+          },
+          {
+            "id": "u6",
+            "text": "\nLatest recorded release · v0.10.0 \n",
+            "start": 3657,
+            "end": 3693
+          },
+          {
+            "id": "u7",
+            "text": "\nGitHub checked 2026-10-17 UTC\n",
+            "start": 3693,
+            "end": 3724
+          },
+          {
+            "id": "u8",
+            "text": "\nGitHub \n",
+            "start": 3724,
+            "end": 3733
+          },
+          {
+            "id": "u9",
+            "text": "\nMode 04 / life\n",
+            "start": 3733,
+            "end": 3749
+          }
+        ]
+      },
+      "response": {
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "plan": {
+          "status": "not-answered",
+          "excerpts": [],
+          "contexts": [],
+          "answer": {
+            "lead": [],
+            "sections": [],
+            "intent": "fact"
+          },
+          "coverage": {
+            "protocol": "source-answer-v1",
+            "passageIds": [
+              "u0",
+              "u1",
+              "u2",
+              "u3",
+              "u4",
+              "u5",
+              "u6",
+              "u7",
+              "u8",
+              "u9"
+            ],
+            "processed": 10,
+            "completeProbability": 0.07,
+            "intent": "fact"
+          }
+        },
+        "needsReview": true,
+        "confidence": {
+          "u0_relevant": 0.05,
+          "u0_role": 0.93,
+          "u1_relevant": 0.18,
+          "u1_role": 0.72,
+          "u2_relevant": 0.03,
+          "u2_role": 1,
+          "u3_relevant": 0.04,
+          "u3_role": 1,
+          "u4_relevant": 0.05,
+          "u4_role": 0.99,
+          "u5_relevant": 0.04,
+          "u5_role": 1,
+          "u6_relevant": 0.06,
+          "u6_role": 0.99,
+          "u7_relevant": 0.03,
+          "u7_role": 0.99,
+          "u8_relevant": 0.04,
+          "u8_role": 1,
+          "u9_relevant": 0.17,
+          "u9_role": 0.71,
+          "answer_complete": 0.07,
+          "intent": 1
+        }
+      }
+    },
+    {
+      "input": {
+        "mode": "source-answer",
+        "question": "Which software projects belong to the ModePot family?",
+        "passages": [
+          {
+            "id": "u0",
+            "text": "\nlifepot\n",
+            "start": 3749,
+            "end": 3758
+          },
+          {
+            "id": "u1",
+            "text": "\nBounded artificial-life game\n",
+            "start": 3758,
+            "end": 3788
+          },
+          {
+            "id": "u2",
+            "text": "\nDescribe a world. Watch deterministic life adapt.\n",
+            "start": 3788,
+            "end": 3839
+          },
+          {
+            "id": "u3",
+            "text": "\nLifePot is an open-source artificial-life game where Jev proposes typed ecology, deterministic code runs the world, and a validated ledger makes every accepted change inspectable and replayable.\n",
+            "start": 3839,
+            "end": 4035
+          },
+          {
+            "id": "u4",
+            "text": "\nIllustrative animation · not a live run\n",
+            "start": 4035,
+            "end": 4076
+          },
+          {
+            "id": "u5",
+            "text": "\nIllustrative Conway’s Game of Life: each frame follows the same neighbor-count birth and survival rules; live cells appear, disappear, and move.\n",
+            "start": 4076,
+            "end": 4222
+          },
+          {
+            "id": "u6",
+            "text": "\nPlay the game \n",
+            "start": 4222,
+            "end": 4238
+          },
+          {
+            "id": "u7",
+            "text": "\nExplore LifePot \n",
+            "start": 4238,
+            "end": 4256
+          },
+          {
+            "id": "u8",
+            "text": "\nDocs \n",
+            "start": 4256,
+            "end": 4263
+          },
+          {
+            "id": "u9",
+            "text": "\nSource snapshot · 82e6578 \n",
+            "start": 4263,
+            "end": 4291
+          }
+        ]
+      },
+      "response": {
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "plan": {
+          "status": "not-answered",
+          "excerpts": [],
+          "contexts": [],
+          "answer": {
+            "lead": [],
+            "sections": [],
+            "intent": "fact"
+          },
+          "coverage": {
+            "protocol": "source-answer-v1",
+            "passageIds": [
+              "u0",
+              "u1",
+              "u2",
+              "u3",
+              "u4",
+              "u5",
+              "u6",
+              "u7",
+              "u8",
+              "u9"
+            ],
+            "processed": 10,
+            "completeProbability": 0.06,
+            "intent": "fact"
+          }
+        },
+        "needsReview": true,
+        "confidence": {
+          "u0_relevant": 0.23,
+          "u0_role": 0.51,
+          "u1_relevant": 0.09,
+          "u1_role": 0.93,
+          "u2_relevant": 0.1,
+          "u2_role": 0.94,
+          "u3_relevant": 0.32,
+          "u3_role": 0.6,
+          "u4_relevant": 0.04,
+          "u4_role": 0.89,
+          "u5_relevant": 0.08,
+          "u5_role": 0.96,
+          "u6_relevant": 0.03,
+          "u6_role": 1,
+          "u7_relevant": 0.05,
+          "u7_role": 0.98,
+          "u8_relevant": 0.03,
+          "u8_role": 1,
+          "u9_relevant": 0.05,
+          "u9_role": 1,
+          "answer_complete": 0.06,
+          "intent": 1
+        }
+      }
+    },
+    {
+      "input": {
+        "mode": "source-answer",
+        "question": "Which software projects belong to the ModePot family?",
+        "passages": [
+          {
+            "id": "u0",
+            "text": "\nREADME · 84026ca00ffa \n",
+            "start": 4291,
+            "end": 4315
+          },
+          {
+            "id": "u1",
+            "text": "\nRoadmap · 775c8cefb58f \n",
+            "start": 4315,
+            "end": 4340
+          },
+          {
+            "id": "u2",
+            "text": "\nLatest recorded release · v0.8.0 \n",
+            "start": 4340,
+            "end": 4375
+          },
+          {
+            "id": "u3",
+            "text": "\nGitHub checked 2026-10-17 UTC\n",
+            "start": 4375,
+            "end": 4406
+          },
+          {
+            "id": "u4",
+            "text": "\nGitHub \n",
+            "start": 4406,
+            "end": 4415
+          },
+          {
+            "id": "u5",
+            "text": "\nMode 05 / engine\n",
+            "start": 4415,
+            "end": 4433
+          },
+          {
+            "id": "u6",
+            "text": "\nrefpot\n",
+            "start": 4433,
+            "end": 4441
+          },
+          {
+            "id": "u7",
+            "text": "\nEmbedded database · experimental alpha\n",
+            "start": 4441,
+            "end": 4481
+          },
+          {
+            "id": "u8",
+            "text": "\nOwn the engine. Keep the usage simple.\n",
+            "start": 4481,
+            "end": 4521
+          },
+          {
+            "id": "u9",
+            "text": "\nRefPot v0.1.1 is a publicly released experimental alpha. Its native C++ engine and small Python Database/Row API provide fixed-schema CRUD and explicit transactions. SQL and ORM remain planned, not shipped. Qualification is limited; there is no broad performance result or production-durability claim.\n",
+            "start": 4521,
+            "end": 4824
+          }
+        ]
+      },
+      "response": {
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "plan": {
+          "status": "partial",
+          "excerpts": [
+            {
+              "start": 4416,
+              "end": 4432,
+              "text": "Mode 05 / engine",
+              "sourceId": "source-4415-4433",
+              "id": "source-4416-4432",
+              "role": "direct",
+              "relevance": 0.68
+            },
+            {
+              "start": 4434,
+              "end": 4440,
+              "text": "refpot",
+              "sourceId": "source-4433-4441",
+              "id": "source-4434-4440",
+              "role": "direct",
+              "relevance": 0.67
+            },
+            {
+              "start": 4522,
+              "end": 4578,
+              "text": "RefPot v0.1.1 is a publicly released experimental alpha.",
+              "sourceId": "source-4521-4824",
+              "id": "source-4522-4578",
+              "role": "direct",
+              "relevance": 0.71
+            }
+          ],
+          "contexts": [
+            {
+              "id": "source-4415-4433",
+              "text": "\nMode 05 / engine\n",
+              "start": 4415,
+              "end": 4433,
+              "role": "direct",
+              "relevance": 0.68
+            },
+            {
+              "id": "source-4433-4441",
+              "text": "\nrefpot\n",
+              "start": 4433,
+              "end": 4441,
+              "role": "direct",
+              "relevance": 0.67
+            },
+            {
+              "id": "source-4521-4824",
+              "text": "\nRefPot v0.1.1 is a publicly released experimental alpha. Its native C++ engine and small Python Database/Row API provide fixed-schema CRUD and explicit transactions. SQL and ORM remain planned, not shipped. Qualification is limited; there is no broad performance result or production-durability claim.\n",
+              "start": 4521,
+              "end": 4824,
+              "role": "direct",
+              "relevance": 0.71
+            }
+          ],
+          "answer": {
+            "lead": [
+              {
+                "start": 4416,
+                "end": 4432,
+                "text": "Mode 05 / engine",
+                "sourceId": "source-4415-4433",
+                "id": "source-4416-4432",
+                "role": "direct",
+                "relevance": 0.68
+              },
+              {
+                "start": 4434,
+                "end": 4440,
+                "text": "refpot",
+                "sourceId": "source-4433-4441",
+                "id": "source-4434-4440",
+                "role": "direct",
+                "relevance": 0.67
+              },
+              {
+                "start": 4522,
+                "end": 4578,
+                "text": "RefPot v0.1.1 is a publicly released experimental alpha.",
+                "sourceId": "source-4521-4824",
+                "id": "source-4522-4578",
+                "role": "direct",
+                "relevance": 0.71
+              }
+            ],
+            "sections": [
+              {
+                "kind": "direct",
+                "title": "Supporting details",
+                "items": [
+                  {
+                    "start": 4416,
+                    "end": 4432,
+                    "text": "Mode 05 / engine",
+                    "sourceId": "source-4415-4433",
+                    "id": "source-4416-4432",
+                    "role": "direct",
+                    "relevance": 0.68
+                  },
+                  {
+                    "start": 4434,
+                    "end": 4440,
+                    "text": "refpot",
+                    "sourceId": "source-4433-4441",
+                    "id": "source-4434-4440",
+                    "role": "direct",
+                    "relevance": 0.67
+                  },
+                  {
+                    "start": 4522,
+                    "end": 4578,
+                    "text": "RefPot v0.1.1 is a publicly released experimental alpha.",
+                    "sourceId": "source-4521-4824",
+                    "id": "source-4522-4578",
+                    "role": "direct",
+                    "relevance": 0.71
+                  }
+                ]
+              }
+            ],
+            "intent": "fact"
+          },
+          "coverage": {
+            "protocol": "source-answer-v1",
+            "passageIds": [
+              "u0",
+              "u1",
+              "u2",
+              "u3",
+              "u4",
+              "u5",
+              "u6",
+              "u7",
+              "u8",
+              "u9"
+            ],
+            "processed": 10,
+            "completeProbability": 0.38,
+            "intent": "fact"
+          }
+        },
+        "needsReview": true,
+        "confidence": {
+          "u0_relevant": 0.05,
+          "u0_role": 0.98,
+          "u1_relevant": 0.05,
+          "u1_role": 0.99,
+          "u2_relevant": 0.07,
+          "u2_role": 0.99,
+          "u3_relevant": 0.03,
+          "u3_role": 1,
+          "u4_relevant": 0.04,
+          "u4_role": 0.99,
+          "u5_relevant": 0.68,
+          "u5_role": 0.91,
+          "u6_relevant": 0.67,
+          "u6_role": 0.94,
+          "u7_relevant": 0.24,
+          "u7_role": 0.51,
+          "u8_relevant": 0.08,
+          "u8_role": 0.99,
+          "u9_relevant": 0.71,
+          "u9_role": 0.63,
+          "answer_complete": 0.38,
+          "intent": 1,
+          "u9_span": 0.4
+        }
+      }
+    },
+    {
+      "input": {
+        "mode": "source-answer",
+        "question": "Which software projects belong to the ModePot family?",
+        "passages": [
+          {
+            "id": "u0",
+            "text": "\nIllustrative animation · proposed architecture, not a live run\n",
+            "start": 4824,
+            "end": 4888
+          },
+          {
+            "id": "u1",
+            "text": "\nIllustration of two proposed entry paths: direct SQL statements and structured Python ORM operations converge on one shared relational execution core. This is a proposed architecture, not a live run.\n",
+            "start": 4888,
+            "end": 5089
+          },
+          {
+            "id": "u2",
+            "text": "\nExplore RefPot \n",
+            "start": 5089,
+            "end": 5106
+          },
+          {
+            "id": "u3",
+            "text": "\nDocs \n",
+            "start": 5106,
+            "end": 5113
+          },
+          {
+            "id": "u4",
+            "text": "\nSource snapshot · 4741eb4 \n",
+            "start": 5113,
+            "end": 5141
+          },
+          {
+            "id": "u5",
+            "text": "\nREADME · 3ba385bab828 \n",
+            "start": 5141,
+            "end": 5165
+          },
+          {
+            "id": "u6",
+            "text": "\nRoadmap · bde8911c1fa1 \n",
+            "start": 5165,
+            "end": 5190
+          },
+          {
+            "id": "u7",
+            "text": "\nLatest recorded release · v0.1.1 \n",
+            "start": 5190,
+            "end": 5225
+          },
+          {
+            "id": "u8",
+            "text": "\nGitHub checked 2026-10-17 UTC\n",
+            "start": 5225,
+            "end": 5256
+          },
+          {
+            "id": "u9",
+            "text": "\nGitHub \n",
+            "start": 5256,
+            "end": 5265
+          }
+        ]
+      },
+      "response": {
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "plan": {
+          "status": "not-answered",
+          "excerpts": [],
+          "contexts": [],
+          "answer": {
+            "lead": [],
+            "sections": [],
+            "intent": "fact"
+          },
+          "coverage": {
+            "protocol": "source-answer-v1",
+            "passageIds": [
+              "u0",
+              "u1",
+              "u2",
+              "u3",
+              "u4",
+              "u5",
+              "u6",
+              "u7",
+              "u8",
+              "u9"
+            ],
+            "processed": 10,
+            "completeProbability": 0.06,
+            "intent": "fact"
+          }
+        },
+        "needsReview": true,
+        "confidence": {
+          "u0_relevant": 0.04,
+          "u0_role": 0.93,
+          "u1_relevant": 0.09,
+          "u1_role": 0.96,
+          "u2_relevant": 0.1,
+          "u2_role": 0.72,
+          "u3_relevant": 0.03,
+          "u3_role": 1,
+          "u4_relevant": 0.04,
+          "u4_role": 1,
+          "u5_relevant": 0.04,
+          "u5_role": 1,
+          "u6_relevant": 0.03,
+          "u6_role": 1,
+          "u7_relevant": 0.06,
+          "u7_role": 0.99,
+          "u8_relevant": 0.03,
+          "u8_role": 0.99,
+          "u9_relevant": 0.03,
+          "u9_role": 1,
+          "answer_complete": 0.06,
+          "intent": 1
+        }
+      }
+    },
+    {
+      "input": {
+        "mode": "source-answer",
+        "question": "Which software projects belong to the ModePot family?",
+        "passages": [
+          {
+            "id": "u0",
+            "text": "\nMode 06 / utility\n",
+            "start": 5265,
+            "end": 5284
+          },
+          {
+            "id": "u1",
+            "text": "\nutilitypot\n",
+            "start": 5284,
+            "end": 5296
+          },
+          {
+            "id": "u2",
+            "text": "\nSeven tools · four local, three AI-assisted\n",
+            "start": 5296,
+            "end": 5341
+          },
+          {
+            "id": "u3",
+            "text": "\nOne task. One action. Inspect the result.\n",
+            "start": 5341,
+            "end": 5384
+          },
+          {
+            "id": "u4",
+            "text": "\nFour browser-local utilities handle CSV/JSON conversion, dates and meeting calculations. Three AI-assisted tools use Jev for entities, flowcharts and webpage evidence after disclosed submission. Inspect results, then copy or download.\n",
+            "start": 5384,
+            "end": 5620
+          },
+          {
+            "id": "u5",
+            "text": "\nIllustrative mechanism · not a live run\n",
+            "start": 5620,
+            "end": 5661
+          },
+          {
+            "id": "u6",
+            "text": "\nFour fixed browser-local workflows perform conversions and calculations without API calls. Three fixed AI-assisted workflows use disclosed Jev interpretation. All seven provide inspectable results and exports. Illustration only, not a live run.\n",
+            "start": 5661,
+            "end": 5907
+          },
+          {
+            "id": "u7",
+            "text": "\nExplore UtilityPot \n",
+            "start": 5907,
+            "end": 5928
+          },
+          {
+            "id": "u8",
+            "text": "\nDocs \n",
+            "start": 5928,
+            "end": 5935
+          },
+          {
+            "id": "u9",
+            "text": "\nSource snapshot · 9077d4c \n",
+            "start": 5935,
+            "end": 5963
+          }
+        ]
+      },
+      "response": {
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "plan": {
+          "status": "not-answered",
+          "excerpts": [],
+          "contexts": [],
+          "answer": {
+            "lead": [],
+            "sections": [],
+            "intent": "fact"
+          },
+          "coverage": {
+            "protocol": "source-answer-v1",
+            "passageIds": [
+              "u0",
+              "u1",
+              "u2",
+              "u3",
+              "u4",
+              "u5",
+              "u6",
+              "u7",
+              "u8",
+              "u9"
+            ],
+            "processed": 10,
+            "completeProbability": 0.16,
+            "intent": "fact"
+          }
+        },
+        "needsReview": true,
+        "confidence": {
+          "u0_relevant": 0.17,
+          "u0_role": 0.7,
+          "u1_relevant": 0.42,
+          "u1_role": 0.63,
+          "u2_relevant": 0.29,
+          "u2_role": 0.74,
+          "u3_relevant": 0.07,
+          "u3_role": 0.98,
+          "u4_relevant": 0.51,
+          "u4_role": 0.37,
+          "u5_relevant": 0.05,
+          "u5_role": 0.76,
+          "u6_relevant": 0.28,
+          "u6_role": 0.53,
+          "u7_relevant": 0.1,
+          "u7_role": 0.85,
+          "u8_relevant": 0.04,
+          "u8_role": 1,
+          "u9_relevant": 0.06,
+          "u9_role": 0.99,
+          "answer_complete": 0.16,
+          "intent": 1
+        }
+      }
+    },
+    {
+      "input": {
+        "mode": "source-answer",
+        "question": "Which software projects belong to the ModePot family?",
+        "passages": [
+          {
+            "id": "u0",
+            "text": "\nREADME · 7fb7e4692ea5 \n",
+            "start": 5963,
+            "end": 5987
+          },
+          {
+            "id": "u1",
+            "text": "\nRoadmap · not publishedNo release recordedGitHub checked 2026-10-17 UTC\n",
+            "start": 5987,
+            "end": 6060
+          },
+          {
+            "id": "u2",
+            "text": "\nGitHub \n",
+            "start": 6060,
+            "end": 6069
+          },
+          {
+            "id": "u3",
+            "text": "\nOPEN SOURCE / PARTICIPATE\n",
+            "start": 6069,
+            "end": 6096
+          },
+          {
+            "id": "u4",
+            "text": "\nBuild with us.\n",
+            "start": 6096,
+            "end": 6112
+          },
+          {
+            "id": "u5",
+            "text": "\nStart with the project’s contribution guide; discuss a change before taking on substantial work, then use its issue tracker to propose or report it.\n",
+            "start": 6112,
+            "end": 6262
+          },
+          {
+            "id": "u6",
+            "text": "\nDexpot contribution guide ↗\n",
+            "start": 6262,
+            "end": 6291
+          },
+          {
+            "id": "u7",
+            "text": "\nIntpot contribution guide ↗\n",
+            "start": 6291,
+            "end": 6320
+          },
+          {
+            "id": "u8",
+            "text": "\nSummonpot contribution guide ↗\n",
+            "start": 6320,
+            "end": 6352
+          },
+          {
+            "id": "u9",
+            "text": "\nLifePot contribution guide ↗\n",
+            "start": 6352,
+            "end": 6382
+          }
+        ]
+      },
+      "response": {
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "plan": {
+          "status": "not-answered",
+          "excerpts": [],
+          "contexts": [],
+          "answer": {
+            "lead": [],
+            "sections": [],
+            "intent": "fact"
+          },
+          "coverage": {
+            "protocol": "source-answer-v1",
+            "passageIds": [
+              "u0",
+              "u1",
+              "u2",
+              "u3",
+              "u4",
+              "u5",
+              "u6",
+              "u7",
+              "u8",
+              "u9"
+            ],
+            "processed": 10,
+            "completeProbability": 0.4,
+            "intent": "fact"
+          }
+        },
+        "needsReview": true,
+        "confidence": {
+          "u0_relevant": 0.04,
+          "u0_role": 0.99,
+          "u1_relevant": 0.04,
+          "u1_role": 1,
+          "u2_relevant": 0.03,
+          "u2_role": 1,
+          "u3_relevant": 0.03,
+          "u3_role": 1,
+          "u4_relevant": 0.03,
+          "u4_role": 1,
+          "u5_relevant": 0.07,
+          "u5_role": 0.95,
+          "u6_relevant": 0.39,
+          "u6_role": 0.44,
+          "u7_relevant": 0.31,
+          "u7_role": 0.46,
+          "u8_relevant": 0.37,
+          "u8_role": 0.51,
+          "u9_relevant": 0.42,
+          "u9_role": 0.44,
+          "answer_complete": 0.4,
+          "intent": 1
+        }
+      }
+    },
+    {
+      "input": {
+        "mode": "source-answer",
+        "question": "Which software projects belong to the ModePot family?",
+        "passages": [
+          {
+            "id": "u0",
+            "text": "\nPropose Dexpot work ↗\n",
+            "start": 6382,
+            "end": 6405
+          },
+          {
+            "id": "u1",
+            "text": "\nPropose Intpot work ↗\n",
+            "start": 6405,
+            "end": 6428
+          },
+          {
+            "id": "u2",
+            "text": "\nPropose Summonpot work ↗\n",
+            "start": 6428,
+            "end": 6454
+          },
+          {
+            "id": "u3",
+            "text": "\nPropose LifePot work ↗\n",
+            "start": 6454,
+            "end": 6478
+          },
+          {
+            "id": "u4",
+            "text": "\nDiscord · project questions and community discussion ↗\n",
+            "start": 6478,
+            "end": 6534
+          },
+          {
+            "id": "u5",
+            "text": "\nWHAT IS MODEPOT?\n",
+            "start": 6534,
+            "end": 6552
+          },
+          {
+            "id": "u6",
+            "text": "\nSimpler software.\n",
+            "start": 6552,
+            "end": 6571
+          },
+          {
+            "id": "u7",
+            "text": "\nBigger possibilities.\n",
+            "start": 6571,
+            "end": 6594
+          },
+          {
+            "id": "u8",
+            "text": "\nModePot exists to remove accumulated complexity. We simplify how frameworks are used, modernize how they are built, and optimize the paths that matter without passing the machinery on to developers.\n",
+            "start": 6594,
+            "end": 6794
+          },
+          {
+            "id": "u9",
+            "text": "\nWe are building an open-source family of fast, approachable frameworks, tools, engines, and games, with AI-native and agent-friendly approaches where they add value. Dexpot, Intpot, Summonpot, LifePot, RefPot, and UtilityPot are only the beginning. ModePot was created by Tugrul Guner.\n",
+            "start": 6794,
+            "end": 7081
+          }
+        ]
+      },
+      "response": {
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "plan": {
+          "status": "answered",
+          "excerpts": [
+            {
+              "start": 6961,
+              "end": 7043,
+              "text": "Dexpot, Intpot, Summonpot, LifePot, RefPot, and UtilityPot are only the beginning.",
+              "sourceId": "source-6794-7081",
+              "id": "source-6961-7043",
+              "role": "direct",
+              "relevance": 0.97
+            }
+          ],
+          "contexts": [
+            {
+              "id": "source-6794-7081",
+              "text": "\nWe are building an open-source family of fast, approachable frameworks, tools, engines, and games, with AI-native and agent-friendly approaches where they add value. Dexpot, Intpot, Summonpot, LifePot, RefPot, and UtilityPot are only the beginning. ModePot was created by Tugrul Guner.\n",
+              "start": 6794,
+              "end": 7081,
+              "role": "direct",
+              "relevance": 0.97
+            }
+          ],
+          "answer": {
+            "lead": [
+              {
+                "start": 6961,
+                "end": 7043,
+                "text": "Dexpot, Intpot, Summonpot, LifePot, RefPot, and UtilityPot are only the beginning.",
+                "sourceId": "source-6794-7081",
+                "id": "source-6961-7043",
+                "role": "direct",
+                "relevance": 0.97
+              }
+            ],
+            "sections": [
+              {
+                "kind": "direct",
+                "title": "Supporting details",
+                "items": [
+                  {
+                    "start": 6961,
+                    "end": 7043,
+                    "text": "Dexpot, Intpot, Summonpot, LifePot, RefPot, and UtilityPot are only the beginning.",
+                    "sourceId": "source-6794-7081",
+                    "id": "source-6961-7043",
+                    "role": "direct",
+                    "relevance": 0.97
+                  }
+                ]
+              }
+            ],
+            "intent": "fact"
+          },
+          "coverage": {
+            "protocol": "source-answer-v1",
+            "passageIds": [
+              "u0",
+              "u1",
+              "u2",
+              "u3",
+              "u4",
+              "u5",
+              "u6",
+              "u7",
+              "u8",
+              "u9"
+            ],
+            "processed": 10,
+            "completeProbability": 0.9,
+            "intent": "fact"
+          }
+        },
+        "needsReview": true,
+        "confidence": {
+          "u0_relevant": 0.2,
+          "u0_role": 0.66,
+          "u1_relevant": 0.16,
+          "u1_role": 0.78,
+          "u2_relevant": 0.23,
+          "u2_role": 0.6,
+          "u3_relevant": 0.28,
+          "u3_role": 0.45,
+          "u4_relevant": 0.03,
+          "u4_role": 1,
+          "u5_relevant": 0.07,
+          "u5_role": 0.98,
+          "u6_relevant": 0.04,
+          "u6_role": 1,
+          "u7_relevant": 0.04,
+          "u7_role": 0.99,
+          "u8_relevant": 0.17,
+          "u8_role": 0.58,
+          "u9_relevant": 0.97,
+          "u9_role": 1,
+          "answer_complete": 0.9,
+          "intent": 1,
+          "u9_span": 0.87
+        }
+      }
+    },
+    {
+      "input": {
+        "mode": "source-answer",
+        "question": "Which software projects belong to the ModePot family?",
+        "passages": [
+          {
+            "id": "u0",
+            "text": "\nPartner\n",
+            "start": 7081,
+            "end": 7090
+          },
+          {
+            "id": "u1",
+            "text": "\nMaking math fun and thinking a habit.\n",
+            "start": 7090,
+            "end": 7129
+          },
+          {
+            "id": "u2",
+            "text": "\nStory games and puzzles that build analytical thinking and math skills for kids ages 5–10.\n",
+            "start": 7129,
+            "end": 7221
+          },
+          {
+            "id": "u3",
+            "text": "\nExplore Circles & Cookies",
+            "start": 7221,
+            "end": 7247
+          }
+        ]
+      },
+      "response": {
+        "source": "jev",
+        "model": "jev-1.13.0",
+        "plan": {
+          "status": "not-answered",
+          "excerpts": [],
+          "contexts": [],
+          "answer": {
+            "lead": [],
+            "sections": [],
+            "intent": "fact"
+          },
+          "coverage": {
+            "protocol": "source-answer-v1",
+            "passageIds": ["u0", "u1", "u2", "u3"],
+            "processed": 4,
+            "completeProbability": 0.1,
+            "intent": "fact"
+          }
+        },
+        "needsReview": true,
+        "confidence": {
+          "u0_relevant": 0.03,
+          "u0_role": 0.99,
+          "u1_relevant": 0.07,
+          "u1_role": 0.99,
+          "u2_relevant": 0.39,
+          "u2_role": 0.43,
+          "u3_relevant": 0.54,
+          "u3_role": 0.65,
+          "answer_complete": 0.1,
+          "intent": 1
+        }
+      }
+    }
+  ]
+}
