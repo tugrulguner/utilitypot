@@ -13,7 +13,7 @@ License: MIT
 - [Fix mixed spreadsheet dates](https://utilitypot.modepot.io/tools/fix-excel-dates/): Clean up supported date text and keep unclear or invalid values visible. Browser-local; no AI.
 - [Find a meeting time](https://utilitypot.modepot.io/tools/meeting-time-finder/): Compare availability across cities and download a calendar event. Browser-local; timezone-aware calculations.
 - [JSON to CSV](https://utilitypot.modepot.io/tools/json-to-csv/): Turn JSON records or one object into CSV for a spreadsheet. Browser-local; no AI or upload.
-- [Custom entity extraction](https://utilitypot.modepot.io/tools/entity-extractor/): Highlight people, companies or custom categories in short text. Bounded AI; review exact source spans.
+- [Extract named entities (NER)](https://utilitypot.modepot.io/tools/entity-extractor/): Named Entity Recognition (NER) for people, organizations and custom categories in short text. Bounded AI; review exact source mentions.
 - [Text to Mermaid flowchart](https://utilitypot.modepot.io/tools/text-to-mermaid/): Turn up to eight listed steps into an editable, exportable flowchart. Bounded AI proposes interpretation; rendering is local.
 - [Ask a webpage](https://utilitypot.modepot.io/tools/ask-a-webpage/): Find exact passages in pasted text or public HTTP/HTTPS pages. Blocked or unsupported pages require pasted text. Bounded AI selects evidence.
 

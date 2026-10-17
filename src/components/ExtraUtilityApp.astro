@@ -11,7 +11,7 @@ const examples = {
   ],
   entities: [
     "Load example: repeated names",
-    "Find names in the sample source, then review accepted highlights after extraction.",
+    "Extract named entities from the sample source, then review exact source mentions.",
   ],
   diagram: [
     "Load example: approval steps",
@@ -203,7 +203,7 @@ const examples = {
           />
         </div>
         <p id="processing-disclosure" class="notice">
-          Selecting Find matches sends text and selected categories to
+          Selecting Extract entities sends text and selected categories to
           Jev/TypeSafe. Up to 120 source tokens and three matches per category;
           review highlights.
         </p>
@@ -270,7 +270,7 @@ const examples = {
           aria-describedby="processing-disclosure"
           class="primary"
         >
-          Find matches
+          Extract entities
         </button>
       )}
       {tool === "diagram" && (
@@ -351,7 +351,7 @@ const examples = {
         {tool === "jsonCsv"
           ? "Spreadsheet preview"
           : tool === "entities"
-            ? "Matches in context"
+            ? "Named entities in context"
             : tool === "diagram"
               ? "Your flowchart"
               : "Source evidence"}

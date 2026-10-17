@@ -81,12 +81,12 @@ for (const [label, entities, expected] of [
       { type: "Person", text: "Nora", start: 0, end: 4 },
       { type: "Organization", text: "Acme", start: 15, end: 19 },
     ],
-    "Found 2 mentions in 2 categories. Review the highlights and categories.",
+    "2 unique entities; 2 mentions across 2 categories. Review each exact source occurrence.",
   ],
   [
     "one",
     [{ type: "Person", text: "Nora", start: 0, end: 4 }],
-    "Found 1 mention in 1 category. Review the highlights and categories.",
+    "1 unique entity; 1 mention across 1 category. Review each exact source occurrence.",
   ],
   ["none", [], "No matching names or terms found for the selected categories."],
 ]) {

@@ -5,7 +5,7 @@ const tools = [
   ["fix-excel-dates", "Fix dates", "#results"],
   ["meeting-time-finder", "Find times", "#results"],
   ["json-to-csv", "Convert", "#extra-results"],
-  ["entity-extractor", "Find matches", "#extra-results"],
+  ["entity-extractor", "Extract entities", "#extra-results"],
   ["text-to-mermaid", "Create flowchart", "#extra-results"],
   ["ask-a-webpage", "Find answer", "#extra-results"],
 ];

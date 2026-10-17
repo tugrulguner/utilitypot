@@ -20,7 +20,7 @@
 - JSON to CSV: select a record array, flatten objects, explicitly omit/join/reject other arrays; escape spreadsheet formulas. Numeric values that would be rounded are refused; quote long identifiers and high-precision values to preserve them.
 - Mixed spreadsheet dates: preserve original values, flag ambiguous dates and retain partial precision.
 - Meeting time finder: reviewed one-off windows, exclusions, timezone-aware overlap and calendar export.
-- Custom entity extraction: up to four definitions, three mentions per type and 120 source tokens. Exact offsets are validated; not exhaustive NER.
+- Named Entity Recognition (NER), “Extract named entities”: up to four definitions, three mentions per type and 120 source tokens. Exact offsets are validated; not exhaustive NER.
 - Text to Mermaid: up to eight listed steps, reviewable graph, local flowchart rendering and Mermaid/SVG downloads. Not arbitrary code generation.
 - Ask a webpage: exact supporting paragraphs with separate answer-presence judgment. Read public HTTP/HTTPS pages by hostname, or paste text. Access-blocked, JavaScript-only, large or unsupported pages require pasted text. Not generated essays or independent fact verification.
 

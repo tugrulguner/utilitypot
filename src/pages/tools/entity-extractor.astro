@@ -6,8 +6,8 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
 ---
 
 <UtilityLayout
-  title="Find people and companies"
-  description="Highlight people, companies, or a category you choose."
+  title="Extract named entities"
+  description="Named Entity Recognition (NER): extract and review people, organizations, and custom entity types in short text."
   seoDescription={guides["entity-extractor"].description}
   searchTitle={guides["entity-extractor"].title}
   slug="entity-extractor"
@@ -18,12 +18,13 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
     <summary>How this tool works &amp; limits</summary>
     <h2>What this tool does</h2>
     <p>
-      Define up to four categories, with at most three selected mentions per
-      category, in up to 120 source tokens. This is bounded custom entity
-      extraction, not exhaustive multilingual NER. Jev selects source token
-      boundaries; the application validates exact text and offsets. Missing,
-      inconsistent or unsupported spans are rejected. Review every label before
-      using exported data.
+      Named Entity Recognition (NER) identifies named people, organizations,
+      places, and other defined entities in text. Define up to four categories,
+      with at most three selected mentions per category, in up to 120 source
+      tokens. This is bounded custom entity extraction, not exhaustive
+      multilingual NER. Jev selects source token boundaries; the application
+      validates exact text and offsets. Missing, inconsistent or unsupported
+      spans are rejected. Review every label before using exported data.
     </p>
     <h2>Privacy and uncertainty</h2>
     <p>

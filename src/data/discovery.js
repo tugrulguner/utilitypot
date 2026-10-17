@@ -110,12 +110,12 @@ export const guides = {
       "Interested in making your own Python tools available through several interfaces?",
   },
   "entity-extractor": {
-    title: "Entity extractor — people, companies and custom types",
+    title: "Extract named entities — Named Entity Recognition (NER)",
     description:
-      "Find people, companies or custom categories in short text. Review exact source spans, correct mentions manually and export JSON. Bounded AI extraction.",
+      "Extract people, organizations or custom categories from short text with Named Entity Recognition (NER). Review exact source mentions, correct them and export JSON. Bounded AI extraction.",
     steps: [
       "Paste short text and choose people, companies or a custom category.",
-      "Find matches, then investigate each category, exact source occurrence and label.",
+      "Extract entities, then review grouped names, categories and each exact source occurrence.",
       "Validate the reviewed mentions, then copy or download JSON with source offsets.",
     ],
     example:

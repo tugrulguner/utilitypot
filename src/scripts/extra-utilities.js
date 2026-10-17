@@ -918,6 +918,25 @@ if (root) {
           "aria-label",
           "Full source with highlighted matches",
         );
+        // Default category identities remain stable when another category is disabled.
+        const categorySlots = new Map();
+        if (types.includes("Person")) categorySlots.set("Person", 0);
+        if (types.includes("Organization"))
+          categorySlots.set("Organization", 1);
+        const availableSlots = [2, 3, 0, 1].filter(
+          (slot) => ![...categorySlots.values()].includes(slot),
+        );
+        for (const type of types)
+          if (!categorySlots.has(type))
+            categorySlots.set(type, availableSlots.shift());
+        const legend = document.createElement("div");
+        legend.className = "entity-legend";
+        legend.setAttribute("aria-label", "Entity category legend");
+        const selection = document.createElement("p");
+        selection.className = "entity-selection";
+        selection.textContent =
+          "Choose a numbered mention to inspect its category and exact position in the source.";
+        const occurrenceButtons = [];
         const marks = new Map();
         const ordered = [...items].sort((a, b) => a.start - b.start);
         ordered.forEach((_, n) => marks.set(n, []));
@@ -946,6 +965,14 @@ if (root) {
           mark.tabIndex = -1;
           mark.title = active.map((n) => ordered[n].type).join(", ");
           mark.dataset.entityOccurrence = active.join(" ");
+          const slots = [
+            ...new Set(active.map((n) => categorySlots.get(ordered[n].type))),
+          ];
+          mark.dataset.categorySlot = slots[0];
+          if (slots.length > 1) {
+            mark.classList.add("is-shared");
+            mark.style.backgroundImage = `linear-gradient(135deg, ${slots.map((slot, i) => `var(--entity-tint-${slot}) ${(i * 100) / slots.length}% ${((i + 1) * 100) / slots.length}%`).join(", ")})`;
+          }
           documentView.append(mark);
           active.forEach((n) => marks.get(n).push(mark));
         }
@@ -958,6 +985,14 @@ if (root) {
         });
         for (const [category, entities] of groups) {
           const group = document.createElement("section");
+          group.className = "entity-category";
+          group.dataset.entityCategory = category;
+          group.dataset.categorySlot = categorySlots.get(category);
+          const chip = document.createElement("span");
+          chip.className = "entity-category-chip";
+          chip.dataset.categorySlot = categorySlots.get(category);
+          chip.textContent = `${category} · ${[...entities.values()].reduce((sum, ns) => sum + ns.length, 0)}`;
+          legend.append(chip);
           const heading = document.createElement("h3");
           heading.textContent = `${category} (${[...entities.values()].reduce((sum, ns) => sum + ns.length, 0)})`;
           group.append(heading);
@@ -967,20 +1002,45 @@ if (root) {
             const label = document.createElement("strong");
             label.textContent = `${name} (${occurrences.length})`;
             item.append(label);
+            const controls = document.createElement("div");
+            controls.className = "entity-occurrences";
+            item.append(controls);
             occurrences.forEach((n, occurrence) => {
               const button = document.createElement("button");
               button.type = "button";
-              button.textContent = `Occurrence ${occurrence + 1}`;
+              button.className = "entity-occurrence";
+              button.textContent = `${occurrence + 1}`;
+              button.title = source.slice(
+                Math.max(0, ordered[n].start - 30),
+                Math.min(source.length, ordered[n].end + 30),
+              );
+              button.setAttribute("aria-pressed", "false");
+              occurrenceButtons.push(button);
               button.setAttribute(
                 "aria-label",
                 `${category} ${name}, occurrence ${occurrence + 1}`,
               );
               button.addEventListener("click", () => {
                 returnToOccurrence = button;
+                for (const control of occurrenceButtons)
+                  control.setAttribute(
+                    "aria-pressed",
+                    String(control === button),
+                  );
+                for (const row of index.querySelectorAll(".entity-index-item"))
+                  row.classList.toggle("is-selected", row === item);
+                selection.dataset.categorySlot = categorySlots.get(category);
+                selection.textContent = `${category}: ${name} · mention ${occurrence + 1} of ${occurrences.length} · characters ${ordered[n].start + 1}–${ordered[n].end}.`;
                 for (const nodes of marks.values())
                   for (const mark of nodes) mark.classList.remove("is-current");
                 const selected = marks.get(n);
-                for (const mark of selected) mark.classList.add("is-current");
+                for (const mark of selected) {
+                  mark.classList.add("is-current");
+                  mark.style.setProperty(
+                    "--selected-color",
+                    `var(--entity-color-${categorySlots.get(category)})`,
+                  );
+                }
                 const first = selected[0];
                 first.setAttribute(
                   "aria-label",
@@ -995,7 +1055,7 @@ if (root) {
                     : "smooth",
                 });
               });
-              item.append(button);
+              controls.append(button);
             });
             group.append(item);
           }
@@ -1024,13 +1084,20 @@ if (root) {
           });
           toolbar.append(back);
         }
-        sourcePanel.append(toolbar, documentView);
+        sourcePanel.append(toolbar, legend, selection, documentView);
+        if (!items.length) {
+          legend.hidden = true;
+          selection.hidden = true;
+        }
         workspace.append(index, sourcePanel);
         $("extra-visual").append(workspace);
+        const uniqueCount = new Set(
+          items.map((e) => `${e.type}\u0000${e.text}`),
+        ).size;
         const categoryCount = new Set(items.map((e) => e.type)).size;
         status(
           items.length
-            ? `Found ${items.length} ${items.length === 1 ? "mention" : "mentions"} in ${categoryCount} ${categoryCount === 1 ? "category" : "categories"}. Review the highlights and categories.`
+            ? `${uniqueCount} unique ${uniqueCount === 1 ? "entity" : "entities"}; ${items.length} ${items.length === 1 ? "mention" : "mentions"} across ${categoryCount} ${categoryCount === 1 ? "category" : "categories"}. Review each exact source occurrence.`
             : "No matching names or terms found for the selected categories.",
         );
       }
