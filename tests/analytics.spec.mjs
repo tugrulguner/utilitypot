@@ -4,6 +4,7 @@ import {
   fixturePlan,
   approvalGraph,
 } from "./workflow-fixtures.mjs";
+import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
 import { test, expect } from "@playwright/test";
 import { gunzipSync } from "node:zlib";
 test.use({
@@ -53,7 +54,7 @@ async function installSink(context, page) {
       let body = request.postDataBuffer() ?? Buffer.alloc(0);
       if (body[0] === 0x1f && body[1] === 0x8b) body = gunzipSync(body);
       posts.push({ url: request.url(), body: body.toString("utf8") });
-      await route.fulfill({ status: 200, body: "{}" });
+      await fulfillEntityDocumentFixture(route, { status: 200, body: "{}" });
     } else await route.continue();
   });
   await page.addInitScript(
@@ -225,7 +226,7 @@ test("all seven tool handlers emit no initial example action and bounded complet
       await exampleInterpretation(page, slug);
     } else {
       await page.route("**/api/utilities/read-page", (route) =>
-        route.fulfill({
+        fulfillEntityDocumentFixture(route, {
           status: 200,
           contentType: "application/json",
           body: JSON.stringify({
@@ -236,7 +237,7 @@ test("all seven tool handlers emit no initial example action and bounded complet
         }),
       );
       await page.route("**/api/utilities/interpret", (route) =>
-        route.fulfill({
+        fulfillEntityDocumentFixture(route, {
           json: {
             source: "jev",
             model: "fixture",
@@ -457,7 +458,7 @@ test("edited inputs cancel stale AI completions without presenting success", asy
     });
     await context.route("**/api/utilities/interpret", async (route) => {
       await gate;
-      await route.fulfill({
+      await fulfillEntityDocumentFixture(route, {
         contentType: "application/json",
         body: JSON.stringify({
           source: "jev",
@@ -680,7 +681,7 @@ test("AI request completion distinguishes presented success, client rejection, a
     const page = await context.newPage();
     const posts = await installSink(context, page);
     await context.route("**/api/utilities/interpret", (route) =>
-      route.fulfill({
+      fulfillEntityDocumentFixture(route, {
         status: fixture.status,
         contentType: "application/json",
         body: JSON.stringify(

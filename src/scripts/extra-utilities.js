@@ -13,7 +13,8 @@ import {
   validateJsonNumberPrecision,
 } from "../lib/utilities/json-csv.js";
 import { mermaidSource, graphRoleIssues } from "../lib/utilities/diagram.js";
-import { createEntitiesInterpretation } from "../lib/utilities/entities.js";
+import { entityTypes } from "../lib/utilities/entities.js";
+import { extractEntityDocument } from "../lib/utilities/entity-document.js";
 const root = document.querySelector("[data-extra-utility]");
 if (root) {
   const discovery = resultDiscovery(
@@ -25,6 +26,8 @@ if (root) {
     $ = (id) => root.querySelector(`#${id}`);
   let manualArrayPolicy = null;
   let reviewPlan = "";
+  let entityController = null;
+  let entityProcessing = null;
   let revision = 0,
     output = "",
     filename = "",
@@ -78,13 +81,19 @@ if (root) {
   function clear() {
     discovery.reset();
     revision++;
+    entityController?.abort();
+    entityController = null;
     output = "";
     $("extra-status").hidden = false;
     $("extra-results").hidden = true;
-    if (tool === "entities") $("extra-visual").replaceChildren();
+    if (tool === "entities") {
+      $("extra-visual").replaceChildren();
+      $("extra-output").textContent = "";
+    }
   }
   function forgetInterpretation() {
     reviewPlan = "";
+    entityProcessing = null;
     for (const id of ["entity-review", "graph-panel"])
       if ($(id)) $(id).hidden = true;
     for (const id of ["entity-editor", "graph-editor"])
@@ -207,10 +216,7 @@ if (root) {
   }
   function editEntities() {
     const items = JSON.parse(reviewPlan || "[]");
-    const types = createEntitiesInterpretation({
-      text: $("source-text").value,
-      definitions: definitions(),
-    }).state.types;
+    const types = entityTypes(definitions());
     $("entity-editor").replaceChildren();
     items.forEach((entity, i) => {
       const row = document.createElement("div");
@@ -629,6 +635,14 @@ if (root) {
     if (tool === "entities") {
       if (!$("source-text").value.trim())
         return missingField("source-text", "Paste text to extract from.");
+      if (
+        new TextEncoder().encode($("source-text").value).byteLength >
+        2 * 1024 * 1024
+      )
+        return missingField(
+          "source-text",
+          "Source text must be no larger than 2 MiB.",
+        );
       if (!definitions().trim())
         return missingField(
           $("custom-category").checked ? "instructions" : "people-category",
@@ -866,32 +880,83 @@ if (root) {
               ? "Choosing records and array handling…"
               : "Reading flowchart steps and connections…",
       );
-      const r = await fetch("/api/utilities/interpret", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tool, input }),
-        // Entity spans and diagram roles use two bounded 15-second stages.
-        signal: AbortSignal.timeout(
-          ["entities", "diagram"].includes(tool) ? 35000 : 20000,
-        ),
-      });
-      responseStatus = r.status;
-      const data = await r.json();
+      let data;
+      if (tool === "entities") {
+        const controller = new AbortController();
+        entityController = controller;
+        let lastRequest = 0;
+        data = await extractEntityDocument(
+          input,
+          async (payload, { signal }) => {
+            // Respect the existing six-request/minute guard; do not retry a denial.
+            const delay = Math.max(0, lastRequest + 13500 - Date.now());
+            if (delay)
+              await new Promise((resolve, reject) => {
+                const cancel = () => {
+                  clearTimeout(timer);
+                  signal.removeEventListener("abort", cancel);
+                  reject(signal.reason);
+                };
+                const timer = setTimeout(() => {
+                  signal.removeEventListener("abort", cancel);
+                  resolve();
+                }, delay);
+                signal.addEventListener("abort", cancel, { once: true });
+                if (signal.aborted) cancel();
+              });
+            signal.throwIfAborted();
+            lastRequest = Date.now();
+            const response = await fetch("/api/utilities/interpret", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ tool, input: payload }),
+              signal: AbortSignal.any([signal, AbortSignal.timeout(35000)]),
+            });
+            responseStatus = response.status;
+            const body = await response.json();
+            if (!response.ok)
+              throw Error(body.error || "Could not extract names.");
+            return body;
+          },
+          {
+            signal: controller.signal,
+            onProgress: ({ completed, total }) => {
+              if (token === revision)
+                status(
+                  `Extracting names · ${completed} of ${total} sections complete…`,
+                );
+            },
+          },
+        );
+        if (token !== revision) {
+          outcome = "cancelled";
+          return;
+        }
+        entityProcessing = data;
+        reviewPlan = JSON.stringify(data.plan.entities, null, 2);
+        editEntities();
+      } else {
+        const r = await fetch("/api/utilities/interpret", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tool, input }),
+          signal: AbortSignal.timeout(tool === "diagram" ? 35000 : 20000),
+        });
+        responseStatus = r.status;
+        data = await r.json();
+        if (!r.ok) throw Error(data.error || "Jev is unavailable.");
+      }
       if (token !== revision) {
         outcome = "cancelled";
         return;
       }
-      if (!r.ok) throw new Error(data.error || "Jev is unavailable.");
       if (data.source !== "jev" || !data.plan)
-        throw new Error("Unverified interpretation.");
+        throw Error("Unverified interpretation.");
       if (tool === "jsonCsv") {
         paths(data.plan.path);
         $("array-policy").value = manualArrayPolicy ?? data.plan.arrays;
       }
-      if (tool === "entities") {
-        reviewPlan = JSON.stringify(data.plan.entities, null, 2);
-        editEntities();
-      }
+
       if (tool === "diagram") {
         reviewPlan = JSON.stringify(data.plan.graph, null, 2);
         editGraph();
@@ -995,7 +1060,7 @@ if (root) {
                 (tool === "diagram"
                   ? " No AI graph was accepted. Review the input and try again."
                   : tool === "entities"
-                    ? " No AI matches were accepted. Shorten the text and try again."
+                    ? " No matches were accepted. Check the text and try again."
                     : ""),
           true,
         );
@@ -1003,6 +1068,7 @@ if (root) {
     } finally {
       complete(attempt, outcome);
       button.disabled = false;
+      if (tool === "entities" && token === revision) entityController = null;
     }
   }
   $("extra-ask")?.addEventListener("click", askJev);
@@ -1062,13 +1128,10 @@ if (root) {
       if (tool === "entities") {
         const items = JSON.parse(reviewPlan),
           source = $("source-text").value;
-        const spec = createEntitiesInterpretation({
-          text: source,
-          definitions: definitions(),
-        });
-        const types = spec.state.types.map((t) => t.name);
-        if (!Array.isArray(items) || items.length > 12)
-          throw new Error("Use at most 12 entity mentions.");
+        if (new TextEncoder().encode(source).byteLength > 2 * 1024 * 1024)
+          throw Error("Source text must be no larger than 2 MiB.");
+        const types = entityTypes(definitions()).map((t) => t.name);
+        if (!Array.isArray(items)) throw new Error("Invalid entity mentions.");
         for (const e of items) {
           if (
             !types.includes(e.type) ||
@@ -1083,9 +1146,17 @@ if (root) {
               "Every entity must exactly match its source offsets and a defined type.",
             );
         }
-        for (const type of types)
-          if (items.filter((e) => e.type === type).length > 3)
-            throw new Error("At most three mentions per type.");
+        const byType = new Map();
+        for (const e of items) {
+          if (!byType.has(e.type)) byType.set(e.type, []);
+          byType.get(e.type).push(e);
+        }
+        for (const spans of byType.values()) {
+          spans.sort((a, b) => a.start - b.start || a.end - b.end);
+          for (let i = 1; i < spans.length; i++)
+            if (spans[i].start < spans[i - 1].end)
+              throw Error("Overlapping mentions of the same type.");
+        }
         outcome = "unexpected_failure";
         show(
           JSON.stringify(items, null, 2),
@@ -1102,11 +1173,11 @@ if (root) {
         index.hidden = !items.length;
         let returnToOccurrence = null;
         workspace.classList.toggle("is-empty", !items.length);
-        const limit = document.createElement("p");
-        limit.className = "notice";
-        limit.textContent =
-          "Up to 3 mentions per category; additional matches may be omitted.";
-        index.append(limit);
+        const guidance = document.createElement("p");
+        guidance.className = "notice";
+        guidance.textContent =
+          "Review each name and its exact source occurrences.";
+        index.append(guidance);
         const documentView = document.createElement("div");
         documentView.className = "entity-document";
         documentView.setAttribute(
@@ -1144,12 +1215,21 @@ if (root) {
             ...ordered.flatMap((e) => [e.start, e.end]),
           ]),
         ].sort((a, b) => a - b);
+        const startsAt = new Map(),
+          endsAt = new Map(),
+          current = new Set();
+        ordered.forEach((e, n) => {
+          if (!startsAt.has(e.start)) startsAt.set(e.start, []);
+          if (!endsAt.has(e.end)) endsAt.set(e.end, []);
+          startsAt.get(e.start).push(n);
+          endsAt.get(e.end).push(n);
+        });
         for (let i = 1; i < boundaries.length; i++) {
           const start = boundaries[i - 1],
             end = boundaries[i];
-          const active = ordered.flatMap((e, n) =>
-            e.start <= start && e.end >= end ? [n] : [],
-          );
+          for (const n of endsAt.get(start) || []) current.delete(n);
+          for (const n of startsAt.get(start) || []) current.add(n);
+          const active = [...current].sort((a, b) => a - b);
           const text = source.slice(start, end);
           if (!active.length) {
             documentView.append(document.createTextNode(text));
@@ -1286,6 +1366,24 @@ if (root) {
         }
         workspace.append(index, sourcePanel);
         $("extra-visual").append(workspace);
+        if (entityProcessing) {
+          appendInterpretationDetails(
+            $("extra-visual"),
+            entityProcessing.model,
+          );
+          const detail = $("extra-visual").querySelector(
+            "[data-interpretation-details]",
+          );
+          const coverage = document.createElement("p");
+          coverage.textContent = `Complete source processed: ${entityProcessing.plan.coverage.sourceLength} characters, ${entityProcessing.plan.coverage.windows} sections. Review edits are validated locally, not re-inferred.`;
+          const scores = document.createElement("pre");
+          scores.textContent = JSON.stringify(
+            entityProcessing.confidence,
+            null,
+            2,
+          );
+          detail.append(coverage, scores);
+        }
         const uniqueCount = new Set(
           items.map((e) => `${e.type}\u0000${e.text}`),
         ).size;

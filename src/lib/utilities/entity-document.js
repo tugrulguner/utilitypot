@@ -140,12 +140,16 @@ export async function extractEntityDocument(
         throw Error("Invalid entity continuation response.");
       const entries = new Map();
       for (const c of plan.continuation) {
+        const batchSize = c.batchSize ?? 3;
         if (
+          !Number.isInteger(batchSize) ||
+          batchSize < 1 ||
+          batchSize > 3 ||
           !active.some((t) => t.name === c.type) ||
           entries.has(c.type) ||
           !Array.isArray(c.starts) ||
-          c.starts.length > 3 ||
-          c.exhausted !== c.starts.length < 3 ||
+          c.starts.length > batchSize ||
+          c.exhausted !== c.starts.length < batchSize ||
           !Number.isInteger(c.after)
         )
           throw Error("Invalid entity continuation metadata.");

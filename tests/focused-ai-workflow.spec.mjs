@@ -1,3 +1,5 @@
+import { entityWindows } from "../src/lib/utilities/entity-document.js";
+import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
 import { test, expect } from "@playwright/test";
 
 const routes = {
@@ -49,10 +51,10 @@ test("AI tools expose one disclosed Jev action and no alternate execution path",
       page.locator("#import-plan, #prepare-extra, #review-plan"),
     ).toHaveCount(0);
     if (tool === "entities") {
-      await expect(page.locator("#extra-ask")).toHaveText("Extract entities");
+      await expect(page.locator("#extra-ask")).toHaveText("Extract names");
       await expect(page.locator("#source-text")).toHaveAttribute(
         "maxlength",
-        "5000",
+        "2097152",
       );
       await expect(page.locator("#processing-disclosure")).toBeVisible();
       await expect(page.locator("#example-outcome")).toContainText("source");
@@ -89,7 +91,7 @@ test("consented entity interpretation is reviewed against the full source", asyn
   await page.route("**/api/utilities/interpret", async (route) => {
     payload = route.request().postDataJSON();
     const orgStart = text.indexOf("Acme Labs");
-    return route.fulfill({
+    return fulfillEntityDocumentFixture(route, {
       json: {
         source: "jev",
         model: "test-fixture",
@@ -118,7 +120,9 @@ test("consented entity interpretation is reviewed against the full source", asyn
     "Acme Labs",
   ]);
   expect(payload.tool).toBe("entities");
-  expect(payload.input.text).toBe(text);
+  expect(payload.input.text).toBe(entityWindows(text)[0].text);
+  expect(payload.input.range.start).toBe(0);
+  expect(await page.locator(".entity-document").textContent()).toBe(text);
 });
 
 test("AI transmission requires the primary action with visible, programmatically associated disclosure", async ({
@@ -127,7 +131,7 @@ test("AI transmission requires the primary action with visible, programmatically
   let calls = 0;
   await page.route("**/api/utilities/interpret", (route) => {
     calls++;
-    return route.fulfill({
+    return fulfillEntityDocumentFixture(route, {
       status: 503,
       json: { error: "Fixture service unavailable" },
     });
@@ -140,12 +144,12 @@ test("AI transmission requires the primary action with visible, programmatically
     "processing-disclosure",
   );
   await expect(page.locator("#processing-disclosure")).toContainText(
-    "Selecting Extract entities sends text",
+    "Extract names from text sends the source text",
   );
   expect(calls).toBe(0);
   await action.click();
   await expect(page.locator("#extra-status")).toContainText(
-    "No AI matches were accepted",
+    "No matches were accepted",
   );
   expect(calls).toBe(1);
 });

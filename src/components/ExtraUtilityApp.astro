@@ -11,7 +11,7 @@ const examples = {
   ],
   entities: [
     "Load example: repeated names",
-    "Extract named entities from the sample source, then review exact source mentions.",
+    "Extract names from the sample source, then review exact source mentions.",
   ],
   diagram: [
     "Load example: approval steps",
@@ -131,7 +131,7 @@ const examples = {
               ? 10000
               : tool === "diagram"
                 ? 1800
-                : 5000
+                : 2097152
         }
         placeholder={
           tool === "jsonCsv"
@@ -219,9 +219,8 @@ const examples = {
           />
         </div>
         <p id="processing-disclosure" class="notice">
-          Selecting Extract entities sends text and selected categories to
-          Jev/TypeSafe. Up to 120 source tokens and three matches per category;
-          review highlights.
+          Extract names from text sends the source text and selected categories
+          to Jev/TypeSafe. Review exact source mentions before exporting.
         </p>
       </>
     )}
@@ -286,7 +285,7 @@ const examples = {
           aria-describedby="processing-disclosure"
           class="primary"
         >
-          Extract entities
+          Extract names
         </button>
       )}
       {tool === "diagram" && (
@@ -314,9 +313,10 @@ const examples = {
     </div>
     {tool === "entities" && (
       <details>
-        <summary>Extraction limits</summary>Up to 120 source tokens and 1–4
-        categories, three matches per category. This is not exhaustive
-        full-document extraction.
+        <summary>Extraction limits</summary>Up to four categories and 2 MiB of
+        UTF-8 text. Documents run in sections; long documents take time.
+        Capacity limits stop processing without accepting a partial result. AI
+        can miss or mislabel names; review the source before exporting.
       </details>
     )}
     <p class="notice">

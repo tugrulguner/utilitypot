@@ -1,0 +1,59 @@
+{
+  "note": "Genuine Jev1.13.0 response captured in fixture-only nonproduction diagnostic preview. Three independent ordinal questions all selected the same start; no ordered three-distinct-start assignment existed. New sequential decisions require separate real-provider qualification.",
+  "input": {
+    "text": "beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. Mira Calder met Owen Hale. Sara Neri greeted Amir Kade. Yuna Moss joined Juniper Works",
+    "definitions": "Person: a named human individual",
+    "range": {
+      "start": 77,
+      "end": 539
+    },
+    "after": {
+      "Person": 526
+    }
+  },
+  "provider": {
+    "model": "jev-1.13.0",
+    "answers": {
+      "t0_m0_start": {
+        "type": "choice",
+        "choice": "w83",
+        "confidence": 0.33,
+        "probabilities": {
+          "w82": 0.02,
+          "w83": 0.55,
+          "none": 0.43
+        }
+      },
+      "t0_m1_start": {
+        "type": "choice",
+        "choice": "w83",
+        "confidence": 0.74,
+        "probabilities": {
+          "w82": 0.01,
+          "w83": 0.83,
+          "none": 0.16
+        }
+      },
+      "t0_m2_start": {
+        "type": "choice",
+        "choice": "w83",
+        "confidence": 0.48,
+        "probabilities": {
+          "w82": 0.01,
+          "w83": 0.65,
+          "none": 0.34
+        }
+      }
+    },
+    "usage": {
+      "input_tokens": 4350,
+      "output_tokens": 138
+    }
+  },
+  "originalError": {
+    "error": "The interpretation could not be verified. No result was accepted. Try again later.",
+    "code": "entity_starts_invalid",
+    "phase": "followup",
+    "stage": 1
+  }
+}

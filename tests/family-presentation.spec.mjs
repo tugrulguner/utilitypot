@@ -46,7 +46,7 @@ test("family overview, assets and creator remain discoverable", async ({
     "Clean up supported date text",
     "Compare availability across cities",
     "Turn a JSON file into spreadsheet rows and columns",
-    "Named Entity Recognition (NER): extract people, organizations and custom entity types",
+    "Extract people, organizations and custom categories from text",
     "Turn up to eight listed steps into a flowchart",
     "Find exact passages in pasted text or public HTTP/HTTPS pages",
   ])

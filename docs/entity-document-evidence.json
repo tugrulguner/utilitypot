@@ -1,0 +1,104 @@
+{
+  "kind": "genuine candidate hosted UI; no mocked responses, inference retries or production deployment",
+  "startedAt": "2026-10-17T21:06:27.967Z",
+  "cases": [
+    {
+      "name": "complete-original-document",
+      "success": true,
+      "input": "The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. The document describes a quiet afternoon beside the river. Mira Calder met Owen Hale. Sara Neri greeted Amir Kade. Yuna Moss joined Juniper Works.",
+      "mentions": 6,
+      "models": ["jev-1.13.0"],
+      "apiRequests": 4,
+      "clipboard": true,
+      "download": {
+        "bytes": 548,
+        "sha256": "c236941a9a05aea2b67972c0ccffd73d55adedd7625fa362927f9ba3622d2091"
+      }
+    },
+    {
+      "name": "dense-repeated-unicode",
+      "success": true,
+      "input": "  Zoë Lemaire met Tomas Ives. Priya Sen greeted Hugo Lane. Maya Cole called Evan Frost. Zoë Lemaire thanked Priya Sen.\n",
+      "mentions": 8,
+      "models": ["jev-1.13.0"],
+      "apiRequests": 3,
+      "clipboard": true,
+      "download": {
+        "bytes": 707,
+        "sha256": "64b9fa8b12f6dcbb64c3493b82e765e24189400b6ecebe4d711f850de778b672"
+      }
+    },
+    {
+      "name": "owned-boundary-name",
+      "success": true,
+      "input": "quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet quiet Mira Calder joined Juniper Works.  ",
+      "mentions": 2,
+      "models": ["jev-1.13.0"],
+      "apiRequests": 2,
+      "clipboard": true,
+      "download": {
+        "bytes": 192,
+        "sha256": "2f7890573a3abe6ee3305c3085bab6b328534ebc197e6d66d64d4c4d85c12b34"
+      }
+    }
+  ],
+  "api": [
+    {
+      "case": "complete-original-document",
+      "startedAt": "2026-10-17T21:06:38.171Z",
+      "status": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "case": "complete-original-document",
+      "startedAt": "2026-10-17T21:06:51.708Z",
+      "status": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "case": "complete-original-document",
+      "startedAt": "2026-10-17T21:07:05.252Z",
+      "status": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "case": "complete-original-document",
+      "startedAt": "2026-10-17T21:07:18.824Z",
+      "status": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "case": "dense-repeated-unicode",
+      "startedAt": "2026-10-17T21:07:32.482Z",
+      "status": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "case": "dense-repeated-unicode",
+      "startedAt": "2026-10-17T21:07:46.043Z",
+      "status": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "case": "dense-repeated-unicode",
+      "startedAt": "2026-10-17T21:07:59.612Z",
+      "status": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "case": "owned-boundary-name",
+      "startedAt": "2026-10-17T21:08:13.214Z",
+      "status": 200,
+      "model": "jev-1.13.0"
+    },
+    {
+      "case": "owned-boundary-name",
+      "startedAt": "2026-10-17T21:08:26.786Z",
+      "status": 200,
+      "model": "jev-1.13.0"
+    }
+  ],
+  "consoleAndPageErrors": [],
+  "previewsRestored": true,
+  "productionUnchanged": true
+}

@@ -3,6 +3,7 @@ import {
   approvalGraph,
   answeredSource,
 } from "./workflow-fixtures.mjs";
+import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
 import { test, expect } from "@playwright/test";
 const tools = [
   ["csv-to-nested-json", "customers", "#csv-input", "#results"],
@@ -182,7 +183,7 @@ for (const accept of [false, true])
     await page.route("**/api/utilities/read-page", async (route) => {
       reads++;
       await gate;
-      await route.fulfill({
+      await fulfillEntityDocumentFixture(route, {
         json: {
           text: "The source says hello.",
           url: "https://docs.python.org/3/",
@@ -192,7 +193,7 @@ for (const accept of [false, true])
     });
     await page.route("**/api/utilities/interpret", async (route) => {
       interpretations++;
-      await route.fulfill({
+      await fulfillEntityDocumentFixture(route, {
         json: {
           source: "jev",
           plan: {
@@ -258,7 +259,7 @@ for (const slug of ["ask-a-webpage", "entity-extractor"])
       await page.route("**/api/utilities/interpret", async (route) => {
         calls++;
         await gate;
-        await route.fulfill({
+        await fulfillEntityDocumentFixture(route, {
           json: {
             source: "jev",
             model: "regression-fixture",

@@ -1,3 +1,4 @@
+import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
 import { test, expect } from "@playwright/test";
 // UI rendering regression with an explicitly labelled interpretation fixture.
 test("flowchart view offers full-size inspection without rerunning inference", async ({
@@ -6,7 +7,7 @@ test("flowchart view offers full-size inspection without rerunning inference", a
   let calls = 0;
   await page.route("**/api/utilities/interpret", (route) => {
     calls++;
-    return route.fulfill({
+    return fulfillEntityDocumentFixture(route, {
       json: {
         source: "jev",
         model: "fixture",
@@ -51,7 +52,7 @@ test("source edits discard stale AI corrections as well as highlighted results",
   page,
 }) => {
   await page.route("**/api/utilities/interpret", (route) =>
-    route.fulfill({
+    fulfillEntityDocumentFixture(route, {
       json: {
         source: "jev",
         model: "fixture",

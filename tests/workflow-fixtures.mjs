@@ -1,4 +1,5 @@
 // Explicit synthetic UI fixtures, never evidence of hosted Jev semantics.
+import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
 export const exampleEntities = [
   { type: "Person", text: "Ada", start: 0, end: 3 },
   { type: "Organization", text: "Acme Labs", start: 13, end: 22 },
@@ -18,9 +19,11 @@ export const approvalGraph = {
 };
 export async function fixturePlan(page, plan, confidence = {}) {
   await page.route("**/api/utilities/interpret", (route) =>
-    route.fulfill({
-      json: { source: "jev", model: "fixture", plan, confidence },
-    }),
+    fulfillEntityDocumentFixture(
+      route,
+      { json: { source: "jev", model: "fixture", plan, confidence } },
+      () => page.locator("#source-text").inputValue(),
+    ),
   );
 }
 export async function exampleInterpretation(page, slug) {
