@@ -81,12 +81,27 @@ function sourceBlocks(parent, text, role) {
     }
     const bullet = /^\s*(?:[-*+]\s+|\d+[.)]\s+)(.*)$/.exec(line);
     if (bullet) {
-      const ordered = /^\s*\d+[.)]/.test(line) || role === "step";
+      const marker = /^\s*(\d+)[.)]\s/.exec(line),
+        ordinal = marker ? Number(marker[1]) : null;
+      if (
+        marker &&
+        (!Number.isSafeInteger(ordinal) ||
+          ordinal > 2147483647 ||
+          String(ordinal) !== marker[1])
+      ) {
+        list = null;
+        const p = node("p", "answer-paragraph");
+        inlineText(p, line);
+        parent.append(p);
+        continue;
+      }
+      const ordered = !!marker;
       if (!list || list.tagName !== (ordered ? "OL" : "UL")) {
         list = node(ordered ? "ol" : "ul", "answer-list");
         parent.append(list);
       }
       const li = node("li");
+      if (ordered) li.value = ordinal;
       inlineText(li, bullet[1]);
       list.append(li);
       continue;

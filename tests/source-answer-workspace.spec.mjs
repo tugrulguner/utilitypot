@@ -12,12 +12,12 @@ const facts = [
 ];
 const source = facts.map((f) => f.text).join("\n\n");
 // This presentation oracle uses only explicitly declared fixture facts, not live semantics.
-function response(input) {
+function response(input, declared = facts) {
   const spec = createSourceAnswerWindow(input),
     a = {};
   for (const [key, q] of Object.entries(spec.questions)) {
     const p = spec.state.passages.find((p) => key.startsWith(p.id + "_")),
-      f = p && facts.find((f) => p.text.trim() === f.text);
+      f = p && declared.find((f) => p.text.trim() === f.text);
     a[key] =
       q.type === "noul"
         ? { noul: key === "answer_complete" ? 0.95 : f ? 0.93 : 0.01 }
@@ -27,14 +27,22 @@ function response(input) {
     b = {};
   for (const [key, q] of Object.entries(next.questions))
     b[key] = {
-      choice: Object.keys(q.criteria).find((k) => k !== "none") ?? "none",
+      choice:
+        Object.keys(q.criteria).find(
+          (k) =>
+            k !== "none" &&
+            q.criteria[k].text?.trim() ===
+              input.passages
+                .find((p) => p.id === q.instructions.passage_id)
+                ?.text.trim(),
+        ) ?? "none",
     };
   return {
     source: "jev",
     model: "PRESENTATION FIXTURE — NOT LIVE",
     plan: next.decode(b),
     confidence: Object.fromEntries(
-      Object.entries(a).map(([k, v]) => [k, v.noul ?? 0.8]),
+      Object.entries({ ...a, ...b }).map(([k, v]) => [k, v.noul ?? 0.8]),
     ),
   };
 }
@@ -128,4 +136,27 @@ test("editing a question cancels the old answer and cannot restore stale output"
   await expect(page.locator("#extra-ask")).toBeEnabled();
   await expect(page.locator("#extra-results")).toBeHidden();
   await expect(page.locator(".source-answer")).toHaveCount(0);
+});
+test("selected source procedures preserve their original step numbers", async ({
+  page,
+}) => {
+  const text = "2. Download the archive.\n4. Run the checks.",
+    declared = [{ text, role: "step" }];
+  await page.route("**/api/utilities/interpret", (route) =>
+    route.fulfill({
+      json: response(route.request().postDataJSON().input, declared),
+    }),
+  );
+  await page.goto("/tools/ask-a-webpage/");
+  await page.locator("#source-text").fill(text);
+  await page
+    .locator("#instructions")
+    .fill("Which installation steps are listed?");
+  await page.locator("#extra-ask").click();
+  await expect(page.locator(".answer-lead li")).toHaveCount(2);
+  expect(
+    await page
+      .locator(".answer-lead li")
+      .evaluateAll((rows) => rows.map((row) => row.value)),
+  ).toEqual([2, 4]);
 });
