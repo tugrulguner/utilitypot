@@ -55,6 +55,7 @@ test("article answer presents all details, inspectable context and useful Markdo
     .fill("How do I invite the team, and what conditions apply?");
   await page.locator("#extra-ask").click();
   await expect(page.locator(".source-answer")).toBeVisible();
+  await expect(page.locator(".answer-lead")).toContainText(facts[1].text);
   await expect(page.locator(".answer-section-caveat")).toContainText(
     facts[2].text,
   );

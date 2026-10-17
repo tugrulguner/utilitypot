@@ -182,8 +182,43 @@ export function sourceAnswerQuestions(question, passages) {
   };
   return questions;
 }
-function sectionsFor(excerpts) {
-  return Object.keys(headings).flatMap((kind) => {
+const answerOrder = {
+  fact: ["direct", "explanation", "caveat", "conflict", "comparison", "step"],
+  explanation: [
+    "explanation",
+    "direct",
+    "caveat",
+    "conflict",
+    "comparison",
+    "step",
+  ],
+  steps: ["step", "direct", "caveat", "explanation", "comparison", "conflict"],
+  comparison: [
+    "comparison",
+    "direct",
+    "caveat",
+    "conflict",
+    "explanation",
+    "step",
+  ],
+  overview: [
+    "direct",
+    "explanation",
+    "comparison",
+    "step",
+    "caveat",
+    "conflict",
+  ],
+};
+function leadFor(excerpts, intent = "fact") {
+  for (const role of answerOrder[intent] ?? answerOrder.fact) {
+    const items = excerpts.filter((e) => e.role === role);
+    if (items.length) return items.slice(0, 3);
+  }
+  return [];
+}
+function sectionsFor(excerpts, intent = "fact") {
+  return (answerOrder[intent] ?? answerOrder.fact).flatMap((kind) => {
     const items = excerpts.filter((e) => e.role === kind);
     return items.length ? [{ kind, title: headings[kind], items }] : [];
   });
@@ -307,9 +342,6 @@ export function createSourceAnswerWindow(input) {
             relevance: parent.relevance,
           });
         }
-        const preferred = excerpts.filter(
-          (e) => e.role === "direct" || e.role === "step",
-        );
         return {
           status: !excerpts.length
             ? "not-answered"
@@ -320,8 +352,8 @@ export function createSourceAnswerWindow(input) {
           excerpts,
           contexts,
           answer: {
-            lead: (preferred.length ? preferred : excerpts).slice(0, 3),
-            sections: sectionsFor(excerpts),
+            lead: leadFor(excerpts, answers.intent.choice),
+            sections: sectionsFor(excerpts, answers.intent.choice),
             intent: answers.intent.choice,
           },
           coverage: {
@@ -375,7 +407,8 @@ export async function answerSourceDocument(
     contexts = [],
     confidence = {},
     models = new Set();
-  let anyComplete = false;
+  let anyComplete = false,
+    answerIntent;
   onProgress?.({ completed: 0, total: spec.windows.length });
   for (let wi = 0; wi < spec.windows.length; wi++) {
     signal?.throwIfAborted();
@@ -414,6 +447,7 @@ export async function answerSourceDocument(
       !Object.hasOwn(intents, c.intent)
     )
       throw Error("Invalid source-answer coverage.");
+    answerIntent ??= c.intent;
     const seen = new Set(),
       windowContexts = [];
     for (const e of plan.contexts) {
@@ -480,8 +514,7 @@ export async function answerSourceDocument(
   }
   signal?.throwIfAborted();
   all.sort((a, b) => a.start - b.start || a.end - b.end);
-  const preferred = all.filter((e) => e.role === "direct" || e.role === "step");
-  const lead = (preferred.length ? preferred : all).slice(0, 3);
+  const lead = leadFor(all, answerIntent);
   const status = !all.length
     ? "not-answered"
     : anyComplete
@@ -495,7 +528,11 @@ export async function answerSourceDocument(
       status,
       excerpts: all,
       contexts,
-      answer: { lead, sections: sectionsFor(all) },
+      answer: {
+        lead,
+        sections: sectionsFor(all, answerIntent),
+        intent: answerIntent,
+      },
       coverage: {
         complete: true,
         sourceLength: text.length,
