@@ -51,6 +51,27 @@ export function extractPageText(html) {
     "br",
   ]);
   let ignored = 0;
+  const phrasingContainers = new Set([
+    "p",
+    "li",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "dt",
+    "dd",
+    "blockquote",
+    "pre",
+    "code",
+    "td",
+    "th",
+    "summary",
+    "label",
+  ]);
+  const tags = [],
+    flowLinks = new Map();
   const stack = [],
     parts = [],
     primaryParts = [];
@@ -68,7 +89,12 @@ export function extractPageText(html) {
           skip.has(name) ||
           Object.hasOwn(attrs, "hidden") ||
           attrs["aria-hidden"] === "true";
+        const flowLink =
+          name === "a" && !tags.some((tag) => phrasingContainers.has(tag));
+        const parentLink =
+          tags.at(-1) === "a" ? flowLinks.get(stack.length) : undefined;
         stack.push(hidden);
+        tags.push(name);
         if (hidden) ignored++;
         if (
           !ignored &&
@@ -78,16 +104,38 @@ export function extractPageText(html) {
           primaryFound = true;
           primaryDepth = stack.length;
         }
+        if (!ignored && flowLink) {
+          flowLinks.set(stack.length, { lastChild: null, directText: false });
+          append("\n\n");
+        }
+        if (
+          !ignored &&
+          parentLink &&
+          !parentLink.directText &&
+          name !== "img"
+        ) {
+          if (parentLink.lastChild && parentLink.lastChild !== name)
+            append("\n");
+          parentLink.lastChild = name;
+        }
         if (!ignored && blockTags.has(name)) append("\n\n");
       },
       ontext(t) {
-        if (!ignored) append(t);
+        if (!ignored) {
+          append(t);
+          if (tags.at(-1) === "a" && t.trim()) {
+            const link = flowLinks.get(stack.length);
+            if (link) link.directText = true;
+          }
+        }
       },
       onclosetag(name) {
         const closesPrimary = primaryDepth === stack.length;
+        const closesFlowLink = flowLinks.delete(stack.length);
         if (stack.pop()) ignored--;
-        // Inline markup does not create a new source paragraph.
-        if (!ignored && blockTags.has(name)) append("\n\n");
+        tags.pop();
+        // Preserve inline phrasing; standalone link cards retain row/field boundaries.
+        if (!ignored && (blockTags.has(name) || closesFlowLink)) append("\n\n");
         else if (!ignored && (name === "td" || name === "th")) append("\t");
         if (closesPrimary) primaryDepth = 0;
       },
