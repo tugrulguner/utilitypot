@@ -1,12 +1,12 @@
 # UtilityPot
 
-<p align="center"><img src="utilitypot.png?v=wordmark-accent-1" alt="UtilityPot — Jev interprets. You review. Code executes." width="600"></p>
+<p align="center"><img src="utilitypot.png?v=public-positioning-2" alt="UtilityPot — Focused browser tools for data, text, diagrams and planning. Review AI-assisted results; no arbitrary generated code." width="600"></p>
 
 <p align="center">Part of <a href="https://modepot.io/">ModePot</a>. &nbsp; <a href="https://utilitypot.modepot.io/">Project website</a> &nbsp; <a href="https://tugrul.modepot.io/">Created by Tugrul Guner</a></p>
 
-<p align="center"><strong>Jev interprets. You review. Code executes.</strong></p>
+<p align="center"><strong>Focused browser tools for data, text, diagrams and planning.</strong></p>
 
-<p align="center">Open-source utilities for messy data, shared text, diagrams and planning. Bounded AI proposals become inspectable settings and exact operations—not arbitrary generated code.</p>
+<p align="center">Four tools work in your browser; three use bounded AI only after you ask. Review AI-assisted results; no arbitrary generated code.</p>
 
 <p align="center"><a href="https://github.com/tugrulguner/utilitypot/actions/workflows/ci.yml"><img src="https://github.com/tugrulguner/utilitypot/actions/workflows/ci.yml/badge.svg" alt="CI"></a> <a href="https://discord.gg/u3AANZr6RG"><img src="https://img.shields.io/badge/Discord-ModePot-5865F2?logo=discord&logoColor=white" alt="ModePot Discord"></a> <a href="LICENSE"><img src="https://img.shields.io/github/license/tugrulguner/utilitypot" alt="MIT license"></a> <a href="https://github.com/tugrulguner/utilitypot"><img src="https://img.shields.io/github/stars/tugrulguner/utilitypot?style=flat" alt="GitHub stars"></a></p>
 

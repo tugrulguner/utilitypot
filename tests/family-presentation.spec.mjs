@@ -21,17 +21,40 @@ test("family overview, assets and creator remain discoverable", async ({
   await expect(page.locator(".creator-credit")).toBeVisible();
   await expect(page.locator(".product-hero img")).toHaveAttribute(
     "src",
-    "/utilitypot-lockup-v1.png?v=wordmark-accent-1",
+    "/utilitypot-lockup-v2.png?v=public-positioning-2",
   );
   await expect(page.locator("link[rel=icon]")).toHaveAttribute(
     "href",
-    "/utilitypot-mark-v1.svg?v=wordmark-accent-1",
+    "/utilitypot-mark-v2.svg?v=public-positioning-2",
   );
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
-    "https://utilitypot.modepot.io/utilitypot-social-v1.png?v=wordmark-accent-1",
+    "https://utilitypot.modepot.io/utilitypot-social-v2.png?v=public-positioning-2",
   );
   await expect(page.locator("#tools article")).toHaveCount(7);
+  await expect(page.locator(".product-hero img")).toHaveAttribute(
+    "alt",
+    /Focused browser tools for data, text, diagrams and planning/,
+  );
+  await expect(page.locator(".product-hero")).toContainText(
+    "Four tools work entirely in your browser; three use bounded AI only after you ask.",
+  );
+  const cards = await page.locator("#tools article").allTextContents();
+  expect(cards).toHaveLength(7);
+  for (const description of [
+    "Group repeated CSV rows into nested JSON",
+    "Clean up supported date text",
+    "Compare availability across cities",
+    "Turn JSON records or one object into CSV",
+    "Highlight people, companies or your own categories",
+    "Turn up to eight listed steps into a flowchart",
+    "Find exact passages in pasted text or public HTTP/HTTPS pages",
+  ])
+    expect(cards.some((card) => card.includes(description))).toBe(true);
+  expect(cards.filter((card) => card.includes("In your browser"))).toHaveLength(
+    4,
+  );
+  expect(cards.filter((card) => card.includes("Uses AI"))).toHaveLength(3);
 });
 test("family themes override OS, survive reload and follow Auto changes", async ({
   page,
