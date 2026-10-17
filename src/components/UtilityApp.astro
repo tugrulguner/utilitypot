@@ -29,7 +29,7 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
   <section class="panel">
     <header class="workspace-header workspace-toolbar">
       <div>
-        <p class="workspace-kicker">
+        <p class="workspace-kicker" hidden={tool === "meeting"}>
           {tool === "csv"
             ? "CSV rows"
             : tool === "dates"
@@ -41,14 +41,20 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
             ? "Add your data"
             : tool === "dates"
               ? "Clean up your date list"
-              : "Choose a shared time"}
+              : "Where is everyone?"}
         </h2>
       </div>
-      <button disabled data-startup-was-enabled="true" id="load-example">
-        {examples[tool][0]}
-      </button>
+      {tool !== "meeting" && (
+        <button disabled data-startup-was-enabled="true" id="load-example">
+          {examples[tool][0]}
+        </button>
+      )}
     </header>
-    <p id="example-outcome" class="workspace-description notice">
+    <p
+      id="example-outcome"
+      class="workspace-description notice"
+      hidden={tool === "meeting"}
+    >
       {examples[tool][1]}
     </p>
     {tool === "csv" && (
@@ -113,23 +119,23 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
     )}
     {tool === "meeting" && (
       <>
-        <div class="utility-grid">
+        <div class="utility-grid meeting-settings">
           <div>
             <label for="meeting-date">Local date</label>
             <input id="meeting-date" type="date" />
           </div>
           <div>
-            <label for="duration">Minutes</label>
+            <label for="duration">Duration (min)</label>
             <input id="duration" type="number" min="15" max="240" value="30" />
           </div>
         </div>
         <div id="participants">
           {[0, 1].map((i) => (
             <div class="participant panel" data-index={i}>
-              <h2>Participant {i + 1}</h2>
-              <div class="utility-grid">
-                <div>
-                  <label for={`p${i}-zone`}>City / timezone {i + 1}</label>
+              <h2>Person {i + 1}</h2>
+              <div class="participant-place-row">
+                <div class="participant-place">
+                  <label for={`p${i}-zone`}>City or timezone</label>
                   <input
                     id={`p${i}-zone`}
                     data-field="zone"
@@ -138,25 +144,31 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
                     placeholder="Search a city, e.g. London"
                   />
                 </div>
-                <details class="participant-name">
-                  <summary>Name (optional)</summary>
-                  <label for={`p${i}-name`}>Name for participant {i + 1}</label>
-                  <input id={`p${i}-name`} data-field="name" maxlength="60" />
-                </details>
               </div>
-              <div data-availability="local">
+              <details class="participant-hours" data-availability="local">
+                <summary>
+                  <span data-hours-summary>09:00–17:00 local time</span>
+                  <span class="hours-edit">Change hours</span>
+                </summary>
                 <div class="utility-grid">
                   {["start", "end"].map((f, j) => (
                     <div>
                       <label for={`p${i}-${f}`}>
                         {j === 0 ? "Available from" : "Available until"} {i + 1}
                       </label>
-                      <input id={`p${i}-${f}`} data-field={f} type="time" />
+                      <input
+                        id={`p${i}-${f}`}
+                        data-field={f}
+                        type="time"
+                        value={j === 0 ? "09:00" : "17:00"}
+                      />
                     </div>
                   ))}
                 </div>
+                <label for={`p${i}-name`}>Name (optional)</label>
+                <input id={`p${i}-name`} data-field="name" maxlength="60" />
                 <details>
-                  <summary>Excluded interval</summary>
+                  <summary>Add a break or unavailable time</summary>
                   <div class="utility-grid">
                     {["excludeStart", "excludeEnd"].map((f, j) => (
                       <div>
@@ -168,7 +180,11 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
                     ))}
                   </div>
                 </details>
-              </div>
+                <p class="notice">
+                  Hours use this person's local date. Overnight hours finish the
+                  next day.
+                </p>
+              </details>
             </div>
           ))}
         </div>
@@ -181,7 +197,8 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
           ))}
         </datalist>
         <p class="notice">
-          For this date only. Overnight windows finish the next day.
+          Compare 09:00–17:00 local hours, or change them to fit your
+          availability.
         </p>
       </>
     )}
@@ -226,8 +243,11 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
     {tool === "meeting" && (
       <>
         <div class="actions meeting-secondary-actions">
+          <button disabled data-startup-was-enabled="true" id="load-example">
+            {examples[tool][0]}
+          </button>
           <button disabled data-startup-was-enabled="true" id="add-person">
-            Add participant
+            Add person
           </button>
           <button disabled data-startup-was-enabled="true" id="remove-person">
             Remove last

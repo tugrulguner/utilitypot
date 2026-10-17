@@ -1,3 +1,4 @@
+import "../styles/meeting-workspace.css";
 import { resultDiscovery } from "../lib/discovery.js";
 import { exampleReplacementGuard } from "../lib/utilities/example-replacement.js";
 import { groupCsv } from "../lib/utilities/outcome.js";
@@ -81,6 +82,7 @@ if (root) {
       e.target.removeAttribute("aria-invalid");
     }
     invalidate();
+    if (tool === "meeting") updateHours();
     if (["csv-input", "json-example"].includes(e.target.id)) {
       $("mapping-panel").hidden = true;
       fields = [];
@@ -233,6 +235,14 @@ if (root) {
           e.value = people[i][e.dataset.field];
     });
   }
+  function updateHours() {
+    for (const row of root.querySelectorAll(".participant")) {
+      const start = row.querySelector('[data-field="start"]').value;
+      const end = row.querySelector('[data-field="end"]').value;
+      row.querySelector("[data-hours-summary]").textContent =
+        `${start || "Choose start"}–${end || "choose end"} local time`;
+    }
+  }
   $("load-example").addEventListener("click", () => {
     if (!allowExampleReplacement()) return;
     invalidate();
@@ -296,6 +306,10 @@ if (root) {
       syncCsv();
       $("mapping-panel").hidden = true;
     }
+    if (tool === "meeting") {
+      updateHours();
+      $("example-outcome").hidden = false;
+    }
     status(
       "Example loaded. Review the settings, then run locally in this browser.",
     );
@@ -322,7 +336,7 @@ if (root) {
     const p = root.querySelector(".participant").cloneNode(true);
     p.dataset.index = String(n);
     p.querySelectorAll("details").forEach((detail) => (detail.open = false));
-    p.querySelector("h2").textContent = `Participant ${n + 1}`;
+    p.querySelector("h2").textContent = `Person ${n + 1}`;
     for (const e of p.querySelectorAll("[data-field]")) {
       e.id = `p${n}-${e.dataset.field}`;
       if (
@@ -336,13 +350,19 @@ if (root) {
           "excludeEnd",
         ].includes(e.dataset.field)
       )
-        e.value = "";
+        e.value =
+          e.dataset.field === "start"
+            ? "09:00"
+            : e.dataset.field === "end"
+              ? "17:00"
+              : "";
     }
     for (const l of p.querySelectorAll("label")) {
       l.htmlFor = l.htmlFor.replace(/^p\d+/, `p${n}`);
       l.textContent = l.textContent.replace(/\d/, String(n + 1));
     }
     $("participants").append(p);
+    updateHours();
   });
   $("remove-person")?.addEventListener("click", () => {
     if (root.querySelectorAll(".participant").length > 1) {

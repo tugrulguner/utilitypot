@@ -1,0 +1,68 @@
+.utility-app[data-utility="meeting"] .meeting-settings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(5rem, 0.65fr);
+  gap: 0.65rem;
+}
+.utility-app[data-utility="meeting"] .meeting-settings label {
+  font-size: 0.8rem;
+}
+.utility-app[data-utility="meeting"] .workspace-header {
+  margin-bottom: 0.6rem;
+}
+.utility-app[data-utility="meeting"] .workspace-header h2 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+.utility-app[data-utility="meeting"] #participants {
+  display: grid;
+  gap: 0.65rem;
+  margin-block: 0.85rem;
+}
+.utility-app[data-utility="meeting"] .participant.panel {
+  margin: 0;
+  padding: 0.8rem 1rem;
+  border-radius: 0.65rem;
+  background: var(--night-soft);
+}
+.utility-app[data-utility="meeting"] .participant h2 {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0 0 0.4rem;
+  color: var(--muted);
+}
+.utility-app[data-utility="meeting"] .participant-place-row {
+  display: block;
+}
+.utility-app[data-utility="meeting"] .participant-place label {
+  font-size: 0.8rem;
+  margin-block: 0.2rem;
+}
+.utility-app[data-utility="meeting"] .participant-hours {
+  border: 0;
+  padding: 0;
+  margin: 0.35rem 0 0;
+}
+.utility-app[data-utility="meeting"] .participant-hours > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  min-height: 44px;
+  font-size: 0.8rem;
+  font-weight: 550;
+}
+.utility-app[data-utility="meeting"] .hours-edit {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.utility-app[data-utility="meeting"] .participant-hours[open] > summary {
+  margin-bottom: 0.5rem;
+}
+.utility-app[data-utility="meeting"] .participant-hours .notice {
+  font-size: 0.8rem;
+}
+.utility-app[data-utility="meeting"] .meeting-secondary-actions {
+  margin-block: 0.5rem;
+}
