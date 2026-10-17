@@ -204,9 +204,9 @@ test("captured ModePot answer stays successful when passage confidence is low", 
     }),
   );
   await page.getByRole("button", { name: "Find answer", exact: true }).click();
-  await expect(page.locator("#extra-visual")).toHaveText(
-    "Not answered by the supplied source.",
-  );
+  await expect(
+    page.locator("#extra-visual [data-evidence-outcome]"),
+  ).toHaveText("No answer found in the supplied source.");
   await expect(page.locator("#extra-status")).toContainText(
     "No answer found in the supplied source.",
   );

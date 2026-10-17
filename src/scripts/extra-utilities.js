@@ -1,4 +1,5 @@
 import "../styles/entity-results.css";
+import "../styles/page-evidence.css";
 import { resultDiscovery } from "../lib/discovery.js";
 import {
   interpretationReview,
@@ -70,6 +71,7 @@ if (root) {
     );
   };
   const status = (s, error = false) => {
+    $("extra-status").hidden = false;
     $("extra-status").textContent = s;
     $("extra-status").classList.toggle("error", error);
   };
@@ -77,6 +79,7 @@ if (root) {
     discovery.reset();
     revision++;
     output = "";
+    $("extra-status").hidden = false;
     $("extra-results").hidden = true;
     if (tool === "entities") $("extra-visual").replaceChildren();
   }
@@ -652,6 +655,166 @@ if (root) {
     }
     return true;
   }
+  function renderPageEvidence(result, confidence, question, sourceText, model) {
+    const visual = $("extra-visual");
+    const heading = document.createElement("h3");
+    heading.className = "evidence-question";
+    heading.textContent = question;
+    visual.append(heading);
+
+    const outcome = document.createElement("p");
+    outcome.dataset.evidenceOutcome = "";
+    outcome.className = "evidence-outcome";
+    const uncertain =
+      result.status === "answered" &&
+      typeof confidence?.answerability === "number" &&
+      confidence.answerability < 0.6;
+    outcome.textContent =
+      result.status === "not-answered"
+        ? "No answer found in the supplied source."
+        : result.status === "partial"
+          ? "Partial evidence found in the source."
+          : uncertain
+            ? "Possible answer — review this source evidence."
+            : "Answer found in the source.";
+    visual.append(outcome);
+    if (
+      result.status !== "not-answered" &&
+      typeof confidence?.passage === "number" &&
+      confidence.passage < 0.6
+    ) {
+      const selectionNote = document.createElement("p");
+      selectionNote.className = "evidence-selection-note";
+      selectionNote.textContent =
+        "Several passages may fit; review the selected exact excerpt.";
+      visual.append(selectionNote);
+    }
+    if (fetchedMetadata?.truncated) {
+      const coverageNote = document.createElement("p");
+      coverageNote.className = "evidence-coverage-note";
+      coverageNote.textContent =
+        "This page was truncated; results cover only the portion read.";
+      visual.append(coverageNote);
+    }
+
+    if (result.excerpts.length) {
+      const nav = document.createElement("nav");
+      nav.dataset.passageNav = "";
+      nav.className = "evidence-passage-nav";
+      nav.setAttribute("aria-label", "Evidence passages for this question");
+      nav.hidden = result.excerpts.length < 2;
+      const passage = document.createElement("blockquote");
+      passage.className = "evidence-passage";
+      passage.dataset.passageText = "";
+      passage.tabIndex = 0;
+      const count = document.createElement("p");
+      count.className = "evidence-passage-count";
+      count.setAttribute("aria-live", "polite");
+      const copyQuote = document.createElement("button");
+      copyQuote.type = "button";
+      copyQuote.className = "evidence-copy-quote";
+      copyQuote.textContent = "Copy quote";
+      copyQuote.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(passage.textContent);
+          copyQuote.textContent = "Quote copied";
+        } catch {
+          copyQuote.textContent = "Select the quote to copy";
+        }
+      });
+      const select = (index) => {
+        copyQuote.textContent = "Copy quote";
+        const excerpt = result.excerpts[index];
+        passage.textContent = excerpt.text;
+        passage.dataset.passageId = excerpt.id;
+        count.textContent =
+          result.excerpts.length === 1
+            ? "Exact quote"
+            : `Passage ${index + 1} of ${result.excerpts.length}`;
+        [...nav.querySelectorAll("button")].forEach((button, n) => {
+          button.setAttribute("aria-pressed", String(n === index));
+        });
+      };
+      result.excerpts.forEach((excerpt, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = `Passage ${index + 1}`;
+        button.setAttribute("aria-label", `Show passage ${index + 1}`);
+        button.addEventListener("click", () => select(index));
+        nav.append(button);
+      });
+      visual.append(nav, count, passage, copyQuote);
+      select(0);
+    } else {
+      const empty = document.createElement("p");
+      empty.className = "evidence-no-passage";
+      empty.textContent = "No supporting passage was selected.";
+      visual.append(empty);
+    }
+
+    const citation = document.createElement("p");
+    citation.dataset.evidenceSource = "";
+    citation.className = "evidence-citation";
+    const isUrl = fetchedUrl && $("source-mode").value === "url";
+    if (isUrl) {
+      const link = document.createElement("a");
+      link.href = fetchedUrl;
+      link.textContent = new URL(fetchedUrl).hostname;
+      link.title = fetchedUrl;
+      link.target = "_blank";
+      link.setAttribute(
+        "aria-label",
+        `Open source at ${new URL(fetchedUrl).hostname} (opens in a new tab)`,
+      );
+      link.className = "ph-no-autocapture";
+      link.rel = "noopener noreferrer";
+      citation.append("Source · ", link);
+    } else citation.textContent = "Source · Pasted text";
+    visual.append(citation);
+
+    const provenance = document.createElement("details");
+    provenance.className = "evidence-provenance";
+    const summary = document.createElement("summary");
+    summary.textContent = "Source and processing details";
+    provenance.append(summary);
+    const meta = document.createElement("dl");
+    meta.className = "evidence-metadata";
+    const fields = [
+      [
+        "Source version",
+        `Submitted snapshot · ${sourceText.length} characters`,
+      ],
+      [
+        "Coverage",
+        `${sourceText.length} characters · ${sourceText.split(/\n\s*\n/).filter((s) => s.trim()).length} paragraphs${fetchedMetadata?.truncated ? " · truncated to reader coverage" : ""}`,
+      ],
+      ["Answerability score", confidence?.answerability],
+      ["Passage-selection score", confidence?.passage],
+      ["Interpretation version", model ?? "Jev typed interpretation"],
+    ];
+    if (
+      Array.isArray(fetchedMetadata?.redirects) &&
+      fetchedMetadata.redirects.length
+    )
+      fields.push(["Redirects", fetchedMetadata.redirects.join(" → ")]);
+    for (const [label, value] of fields) {
+      if (value === undefined || value === null) continue;
+      const dt = document.createElement("dt");
+      dt.textContent = label;
+      const dd = document.createElement("dd");
+      dd.textContent = String(value);
+      meta.append(dt, dd);
+    }
+    provenance.append(meta);
+    const fullSource = document.createElement("details");
+    const sourceSummary = document.createElement("summary");
+    sourceSummary.textContent = "Inspect full source snapshot";
+    const pre = document.createElement("pre");
+    pre.textContent = sourceText;
+    fullSource.append(sourceSummary, pre);
+    provenance.append(fullSource);
+    visual.append(provenance);
+  }
   async function askJev() {
     if (!requiredAiFields()) return;
     if (tool === "diagram" && !$("source-text").value.trim()) {
@@ -783,50 +946,24 @@ if (root) {
           "utilitypot-evidence.json",
           "application/json",
         );
-        $("extra-visual").textContent =
-          result.status === "not-answered"
-            ? "Not answered by the supplied source."
-            : `${result.status === "partial" ? "Partial evidence" : "Selected source evidence"} — review the exact excerpt below. This is not independent fact verification.`;
+        renderPageEvidence(
+          result,
+          data.confidence,
+          input.question,
+          input.text,
+          data.model,
+        );
       }
       if (tool === "qa") {
-        for (const e of data.plan.excerpts) {
-          const quote = document.createElement("blockquote");
-          quote.textContent = e.text;
-          $("extra-visual").append(quote);
-        }
-        if (fetchedUrl && $("source-mode").value === "url") {
-          const link = document.createElement("a");
-          link.href = fetchedUrl;
-          link.textContent = `Source: ${fetchedUrl}`;
-          link.rel = "noopener noreferrer";
-          $("extra-visual").append(link);
-        }
+        // renderPageEvidence owns the visible evidence workspace; provenance and
+        // the original typed response remain in the downloadable JSON.
       } else if (!(await runLocal(false))) {
         outcome = token !== revision ? "cancelled" : "rejected";
         return;
       }
       if (tool === "qa") {
-        const result = data.plan;
-        const passageUncertain =
-          result.status !== "not-answered" &&
-          result.excerpts.length > 0 &&
-          typeof data.confidence?.passage === "number" &&
-          data.confidence.passage < 0.6;
-        const answerUncertain =
-          result.status === "answered" &&
-          typeof data.confidence?.answerability === "number" &&
-          data.confidence.answerability < 0.6;
-        const outcome =
-          result.status === "answered"
-            ? answerUncertain
-              ? "Possible answer found in the source."
-              : "Answer found in the source."
-            : result.status === "partial"
-              ? "Partial evidence found in the source."
-              : "No answer found in the supplied source.";
-        status(
-          `${outcome}${answerUncertain ? " The source may not fully answer your question; review the excerpt." : ""}${passageUncertain ? " Several passages may fit; review the selected excerpt." : ""}`,
-        );
+        $("extra-status").textContent = "";
+        $("extra-status").hidden = true;
       } else if (tool !== "entities") {
         const review = interpretationReview(tool, data.confidence);
         if (review) status(`${$("extra-status").textContent} ${review}`);
