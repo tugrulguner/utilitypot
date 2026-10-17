@@ -3,6 +3,7 @@ import {
   exampleEntities,
   approvalGraph,
 } from "./workflow-fixtures.mjs";
+import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
 import { test, expect } from "@playwright/test";
 import fs from "node:fs/promises";
 
@@ -14,7 +15,7 @@ test("editing a URL during its fixture read cancels the whole answer pipeline", 
   let inference = 0;
   await page.route("**/api/utilities/read-page", async (route) => {
     await gate;
-    await route.fulfill({
+    await fulfillEntityDocumentFixture(route, {
       json: {
         text: "Old source",
         url: "https://docs.python.org/3/",
@@ -24,7 +25,10 @@ test("editing a URL during its fixture read cancels the whole answer pipeline", 
   });
   await page.route("**/api/utilities/interpret", async (route) => {
     inference++;
-    await route.fulfill({ status: 503, json: { error: "Must not be called" } });
+    await fulfillEntityDocumentFixture(route, {
+      status: 503,
+      json: { error: "Must not be called" },
+    });
   });
   await page.goto("/tools/ask-a-webpage/");
   await page.getByRole("tab", { name: "Public URL", exact: true }).click();
@@ -94,7 +98,7 @@ for (const [label, entities, expected] of [
     page,
   }) => {
     await page.route("**/api/utilities/interpret", (route) =>
-      route.fulfill({
+      fulfillEntityDocumentFixture(route, {
         json: {
           source: "jev",
           model: "jev-1.13.0",
@@ -144,7 +148,7 @@ test("captured ModePot answer stays successful when passage confidence is low", 
   await page.route("**/api/utilities/interpret", async (route) => {
     payload = route.request().postDataJSON();
     const text = payload.input.text;
-    await route.fulfill({
+    await fulfillEntityDocumentFixture(route, {
       json: {
         source: "jev",
         model: "jev-1.13.0",
@@ -194,7 +198,7 @@ test("captured ModePot answer stays successful when passage confidence is low", 
   expect(payload.tool).toBe("qa");
   await page.unroute("**/api/utilities/interpret");
   await page.route("**/api/utilities/interpret", (route) =>
-    route.fulfill({
+    fulfillEntityDocumentFixture(route, {
       json: {
         source: "jev",
         model: "fixture",
@@ -219,7 +223,7 @@ test("partial reader results state partial evidence without error styling", asyn
   page,
 }) => {
   await page.route("**/api/utilities/interpret", (route) =>
-    route.fulfill({
+    fulfillEntityDocumentFixture(route, {
       json: {
         source: "jev",
         model: "fixture",
@@ -253,7 +257,10 @@ test("reader interpretation API failures remain visible errors", async ({
   page,
 }) => {
   await page.route("**/api/utilities/interpret", (route) =>
-    route.fulfill({ status: 503, json: { error: "Jev is unavailable." } }),
+    fulfillEntityDocumentFixture(route, {
+      status: 503,
+      json: { error: "Jev is unavailable." },
+    }),
   );
   await page.goto("/tools/ask-a-webpage/");
   await page.locator("#source-text").fill("Source text.");
@@ -271,7 +278,7 @@ test("uncertain answerability is disclosed without calling a valid response an e
   page,
 }) => {
   await page.route("**/api/utilities/interpret", (route) =>
-    route.fulfill({
+    fulfillEntityDocumentFixture(route, {
       json: {
         source: "jev",
         model: "fixture",
@@ -305,7 +312,7 @@ test("answered response without an excerpt is a failure, not empty success", asy
   page,
 }) => {
   await page.route("**/api/utilities/interpret", (route) =>
-    route.fulfill({
+    fulfillEntityDocumentFixture(route, {
       json: {
         source: "jev",
         model: "fixture",
@@ -368,7 +375,7 @@ test("bare ModePot URL submits a page read; fetch failure is distinct and never 
   await page.route("**/api/utilities/read-page", async (route) => {
     reads++;
     expect(route.request().postDataJSON()).toEqual({ url: "modepot.io/about" });
-    await route.fulfill({
+    await fulfillEntityDocumentFixture(route, {
       status: 502,
       json: {
         code: "fetch_unavailable",
@@ -379,7 +386,10 @@ test("bare ModePot URL submits a page read; fetch failure is distinct and never 
   });
   await page.route("**/api/utilities/interpret", async (route) => {
     inference++;
-    await route.fulfill({ status: 503, json: { error: "Must not be called" } });
+    await fulfillEntityDocumentFixture(route, {
+      status: 503,
+      json: { error: "Must not be called" },
+    });
   });
   await page.goto("/tools/ask-a-webpage/");
   await page.getByRole("tab", { name: "Public URL", exact: true }).click();

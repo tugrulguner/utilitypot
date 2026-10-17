@@ -32,4 +32,6 @@ Observed RED regressions covered the impossible independent ordinals and the act
 
 New protocol-correct browser cases passed for a source beyond 120 tokens with six late mentions and exact JSON export, rejection of a later failed section without partial results, and source-edit cancellation preventing subsequent sections. These fixtures establish application behavior, not model quality.
 
-At initial publication, 145 unit tests, Astro check/build and the three new browser regressions passed. Legacy browser fixture migration, full final gates, exact-head CI and independent review remain required before marking this change ready. No production merge, deployment, tag or release is authorized by this report.
+Legacy fixtures now have a test-only window/continuation adapter. Their original declared spans, malformed-payload behavior, full-source assertions and exact exports are retained; fixture arrays are compared in the document contract's canonical source order. Only these legacy layout fixtures accelerate their request-pacing clock; the new document timing/cancellation regressions and genuine hosted journeys use real time. The adapter has four canonical unit regressions.
+
+Current local qualification: 149 unit tests and all 281 browser cases passed. Worker, release, bundle/archive, audit and deployment dry-run checks also passed. Final exact-head CI and independent review remain required before marking this change ready. No production merge, deployment, tag or release is authorized by this report.

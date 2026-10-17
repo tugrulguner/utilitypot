@@ -1,3 +1,4 @@
+import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
 import { test, expect } from "@playwright/test";
 import { approvalGraph } from "./workflow-fixtures.mjs";
 const tools = [
@@ -5,7 +6,7 @@ const tools = [
   ["fix-excel-dates", "Fix dates", "#results"],
   ["meeting-time-finder", "Find times", "#results"],
   ["json-to-csv", "Convert", "#extra-results"],
-  ["entity-extractor", "Extract entities", "#extra-results"],
+  ["entity-extractor", "Extract names", "#extra-results"],
   ["text-to-mermaid", "Create flowchart", "#extra-results"],
   ["ask-a-webpage", "Find answer", "#extra-results"],
 ];
@@ -30,7 +31,7 @@ for (const width of [1280, 1050, 390])
                     { text: input.text, start: 0, end: input.text.length },
                   ],
                 };
-        await route.fulfill({
+        await fulfillEntityDocumentFixture(route, {
           json: {
             source: "jev",
             model: "layout-regression-fixture",

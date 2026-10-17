@@ -1,3 +1,4 @@
+import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
 import { test, expect } from "@playwright/test";
 
 test("local latency fixture: two valid 11-second entity stages fit the client deadline", async ({
@@ -6,7 +7,7 @@ test("local latency fixture: two valid 11-second entity stages fit the client de
   test.setTimeout(45000);
   await page.route("**/api/utilities/interpret", async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 22000));
-    await route.fulfill({
+    await fulfillEntityDocumentFixture(route, {
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
@@ -34,7 +35,8 @@ test("rejected entity interpretation accepts no spans and exposes no pre-result 
   let calls = 0;
   await page.route("**/api/utilities/interpret", (route) => {
     calls++;
-    return route.fulfill(
+    return fulfillEntityDocumentFixture(
+      route,
       calls === 1
         ? {
             status: 503,
@@ -59,7 +61,7 @@ test("rejected entity interpretation accepts no spans and exposes no pre-result 
   await page.locator("#source-text").fill("Mina met Noah.");
   await page.locator("#extra-ask").click();
   await expect(page.locator("#extra-status")).toContainText(
-    "No AI matches were accepted",
+    "No matches were accepted",
   );
   await expect(page.locator("#extra-results")).toBeHidden();
   await expect(page.locator("#entity-review")).toBeHidden();
@@ -122,7 +124,7 @@ test("completed fixture result is focused and brought into view on mobile", asyn
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route("**/api/utilities/interpret", (route) =>
-    route.fulfill({
+    fulfillEntityDocumentFixture(route, {
       json: {
         source: "jev",
         model: "LOCAL TEST FIXTURE — NOT LIVE JEV",

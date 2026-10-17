@@ -1,3 +1,4 @@
+import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
 import { test, expect } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import { fixturePlan } from "./workflow-fixtures.mjs";
@@ -54,7 +55,14 @@ for (const width of [1280, 1050, 390, 320])
     const file = page.waitForEvent("download");
     await page.locator("#extra-download").click();
     expect(await readFile(await (await file).path(), "utf8")).toBe(
-      JSON.stringify(items, null, 2),
+      JSON.stringify(
+        [...items].sort(
+          (a, b) =>
+            a.start - b.start || a.end - b.end || a.type.localeCompare(b.type),
+        ),
+        null,
+        2,
+      ),
     );
     await page
       .locator(".entity-workspace")
@@ -74,7 +82,7 @@ test("rejected entity starts preserve input and accept no output or automatic re
   let calls = 0;
   await page.route("**/api/utilities/interpret", (route) => {
     calls++;
-    return route.fulfill({
+    return fulfillEntityDocumentFixture(route, {
       status: 503,
       json: {
         error:

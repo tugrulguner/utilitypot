@@ -3,6 +3,7 @@ import {
   approvalGraph,
   exampleEntities,
 } from "./workflow-fixtures.mjs";
+import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
 import { test, expect } from "@playwright/test";
 import fs from "node:fs/promises";
 for (const width of [1280, 390]) {
@@ -11,7 +12,7 @@ for (const width of [1280, 390]) {
     ["fix-excel-dates", "Fix dates", "#results"],
     ["meeting-time-finder", "Find times", "#results"],
     ["json-to-csv", "Convert", "#extra-results"],
-    ["entity-extractor", "Extract entities", "#extra-results"],
+    ["entity-extractor", "Extract names", "#extra-results"],
     ["text-to-mermaid", "Create flowchart", "#extra-results"],
     ["ask-a-webpage", "Find answer", "#extra-results"],
   ])
@@ -36,7 +37,7 @@ for (const width of [1280, 390]) {
                     { text: input.text, start: 0, end: input.text.length },
                   ],
                 };
-        await route.fulfill({
+        await fulfillEntityDocumentFixture(route, {
           json: {
             source: "jev",
             model: "regression-fixture",
@@ -94,7 +95,8 @@ test("branching AI failure remains explicit; retry requires another disclosed AI
   let calls = 0;
   await page.route("**/api/utilities/interpret", (route) => {
     calls++;
-    return route.fulfill(
+    return fulfillEntityDocumentFixture(
+      route,
       calls === 1
         ? { status: 503, json: { error: "Inconsistent decision branches." } }
         : {
@@ -181,7 +183,7 @@ test("URL action reads then interprets once and preserves truncated coverage and
   const source = "Python supports asynchronous I/O.";
   await page.route("**/api/utilities/read-page", (route) => {
     calls.push("read");
-    return route.fulfill({
+    return fulfillEntityDocumentFixture(route, {
       json: {
         text: source,
         url: "https://docs.python.org/3/library/asyncio.html",
@@ -192,7 +194,7 @@ test("URL action reads then interprets once and preserves truncated coverage and
   await page.route("**/api/utilities/interpret", (route) => {
     calls.push("interpret");
     expect(route.request().postDataJSON().input.text).toBe(source);
-    return route.fulfill({
+    return fulfillEntityDocumentFixture(route, {
       json: {
         source: "jev",
         model: "fixture",

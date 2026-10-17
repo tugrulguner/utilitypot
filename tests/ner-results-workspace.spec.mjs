@@ -1,3 +1,5 @@
+import { entityWindows } from "../src/lib/utilities/entity-document.js";
+import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
 import { expect, test } from "@playwright/test";
 
 // Explicit provider fixture: validates the existing exact-span presentation, not live Jev quality.
@@ -21,7 +23,7 @@ const mentions = [
 ];
 async function showManual(page) {
   await page.route("**/api/utilities/interpret", (route) =>
-    route.fulfill({
+    fulfillEntityDocumentFixture(route, {
       json: {
         source: "jev",
         model: "TEST FIXTURE — NOT LIVE JEV",
@@ -94,15 +96,21 @@ for (const width of [1280, 390]) {
     await expect(jump).toBeFocused();
     await expect(jump).toBeInViewport();
     await expect(page.locator(".entity-index")).toBeInViewport();
-    await expect(workspace).toContainText("Up to 3 mentions per category");
+    await expect(workspace).not.toContainText("Up to 3 mentions per category");
+    await expect(workspace).toContainText(
+      "Review each name and its exact source occurrences.",
+    );
     const download = page.waitForEvent("download");
     await page.locator("#extra-download").click();
     const file = await download;
     const fs = await import("node:fs/promises");
     expect(JSON.parse(await fs.readFile(await file.path(), "utf8"))).toEqual(
-      mentions,
+      [...mentions].sort(
+        (a, b) =>
+          a.start - b.start || a.end - b.end || a.type.localeCompare(b.type),
+      ),
     );
-    expect(api).toBe(1);
+    expect(api).toBe(entityWindows(source).length);
     expect(
       await page.evaluate(() => document.body.scrollWidth <= innerWidth),
     ).toBe(true);
