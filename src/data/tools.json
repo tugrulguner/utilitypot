@@ -43,8 +43,8 @@
   },
   {
     "slug": "ask-a-webpage",
-    "title": "Ask a webpage",
-    "description": "Find exact passages in pasted text or public HTTP/HTTPS pages. Blocked or unsupported pages require pasted text.",
+    "title": "Ask a page or text",
+    "description": "Ask questions about a webpage or text and explore source-backed answers, details and citations.",
     "tool": "qa",
     "processing": "Uses AI"
   }

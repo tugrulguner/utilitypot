@@ -6,8 +6,8 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
 ---
 
 <UtilityLayout
-  title="Ask a webpage"
-  description="Ask about a public page or pasted text. Get the exact supporting passage."
+  title="Ask a page or text"
+  description="Ask a question. Explore a source-backed answer, supporting details and the context behind each point."
   seoDescription={guides["ask-a-webpage"].description}
   searchTitle={guides["ask-a-webpage"].title}
   slug="ask-a-webpage"
@@ -15,26 +15,40 @@ import ExtraUtilityApp from "../../components/ExtraUtilityApp.astro";
   <ExtraUtilityApp tool="qa" />
   <ToolDiscovery slug="ask-a-webpage" />
   <details class="prose tool-help">
-    <summary>How this tool works &amp; limits</summary>
-    <h2>What this tool does</h2>
+    <summary>How answers and source coverage work</summary>
+    <h2>Your source, organized around your question</h2>
     <p>
-      This tool returns exact supporting paragraphs, not a generated essay. Jev
-      checks answer presence separately from selecting a passage. Unsupported
-      questions return not answered; partial evidence is labeled. Pasted text
-      can come from any source. Public HTTP/HTTPS hostname URLs are supported,
-      including bare hostnames (HTTPS by default). Every redirect repeats URL
-      and DNS safety checks. The reader executes no scripts or embedded
-      requests. Logins, paywalls, access blocks, JavaScript-only content, PDFs
-      and large pages may require pasted text. UTF-8 HTML/plain text is limited
-      to 250,000 bytes, eight seconds and three redirects; only the first 10,000
-      characters and 100 paragraphs are searched, with truncation disclosed.
+      Jev identifies relevant source material, distinguishes direct answers,
+      explanations, procedures, comparisons and caveats, then selects an exact
+      source sentence to introduce the answer. The application assembles the
+      source’s own words into a readable result. It does not generate new prose
+      or add outside facts. Open a citation to inspect where a point came from,
+      or download the answer and its underlying source data.
+    </p>
+    <h2>Complete-source reading, honest limits</h2>
+    <p>
+      Pasted text may contain up to 2 MiB of UTF-8 text; questions may contain
+      up to 1,000 characters. All source sections are processed rather than
+      searching only the first 10,000 characters or 100 paragraphs. Large
+      sources take longer, and processing every section does not guarantee that
+      every relevant point was recognized. A failed section rejects the result
+      instead of silently accepting a partial scan.
+    </p>
+    <p>
+      Public HTTP/HTTPS pages and bare hostnames are supported. Reading is
+      limited to 250,000 bytes, eight seconds and three redirects; every
+      redirect repeats URL and public-address checks. The reader executes no
+      page scripts or embedded requests. Logins, paywalls, access blocks,
+      JavaScript-only pages and PDFs may require pasted text. These transport
+      protections are separate from answer coverage and are not bypassed.
     </p>
     <h2>Privacy and uncertainty</h2>
     <p>
-      Only explicit AI requests send bounded source context to Jev through our
-      protected server. There is no account or application input-history
-      database. AI classifications can be wrong; typed output is not proof of
-      truth. <a href="/privacy/">Read privacy and operating limits.</a>
+      Only your explicit action sends source context and the question to Jev
+      through the protected server. There is no account or input-history
+      database. Source text and model judgments can be wrong; inspect the
+      supporting material before relying on an answer.{" "}
+      <a href="/privacy/">Privacy and operating limits.</a>
     </p>
   </details>
 </UtilityLayout>

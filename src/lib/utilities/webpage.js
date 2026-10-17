@@ -242,11 +242,10 @@ export async function readPublicPage(value, fetcher = fetch, options = {}) {
         throw new PageReadError("unsupported_content");
       }
       if (!text || /\x00/.test(text)) throw new PageReadError("empty_page");
-      const paragraphs = text.slice(0, 10000).split(/\n\s*\n/);
       return {
         url: url.href,
-        text: paragraphs.slice(0, 100).join("\n\n"),
-        truncated: text.length > 10000 || paragraphs.length > 100,
+        text,
+        truncated: false,
         redirects,
       };
     }

@@ -235,6 +235,92 @@ test("second-stage provider validation cannot be bypassed by a stale endpoint", 
   assert.ok(!(await response.text()).includes("must-not-leak"));
 });
 
+test("source-answer mode verifies typed window judgments and keeps legacy QA contract", async () => {
+  const text =
+    "The support period is two years.\n\nThe process starts after signup.";
+  const firstEnd = text.indexOf("\n\n");
+  const secondStart = firstEnd + 2;
+  const response = await handleRequest(
+    request({
+      tool: "qa",
+      input: {
+        mode: "source-answer",
+        question: "What is the support period?",
+        passages: [
+          { id: "u0", start: 0, end: firstEnd, text: text.slice(0, firstEnd) },
+          {
+            id: "u1",
+            start: secondStart,
+            end: text.length,
+            text: text.slice(secondStart),
+          },
+        ],
+      },
+    }),
+    env,
+    async (_url, init) => {
+      const body = JSON.parse(init.body);
+      assert.equal(body.model, "jev-latest");
+      assert.ok(Object.keys(body.questions).length <= 24);
+      const answers = Object.fromEntries(
+        Object.entries(body.questions).map(([key, q]) => {
+          if (q.type === "noul")
+            return [
+              key,
+              {
+                type: "noul",
+                noul:
+                  key === "answer_complete" || key.startsWith("u0")
+                    ? 0.95
+                    : 0.02,
+              },
+            ];
+          const choice =
+            key === "intent"
+              ? "fact"
+              : key.endsWith("_span")
+                ? "s0"
+                : key.startsWith("u0")
+                  ? "direct"
+                  : "unrelated";
+          return [
+            key,
+            {
+              type: "choice",
+              choice,
+              confidence: 1,
+              probabilities: Object.fromEntries(
+                Object.keys(q.criteria).map((k) => [k, k === choice ? 1 : 0]),
+              ),
+            },
+          ];
+        }),
+      );
+      return Response.json({
+        model: "jev-live-test",
+        answers,
+        usage: { input_tokens: 1, output_tokens: 1 },
+      });
+    },
+  );
+  assert.equal(response.status, 200);
+  const out = await response.json();
+  assert.equal(out.source, "jev");
+  assert.equal(out.plan.excerpts[0].text, text.slice(0, firstEnd));
+  assert.equal(out.plan.excerpts[0].start, 0);
+  assert.equal(out.plan.status, "answered");
+  assert.ok(Object.hasOwn(out.confidence, "u0_relevant"));
+  const legacy = await handleRequest(
+    request(input),
+    env,
+    async (_url, init) => {
+      const body = JSON.parse(init.body);
+      return Response.json(supportedResponse(body.questions));
+    },
+  );
+  assert.equal(legacy.status, 200);
+});
+
 const request = (body, headers = {}) =>
   new Request("https://modepot.io/api/utilities/interpret", {
     method: "POST",

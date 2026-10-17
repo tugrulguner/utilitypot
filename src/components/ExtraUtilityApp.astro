@@ -18,8 +18,8 @@ const examples = {
     "Four supplied steps become an inspectable approval flowchart after Jev proposes connections.",
   ],
   qa: [
-    "Load example: privacy passage",
-    "Expected quotation: “The application does not store submitted text or require an account.”",
+    "Load example: privacy question",
+    "See how a source-backed answer brings together relevant facts and conditions.",
   ],
 };
 ---
@@ -48,7 +48,7 @@ const examples = {
               ? "Explore names in context"
               : tool === "diagram"
                 ? "Describe the flow"
-                : "Find evidence in a source"}
+                : "Ask your source"}
         </h2>
       </div>
       <button disabled data-startup-was-enabled="true" id="extra-example">
@@ -123,12 +123,12 @@ const examples = {
         class={
           tool === "jsonCsv" ? "input-surface" : "input-surface prose-input"
         }
-        rows="7"
+        rows={tool === "qa" ? 5 : 7}
         maxlength={
           tool === "jsonCsv"
             ? 2000000
             : tool === "qa"
-              ? 10000
+              ? 2097152
               : tool === "diagram"
                 ? 1800
                 : 2097152
@@ -139,7 +139,7 @@ const examples = {
             : tool === "diagram"
               ? "Receive request\nReview request\nSend reply"
               : tool === "qa"
-                ? "Paste the source paragraphs here."
+                ? "Paste an article, document, notes or other source text."
                 : "Ada works at Acme Labs."
         }
       />
@@ -252,12 +252,13 @@ const examples = {
         <textarea
           id="instructions"
           rows="2"
-          maxlength="400"
+          maxlength="1000"
           placeholder="What does this source say about cancellation?"
         />
         <p id="processing-disclosure" class="notice">
           Selecting Find answer sends source + question to Jev/TypeSafe. URL
-          mode reads the public page first. Answers quote the source.
+          mode reads the public page first. Jev selects and organizes the
+          source’s own words; it does not generate new prose.
         </p>
         <p id="source-coverage" class="notice" />
         <details id="source-inspection" hidden>
@@ -363,27 +364,32 @@ const examples = {
     hidden
   >
     <header class="result-toolbar">
-      <h2 id="extra-results-title">
+      <h2
+        id="extra-results-title"
+        class={tool === "qa" ? "sr-only" : undefined}
+      >
         {tool === "jsonCsv"
           ? "Spreadsheet preview"
           : tool === "entities"
             ? "Named entities in context"
             : tool === "diagram"
               ? "Your flowchart"
-              : "Source evidence"}
+              : "Answer"}
       </h2>
       <div class="actions">
         <button disabled data-startup-was-enabled="true" id="extra-download">
-          Download result
+          {tool === "qa" ? "Download answer" : "Download result"}
         </button>
         <button disabled data-startup-was-enabled="true" id="extra-copy">
-          Copy result
+          {tool === "qa" ? "Copy answer" : "Copy result"}
         </button>
       </div>
     </header>
     <div id="extra-visual" class="result-inspector" />
     <details>
-      <summary>Export code view</summary>
+      <summary>
+        {tool === "qa" ? "Answer Markdown" : "Export code view"}
+      </summary>
       <pre id="extra-output" />
     </details>
     <FamilyDiscovery surface="result" />

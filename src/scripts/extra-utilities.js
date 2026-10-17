@@ -15,6 +15,12 @@ import {
 import { mermaidSource, graphRoleIssues } from "../lib/utilities/diagram.js";
 import { entityTypes } from "../lib/utilities/entities.js";
 import { extractEntityDocument } from "../lib/utilities/entity-document.js";
+import { answerSourceDocument } from "../lib/utilities/source-answer.js";
+import {
+  createSourceAnswerView,
+  sourceAnswerMarkdown,
+} from "../lib/utilities/source-answer-view.js";
+import "../styles/source-answer.css";
 const root = document.querySelector("[data-extra-utility]");
 if (root) {
   const discovery = resultDiscovery(
@@ -26,7 +32,7 @@ if (root) {
     $ = (id) => root.querySelector(`#${id}`);
   let manualArrayPolicy = null;
   let reviewPlan = "";
-  let entityController = null;
+  let documentController = null;
   let entityProcessing = null;
   let revision = 0,
     output = "",
@@ -81,12 +87,12 @@ if (root) {
   function clear() {
     discovery.reset();
     revision++;
-    entityController?.abort();
-    entityController = null;
+    documentController?.abort();
+    documentController = null;
     output = "";
     $("extra-status").hidden = false;
     $("extra-results").hidden = true;
-    if (tool === "entities") {
+    if (["entities", "qa"].includes(tool)) {
       $("extra-visual").replaceChildren();
       $("extra-output").textContent = "";
     }
@@ -616,8 +622,8 @@ if (root) {
       $("source-inspection").hidden = false;
       $("fetched-source").textContent = data.text;
       $("source-coverage").textContent = data.truncated
-        ? "Source truncated: only the first 10,000 characters / 100 paragraphs are searched. An absent answer may exist outside this coverage."
-        : "Fetched source is within the 10,000 character / 100 paragraph limit. Inspect the source below.";
+        ? "Only part of this source was retrieved. The answer may miss material outside that coverage."
+        : "The full readable page is ready. All source sections will be considered for your question.";
       complete(attempt, "success");
       return true;
     } catch (e) {
@@ -671,166 +677,6 @@ if (root) {
     }
     return true;
   }
-  function renderPageEvidence(result, confidence, question, sourceText, model) {
-    const visual = $("extra-visual");
-    const heading = document.createElement("h3");
-    heading.className = "evidence-question";
-    heading.textContent = question;
-    visual.append(heading);
-
-    const outcome = document.createElement("p");
-    outcome.dataset.evidenceOutcome = "";
-    outcome.className = "evidence-outcome";
-    const uncertain =
-      result.status === "answered" &&
-      typeof confidence?.answerability === "number" &&
-      confidence.answerability < 0.6;
-    outcome.textContent =
-      result.status === "not-answered"
-        ? "No answer found in the supplied source."
-        : result.status === "partial"
-          ? "Partial evidence found in the source."
-          : uncertain
-            ? "Possible answer — review this source evidence."
-            : "Answer found in the source.";
-    visual.append(outcome);
-    if (
-      result.status !== "not-answered" &&
-      typeof confidence?.passage === "number" &&
-      confidence.passage < 0.6
-    ) {
-      const selectionNote = document.createElement("p");
-      selectionNote.className = "evidence-selection-note";
-      selectionNote.textContent =
-        "Several passages may fit; review the selected exact excerpt.";
-      visual.append(selectionNote);
-    }
-    if (fetchedMetadata?.truncated) {
-      const coverageNote = document.createElement("p");
-      coverageNote.className = "evidence-coverage-note";
-      coverageNote.textContent =
-        "This page was truncated; results cover only the portion read.";
-      visual.append(coverageNote);
-    }
-
-    if (result.excerpts.length) {
-      const nav = document.createElement("nav");
-      nav.dataset.passageNav = "";
-      nav.className = "evidence-passage-nav";
-      nav.setAttribute("aria-label", "Evidence passages for this question");
-      nav.hidden = result.excerpts.length < 2;
-      const passage = document.createElement("blockquote");
-      passage.className = "evidence-passage";
-      passage.dataset.passageText = "";
-      passage.tabIndex = 0;
-      const count = document.createElement("p");
-      count.className = "evidence-passage-count";
-      count.setAttribute("aria-live", "polite");
-      const copyQuote = document.createElement("button");
-      copyQuote.type = "button";
-      copyQuote.className = "evidence-copy-quote";
-      copyQuote.textContent = "Copy quote";
-      copyQuote.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(passage.textContent);
-          copyQuote.textContent = "Quote copied";
-        } catch {
-          copyQuote.textContent = "Select the quote to copy";
-        }
-      });
-      const select = (index) => {
-        copyQuote.textContent = "Copy quote";
-        const excerpt = result.excerpts[index];
-        passage.textContent = excerpt.text;
-        passage.dataset.passageId = excerpt.id;
-        count.textContent =
-          result.excerpts.length === 1
-            ? "Exact quote"
-            : `Passage ${index + 1} of ${result.excerpts.length}`;
-        [...nav.querySelectorAll("button")].forEach((button, n) => {
-          button.setAttribute("aria-pressed", String(n === index));
-        });
-      };
-      result.excerpts.forEach((_, index) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.textContent = `Passage ${index + 1}`;
-        button.setAttribute("aria-label", `Show passage ${index + 1}`);
-        button.addEventListener("click", () => select(index));
-        nav.append(button);
-      });
-      visual.append(nav, count, passage, copyQuote);
-      select(0);
-    } else {
-      const empty = document.createElement("p");
-      empty.className = "evidence-no-passage";
-      empty.textContent = "No supporting passage was selected.";
-      visual.append(empty);
-    }
-
-    const citation = document.createElement("p");
-    citation.dataset.evidenceSource = "";
-    citation.className = "evidence-citation";
-    const isUrl = fetchedUrl && $("source-mode").value === "url";
-    if (isUrl) {
-      const link = document.createElement("a");
-      link.href = fetchedUrl;
-      link.textContent = new URL(fetchedUrl).hostname;
-      link.title = fetchedUrl;
-      link.target = "_blank";
-      link.setAttribute(
-        "aria-label",
-        `Open source at ${new URL(fetchedUrl).hostname} (opens in a new tab)`,
-      );
-      link.className = "ph-no-autocapture";
-      link.rel = "noopener noreferrer";
-      citation.append("Source · ", link);
-    } else citation.textContent = "Source · Pasted text";
-    visual.append(citation);
-
-    const provenance = document.createElement("details");
-    provenance.className = "evidence-provenance";
-    const summary = document.createElement("summary");
-    summary.textContent = "Source and processing details";
-    provenance.append(summary);
-    const meta = document.createElement("dl");
-    meta.className = "evidence-metadata";
-    const fields = [
-      [
-        "Source version",
-        `Submitted snapshot · ${sourceText.length} characters`,
-      ],
-      [
-        "Coverage",
-        `${sourceText.length} characters · ${sourceText.split(/\n\s*\n/).filter((s) => s.trim()).length} paragraphs${fetchedMetadata?.truncated ? " · truncated to reader coverage" : ""}`,
-      ],
-      ["Answerability score", confidence?.answerability],
-      ["Passage-selection score", confidence?.passage],
-      ["Interpretation version", model ?? "Jev typed interpretation"],
-    ];
-    if (
-      Array.isArray(fetchedMetadata?.redirects) &&
-      fetchedMetadata.redirects.length
-    )
-      fields.push(["Redirects", fetchedMetadata.redirects.join(" → ")]);
-    for (const [label, value] of fields) {
-      if (value === undefined || value === null) continue;
-      const dt = document.createElement("dt");
-      dt.textContent = label;
-      const dd = document.createElement("dd");
-      dd.textContent = String(value);
-      meta.append(dt, dd);
-    }
-    provenance.append(meta);
-    const fullSource = document.createElement("details");
-    const sourceSummary = document.createElement("summary");
-    sourceSummary.textContent = "Inspect full source snapshot";
-    const pre = document.createElement("pre");
-    pre.textContent = sourceText;
-    fullSource.append(sourceSummary, pre);
-    provenance.append(fullSource);
-    visual.append(provenance);
-  }
   async function askJev() {
     if (!requiredAiFields()) return;
     if (tool === "diagram" && !$("source-text").value.trim()) {
@@ -875,17 +721,19 @@ if (root) {
         tool === "entities"
           ? "Finding names and categories…"
           : tool === "qa"
-            ? "Finding a relevant passage…"
+            ? "Reading your source and organizing an answer…"
             : tool === "jsonCsv"
               ? "Choosing records and array handling…"
               : "Reading flowchart steps and connections…",
       );
       let data;
-      if (tool === "entities") {
+      if (["entities", "qa"].includes(tool)) {
         const controller = new AbortController();
-        entityController = controller;
+        documentController = controller;
         let lastRequest = 0;
-        data = await extractEntityDocument(
+        const interpretDocument =
+          tool === "qa" ? answerSourceDocument : extractEntityDocument;
+        data = await interpretDocument(
           input,
           async (payload, { signal }) => {
             // Respect the existing six-request/minute guard; do not retry a denial.
@@ -915,7 +763,12 @@ if (root) {
             responseStatus = response.status;
             const body = await response.json();
             if (!response.ok)
-              throw Error(body.error || "Could not extract names.");
+              throw Error(
+                body.error ||
+                  (tool === "qa"
+                    ? "Could not prepare a source-backed answer."
+                    : "Could not extract names."),
+              );
             return body;
           },
           {
@@ -923,7 +776,7 @@ if (root) {
             onProgress: ({ completed, total }) => {
               if (token === revision)
                 status(
-                  `Extracting names · ${completed} of ${total} sections complete…`,
+                  `${tool === "qa" ? "Reading source" : "Extracting names"} · ${completed} of ${total} sections complete…`,
                 );
             },
           },
@@ -932,9 +785,11 @@ if (root) {
           outcome = "cancelled";
           return;
         }
-        entityProcessing = data;
-        reviewPlan = JSON.stringify(data.plan.entities, null, 2);
-        editEntities();
+        if (tool === "entities") {
+          entityProcessing = data;
+          reviewPlan = JSON.stringify(data.plan.entities, null, 2);
+          editEntities();
+        }
       } else {
         const r = await fetch("/api/utilities/interpret", {
           method: "POST",
@@ -962,68 +817,34 @@ if (root) {
         editGraph();
       }
       if (tool === "qa") {
-        const result = data.plan;
-        evidenceAnswered = result.status === "answered";
-        if (!["answered", "partial", "not-answered"].includes(result.status))
-          throw new Error("Invalid answer status.");
-        for (const e of result.excerpts || [])
-          if (
-            !Number.isInteger(e.start) ||
-            !Number.isInteger(e.end) ||
-            $("source-text").value.slice(e.start, e.end) !== e.text
-          )
-            throw Error("Evidence does not match the source snapshot.");
-        if (result.status !== "not-answered" && !result.excerpts?.length)
-          throw Error("No supporting excerpt was returned.");
+        evidenceAnswered =
+          data.plan.status !== "not-answered" && data.plan.excerpts.length > 0;
+        const sourceUrl =
+          fetchedUrl && $("source-mode").value === "url" ? fetchedUrl : "";
         show(
-          JSON.stringify(
-            {
-              ...result,
-              question: input.question,
-              source: {
-                kind:
-                  fetchedUrl && $("source-mode").value === "url"
-                    ? "fetched-url"
-                    : "pasted-text",
-                text: input.text,
-                coverage: {
-                  characters: input.text.length,
-                  paragraphs: input.text
-                    .split(/\n\s*\n/)
-                    .filter((s) => s.trim()).length,
-                  truncated:
-                    $("source-mode").value === "url" &&
-                    fetchedMetadata?.truncated === true,
-                },
-                ...(fetchedUrl && $("source-mode").value === "url"
-                  ? {
-                      url: fetchedUrl,
-                      ...(Array.isArray(fetchedMetadata?.redirects)
-                        ? {
-                            retrieval: { redirects: fetchedMetadata.redirects },
-                          }
-                        : {}),
-                    }
-                  : {}),
-              },
-            },
-            null,
-            2,
-          ),
-          "utilitypot-evidence.json",
-          "application/json",
+          sourceAnswerMarkdown(data.plan, {
+            question: input.question,
+            sourceLabel: sourceUrl || "Pasted text",
+          }),
+          "utilitypot-answer.md",
+          "text/markdown",
         );
-        renderPageEvidence(
-          result,
-          data.confidence,
-          input.question,
-          input.text,
-          data.model,
+        $("extra-visual").append(
+          createSourceAnswerView(data, {
+            question: input.question,
+            text: input.text,
+            url: sourceUrl,
+            truncated: fetchedMetadata?.truncated === true,
+            onChangeQuestion: () => {
+              $("instructions").focus();
+              $("instructions").scrollIntoView({ block: "center" });
+            },
+          }),
         );
       }
       if (tool === "qa") {
-        // renderPageEvidence owns the visible evidence workspace; provenance and
-        // the original typed response remain in the downloadable JSON.
+        // The source-answer renderer owns the visible reading workspace; raw
+        // evidence and processing metadata remain in its secondary JSON export.
       } else if (!(await runLocal(false))) {
         outcome = token !== revision ? "cancelled" : "rejected";
         return;
@@ -1068,7 +889,8 @@ if (root) {
     } finally {
       complete(attempt, outcome);
       button.disabled = false;
-      if (tool === "entities" && token === revision) entityController = null;
+      if (["entities", "qa"].includes(tool) && token === revision)
+        documentController = null;
     }
   }
   $("extra-ask")?.addEventListener("click", askJev);

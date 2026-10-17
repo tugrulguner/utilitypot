@@ -5,6 +5,10 @@ import {
   readPublicPage,
   PageReadError,
 } from "../src/lib/utilities/webpage.js";
+import {
+  createSourceAnswerWindow,
+  SOURCE_ANSWER_MAX_QUESTIONS,
+} from "../src/lib/utilities/source-answer.js";
 const builders = {
   entities: createEntitiesInterpretation,
   diagram: createDiagramInterpretation,
@@ -66,6 +70,18 @@ export function validateAnswers(questions, response) {
   for (const key of keys) {
     const a = answers[key],
       opts = Object.keys(questions[key].criteria);
+    if (questions[key].type === "noul") {
+      if (
+        !a ||
+        a.type !== "noul" ||
+        typeof a.noul !== "number" ||
+        !Number.isFinite(a.noul) ||
+        a.noul < 0 ||
+        a.noul > 1
+      )
+        throw new Error("Invalid noul");
+      continue;
+    }
     if (
       !a ||
       a.type !== "choice" ||
@@ -116,7 +132,7 @@ export async function handleRequest(request, env, providerFetch = fetch) {
     return json({ error: "Same-origin requests only." }, 403);
   if (!request.headers.get("content-type")?.startsWith("application/json"))
     return json({ error: "Use JSON." }, 415);
-  let spec, pageUrl, entityInput;
+  let spec, pageUrl, entityInput, sourceAnswerInput;
   try {
     const body = JSON.parse(await boundedText(request.body, 16000));
     if (readPage) {
@@ -135,10 +151,18 @@ export async function handleRequest(request, env, providerFetch = fetch) {
         !Object.hasOwn(builders, body.tool)
       )
         return json({ error: "Invalid utility request." }, 400);
-      spec = builders[body.tool](body.input);
+      spec =
+        body.tool === "qa" && body.input?.mode === "source-answer"
+          ? createSourceAnswerWindow(body.input)
+          : builders[body.tool](body.input);
+      sourceAnswerInput =
+        body.tool === "qa" && body.input?.mode === "source-answer";
       if (body.tool === "entities" && body.input.range)
         entityInput = body.input;
-      if (Object.keys(spec.questions).length > 24)
+      if (
+        Object.keys(spec.questions).length >
+        (sourceAnswerInput ? SOURCE_ANSWER_MAX_QUESTIONS : 24)
+      )
         throw new Error("Question budget exceeded");
     }
   } catch (e) {
@@ -208,14 +232,16 @@ export async function handleRequest(request, env, providerFetch = fetch) {
   try {
     let model = "",
       plan;
-    let remainingQuestions = 24;
+    let remainingQuestions = sourceAnswerInput
+      ? SOURCE_ANSWER_MAX_QUESTIONS
+      : 24;
     const mergedAnswers = {};
     const deadline = Date.now() + 30000;
     async function evaluate(initial, prefix = "") {
       let active = initial;
       for (let stage = 0; stage < 2; stage++) {
         providerStage = stage + 1;
-        if (entityInput) request.signal.throwIfAborted();
+        if (entityInput || sourceAnswerInput) request.signal.throwIfAborted();
         const count = Object.keys(active.questions).length;
         if (!count) {
           failurePhase = "decode";
@@ -223,9 +249,10 @@ export async function handleRequest(request, env, providerFetch = fetch) {
         }
         if (count > remainingQuestions) throw Error("Question budget exceeded");
         remainingQuestions -= count;
-        const timeout = entityInput
-          ? Math.min(15000, deadline - Date.now())
-          : 15000;
+        const timeout =
+          entityInput || sourceAnswerInput
+            ? Math.min(15000, deadline - Date.now())
+            : 15000;
         if (timeout <= 0) throw Error("Entity window deadline exceeded.");
         failurePhase = "provider_fetch";
         const r = await providerFetch("https://api.typesafe.ai/v1/systemone", {
@@ -239,9 +266,10 @@ export async function handleRequest(request, env, providerFetch = fetch) {
             state: active.state,
             questions: active.questions,
           }),
-          signal: entityInput
-            ? AbortSignal.any([request.signal, AbortSignal.timeout(timeout)])
-            : AbortSignal.timeout(timeout),
+          signal:
+            entityInput || sourceAnswerInput
+              ? AbortSignal.any([request.signal, AbortSignal.timeout(timeout)])
+              : AbortSignal.timeout(timeout),
         });
         if (!r.ok) {
           await r.body?.cancel();
@@ -343,7 +371,10 @@ export async function handleRequest(request, env, providerFetch = fetch) {
       plan,
       needsReview: true,
       confidence: Object.fromEntries(
-        Object.entries(mergedAnswers).map(([k, a]) => [k, a.confidence]),
+        Object.entries(mergedAnswers).map(([k, a]) => [
+          k,
+          a.type === "noul" ? a.noul : a.confidence,
+        ]),
       ),
     });
   } catch (error) {
