@@ -7,7 +7,7 @@ const { tool } = Astro.props;
 const examples = {
   jsonCsv: [
     "Load example: orders",
-    "Two orders become two spreadsheet rows, including customer.name as a column. Review the selected record sample before converting.",
+    "Two orders become two spreadsheet rows, including customer.name as a column. Review the sample rows before converting.",
   ],
   entities: [
     "Load example: repeated names",
@@ -34,7 +34,7 @@ const examples = {
       <div>
         <p class="workspace-kicker">
           {tool === "jsonCsv"
-            ? "JSON records"
+            ? "JSON data"
             : tool === "entities"
               ? "Text & categories"
               : tool === "diagram"
@@ -43,7 +43,7 @@ const examples = {
         </p>
         <h2>
           {tool === "jsonCsv"
-            ? "Choose records to convert"
+            ? "Make spreadsheet rows from your JSON"
             : tool === "entities"
               ? "Explore names in context"
               : tool === "diagram"
@@ -149,28 +149,44 @@ const examples = {
         <label for="source-file">Or upload JSON (local only, up to 2 MB)</label>
         <input id="source-file" type="file" accept=".json,application/json" />
         <div id="array-options" hidden>
-          <label for="row-path">Which records?</label>
-          <select id="row-path" />
+          <div class="row-choice-control">
+            <label for="row-path">
+              Which list should become spreadsheet rows?
+            </label>
+            <p class="notice">
+              Each item in the selected list becomes a separate row. Choose
+              using the list name, row count and fields.
+            </p>
+            <select id="row-path" />
+          </div>
+          <p id="row-summary" class="row-summary" aria-live="polite" />
           <div id="record-sample-panel" hidden>
             <p class="notice">
-              Preview one selected record (up to 1,000 characters)
+              Sample from your JSON — up to two rows and four fields
             </p>
-            <pre id="record-sample" aria-live="polite" />
+            <div
+              id="record-sample"
+              class="table-scroll"
+              tabindex="0"
+              aria-label="Sample rows from your JSON"
+            />
           </div>
-          <label for="array-policy">Nested arrays within each record</label>
-          <select id="array-policy">
-            <option value="reject">Stop if nested arrays exist</option>
-            <option value="join">Keep as JSON text in a cell</option>
-            <option value="omit">Omit nested-array fields</option>
-          </select>
-          <p id="nested-array-help" class="notice" aria-live="polite">
-            Choose records to inspect nested arrays before conversion.
-          </p>
-          <p class="notice">
-            Nested arrays: Stop makes no CSV; Keep as JSON text preserves
-            values; Omit explicitly removes those fields. Nothing is omitted
-            automatically.
-          </p>
+          <div id="nested-list-options">
+            <label for="array-policy">If a row contains another list</label>
+            <select id="array-policy">
+              <option value="reject">Stop if nested arrays exist</option>
+              <option value="join">Keep as JSON text in a cell</option>
+              <option value="omit">Omit nested-array fields</option>
+            </select>
+            <p id="nested-array-help" class="notice" aria-live="polite">
+              Choose a list above to inspect its data before conversion.
+            </p>
+            <p class="notice">
+              Stop leaves your source unchanged. Keep stores the whole nested
+              list in one cell. Omit leaves those fields out; nothing is removed
+              automatically.
+            </p>
+          </div>
         </div>
       </>
     )}

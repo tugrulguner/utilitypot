@@ -103,7 +103,7 @@ if (root) {
         try {
           paths();
           status(
-            "Choose the records to convert. Review any nested-array paths before converting.",
+            "Each selected item becomes one spreadsheet row. Review the sample and nested-array handling, then convert.",
           );
         } catch {
           /* Incomplete JSON is reported when the user converts. */
@@ -406,25 +406,41 @@ if (root) {
       choices.push({
         path: "$object",
         count: 1,
-        label: "Single object — 1 row",
+        label: "The whole object — 1 spreadsheet row",
       });
     $("array-options").hidden = false;
+    root.querySelector(".row-choice-control").hidden = choices.length <= 1;
+    const describe = (choice) => {
+      const rows =
+        choice.path === "$object"
+          ? [data]
+          : choice.path === "$"
+            ? data
+            : choice.path.split(".").reduce((value, key) => value[key], data);
+      const first = rows?.[0];
+      const fields =
+        first && typeof first === "object"
+          ? Object.keys(first).slice(0, 4)
+          : [];
+      const name =
+        choice.path === "$object"
+          ? "The whole object"
+          : choice.path === "$"
+            ? "The top-level list"
+            : `“${choice.path.split(".").at(-1)}”${choice.path.includes(".") ? ` inside “${choice.path.split(".").slice(0, -1).join(" → ")}”` : ""}`;
+      return `${name} · ${choice.count} ${choice.count === 1 ? "row" : "rows"}${fields.length ? ` · fields: ${fields.join(", ")}` : ""}`;
+    };
     $("row-path").replaceChildren(
-      new Option("Choose records", ""),
-      ...choices.map(
-        (v) =>
-          new Option(
-            v.label ||
-              `${v.path === "$" ? "Top-level records" : v.path} — ${v.count} rows`,
-            v.path,
-          ),
+      new Option(
+        choices.length > 1
+          ? "Choose which data becomes rows"
+          : "Rows to convert",
+        "",
       ),
+      ...choices.map((choice) => new Option(describe(choice), choice.path)),
     );
     $("row-path").value =
-      selected ??
-      (choices.length === 1 && choices[0].path !== "$object"
-        ? choices[0].path
-        : "");
+      selected ?? (choices.length === 1 ? choices[0].path : "");
     $("row-path").dispatchEvent(new Event("change", { bubbles: true }));
     if (!choices.length) throw Error("No supported array of objects found.");
   }
@@ -433,8 +449,10 @@ if (root) {
     $("record-sample").textContent = "";
     $("record-sample-panel").hidden = true;
     if (!path) {
+      $("row-summary").textContent = "Choose a list above to see its rows.";
+      $("nested-list-options").hidden = true;
       $("nested-array-help").textContent =
-        "Choose records to inspect nested arrays before conversion.";
+        "Choose a list above to inspect its data before conversion.";
       return;
     }
     const data = jsonData();
@@ -445,10 +463,40 @@ if (root) {
           ? data
           : path.split(".").reduce((v, k) => v[k], data);
     $("record-sample-panel").hidden = !records?.length;
-    const recordText = JSON.stringify(records?.[0] ?? null, null, 2);
-    $("record-sample").textContent =
-      recordText.slice(0, 1000) +
-      (recordText.length > 1000 ? "… (truncated)" : "");
+    const count = records?.length ?? 0;
+    $("row-summary").textContent =
+      `${count} spreadsheet ${count === 1 ? "row" : "rows"}${path === "$object" ? " from this object" : path === "$" ? " from your list" : ` from “${path.split(".").at(-1)}”`}.`;
+    const examples = records.slice(0, 2);
+    const keys = [
+      ...new Set(examples.flatMap((row) => Object.keys(row))),
+    ].slice(0, 4);
+    const table = document.createElement("table");
+    const head = document.createElement("tr");
+    for (const key of keys) {
+      const th = document.createElement("th");
+      th.scope = "col";
+      th.textContent = key;
+      head.append(th);
+    }
+    table.append(head);
+    for (const row of examples) {
+      const tr = document.createElement("tr");
+      for (const key of keys) {
+        const td = document.createElement("td");
+        const value = row[key];
+        const text =
+          value == null
+            ? ""
+            : typeof value === "object"
+              ? JSON.stringify(value)
+              : String(value);
+        td.textContent = text.length > 160 ? text.slice(0, 160) + "…" : text;
+        td.title = text;
+        tr.append(td);
+      }
+      table.append(tr);
+    }
+    $("record-sample").append(table);
     const found = new Set();
     const walk = (value, prefix = "", depth = 0) => {
       if (depth > 6)
@@ -462,9 +510,10 @@ if (root) {
           walk(child, prefix ? `${prefix}.${key}` : key, depth + 1);
     };
     for (const row of records || []) walk(row);
+    $("nested-list-options").hidden = !found.size;
     $("nested-array-help").textContent = found.size
-      ? `Nested arrays found in selected records (${path}): ${[...found].join(", ")}. Choose “Keep as JSON text” to preserve them, “Omit” to explicitly remove those fields, or “Stop” to make no CSV. Omission is never automatic.`
-      : "No nested arrays found in these records.";
+      ? `Lists found inside these rows (${path}): ${[...found].join(", ")}. Choose “Keep as JSON text” to preserve them, “Omit” to explicitly remove those fields, or “Stop” to make no CSV. Omission is never automatic.`
+      : "No lists inside these rows.";
   }
   $("row-path")?.addEventListener("change", showNestedPaths);
   $("array-policy")?.addEventListener("change", showNestedPaths);
