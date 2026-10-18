@@ -32,11 +32,20 @@ function oracle(classify, stats = { calls: 0, questions: [] }) {
         const choice =
           key === "intent"
             ? "fact"
-            : key.endsWith("_span")
-              ? Object.keys(q.criteria).find((k) => k !== "none")
-              : classify(
-                  body.state.passages.find((p) => key === `${p.id}_role`),
-                ).role;
+            : key === "answer_lead"
+              ? Object.keys(q.criteria)[0]
+              : key.endsWith("_span")
+                ? Object.keys(q.criteria).find(
+                    (k) =>
+                      k !== "none" &&
+                      q.criteria[k]?.text?.trim() ===
+                        body.state.passages
+                          .find((p) => p.id === q.instructions.passage_id)
+                          ?.text.trim(),
+                  )
+                : classify(
+                    body.state.passages.find((p) => key === `${p.id}_role`),
+                  ).role;
         return [
           key,
           {
@@ -111,12 +120,13 @@ test("ten-block QA uses a bounded 32-question budget for relevance, role and pre
     transport(supported, stats),
   );
   assert.equal(stats.calls, 2);
+  assert.ok(stats.questions.reduce((a, b) => a + b, 0) <= 32);
+  for (let i = 0; i < 10; i++)
+    assert.ok(result.plan.excerpts.some((e) => e.text.includes(`Fact ${i}.`)));
   assert.equal(
-    stats.questions.reduce((a, b) => a + b, 0),
-    32,
+    result.plan.answer.sections.flatMap((s) => s.items).length,
+    result.plan.excerpts.length,
   );
-  assert.equal(result.plan.excerpts.length, 10);
-  assert.equal(result.plan.answer.sections.flatMap((s) => s.items).length, 10);
 });
 
 test("complete source beyond10k and100paragraphs retains late supported answers", async () => {
@@ -136,7 +146,20 @@ test("complete source beyond10k and100paragraphs retains late supported answers"
   );
   assert.equal(result.plan.excerpts.length, 1);
   assert.ok(result.plan.excerpts[0].text.includes("five years"));
-  assert.equal(result.plan.coverage.unitsJudged, 120);
+  assert.equal(
+    result.plan.coverage.unitsJudged,
+    createSourceAnswerInterpretation({
+      text,
+      question: "How long is the warranty?",
+    }).units.length,
+  );
+  for (const unit of sourceUnits(text))
+    assert.ok(
+      createSourceAnswerInterpretation({
+        text,
+        question: "How long is the warranty?",
+      }).units.some((p) => p.start <= unit.start && p.end >= unit.end),
+    );
   assert.equal(result.plan.coverage.complete, true);
   assert.equal(result.plan.coverage.semanticExhaustiveness, false);
 });
@@ -191,7 +214,10 @@ test("no supporting source information returns explicit absence without a fabric
   assert.deepEqual(result.plan.excerpts, []);
 });
 test("cancellation and any later-window failure return no partial document", async () => {
-  const text = Array.from({ length: 21 }, (_, i) => `Block ${i}.`).join("\n\n"),
+  const text = Array.from(
+      { length: 21 },
+      (_, i) => `Block ${i}. ${"Source context. ".repeat(100)}`,
+    ).join("\n\n"),
     controller = new AbortController();
   await assert.rejects(
     answerSourceDocument(
@@ -214,7 +240,10 @@ test("cancellation and any later-window failure return no partial document", asy
   );
 });
 test("rejects model changes, missing provenance and valid source spans outside their requested window", async () => {
-  const text = Array.from({ length: 21 }, (_, i) => `Block ${i}.`).join("\n\n");
+  const text = Array.from(
+    { length: 21 },
+    (_, i) => `Block ${i}. ${"Source context. ".repeat(100)}`,
+  ).join("\n\n");
   let calls = 0;
   const real = transport(supported);
   await assert.rejects(

@@ -335,9 +335,35 @@
   }
 }
 
+/* Keep a direct issue route visible without turning it into a promotion panel. */
+.utility-support {
+  display: flex;
+  justify-content: flex-end;
+  grid-column: 1;
+  margin: 0 0 4px;
+}
+.utility-support .feedback-entry {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 2px 8px;
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--ink);
+  background: var(--night-soft);
+  text-decoration: none;
+}
+.utility-support .feedback-entry:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
 /* Keep the first useful action near the input, not below a setup tutorial. */
 .utility-page .utility-main:has(.utility-app) {
-  padding-top: 1.25rem;
+  padding-top: 4px;
 }
 .utility-page .utility-main:has(.utility-app) > .coordinate {
   margin: 0 0 0.5rem;
@@ -346,10 +372,13 @@
   font-size: clamp(1.75rem, 4vw, 2.65rem);
   margin: 0.35rem 0 0.5rem;
 }
+.utility-main:has(> .utility-support) .utility-app > .panel:first-child {
+  margin-top: 0;
+}
 .utility-page .utility-main:has(.utility-app) > .utility-intro {
   font-size: 1rem;
   line-height: 1.5;
-  margin: 0 0 0.85rem;
+  margin: 0;
 }
 .utility-page .utility-app [data-source-mode][aria-selected="true"] {
   border-color: var(--gold);
@@ -659,6 +688,7 @@
     column-gap: 1.25rem;
     align-items: start;
   }
+  .utility-main:has(> .discovery-rail) > .utility-support,
   .utility-main:has(> .discovery-rail) > .family-discovery,
   .utility-main:has(> .discovery-rail) > h1,
   .utility-main:has(> .discovery-rail) > .utility-intro {
@@ -666,11 +696,11 @@
   }
   .utility-main > .utility-app {
     grid-column: 1;
-    grid-row: 4;
+    grid-row: 5;
   }
   .utility-main > .discovery-rail {
     grid-column: 2;
-    grid-row: 4;
+    grid-row: 5;
     margin-top: 1rem;
   }
   .utility-main > .tool-guide,

@@ -175,6 +175,17 @@ const schema = {
       </nav>
     </header>
     <main id="main" class="utility-main">
+      <div class="utility-support">
+        <a
+          class="feedback-entry ph-no-autocapture"
+          href={issueUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Feedback or report an issue for ${toolName} (opens GitHub in a new tab)`}
+        >
+          Feedback / report an issue <span aria-hidden="true">↗</span>
+        </a>
+      </div>
       {!Astro.props.overview && (
         <>
           {tools.some((tool) => tool.slug === slug) ? (

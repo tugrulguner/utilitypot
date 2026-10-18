@@ -250,7 +250,7 @@ for (const mode of ["url", "paste"])
     );
     await page.locator("#extra-copy").click();
     expect(await page.evaluate(() => window.copied)).toBe(raw);
-    await expect(page.locator(".answer-lead .answer-paragraph")).toHaveText(
+    await expect(page.locator(".answer-lead .answer-text")).toHaveText(
       source.slice(18),
     );
     await page.locator("#instructions").fill("A changed question");
