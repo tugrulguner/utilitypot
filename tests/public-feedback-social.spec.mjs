@@ -3,6 +3,48 @@ import { readFile } from "node:fs/promises";
 const tools = JSON.parse(
   await readFile(new URL("../src/data/tools.json", import.meta.url), "utf8"),
 );
+test("rendered identity attribution is cool-colored while the UtilityPot flask stays rose", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const rows = await page.evaluate(async () => {
+    const rows = [];
+    for (const [src, y] of [
+      ["/utilitypot-lockup-v2.png", 255],
+      ["/utilitypot-social-v2.png", 120],
+    ]) {
+      const image = new Image();
+      image.src = src;
+      await image.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      const c = canvas.getContext("2d");
+      c.drawImage(image, 0, 0);
+      const p = c.getImageData(515, y, 600, 50).data;
+      let cool = 0,
+        warm = 0;
+      for (let i = 0; i < p.length; i += 4) {
+        if (p[i] < 130 && p[i + 1] > 150 && p[i + 2] > 180) cool++;
+        if (p[i] > 180 && p[i + 1] > 100 && p[i + 2] < 120) warm++;
+      }
+      rows.push({
+        src,
+        cool,
+        warm,
+        width: image.naturalWidth,
+        height: image.naturalHeight,
+      });
+    }
+    return rows;
+  });
+  for (const r of rows) {
+    expect(r.cool, r.src).toBeGreaterThan(50);
+    expect(r.warm, r.src).toBe(0);
+    expect(r.width).toBe(1200);
+  }
+  await expect(page.locator(".product-art")).toHaveCSS("filter", "none");
+});
 for (const width of [1280, 1050, 768, 390, 320])
   for (const theme of ["light", "dark", "auto"])
     test(`public feedback/social privacy and preserved identity at ${width}px ${theme}`, async ({
