@@ -53,7 +53,7 @@ test("readable extraction prefers semantic main content over surrounding navigat
   );
   assert.equal(text, "Use concurrent tasks.");
 });
-test("public reader output always fits the QA paragraph budget and discloses truncation", async () => {
+test("public reader preserves all readable paragraphs for complete-source processing", async () => {
   const html =
     "<main>" +
     Array.from({ length: 120 }, (_, i) => `<p>Paragraph ${i}</p>`).join("") +
@@ -63,15 +63,9 @@ test("public reader output always fits the QA paragraph budget and discloses tru
     async () =>
       new Response(html, { headers: { "Content-Type": "text/html" } }),
   );
-  assert.equal(result.truncated, true);
-  assert.doesNotThrow(() =>
-    createQaInterpretation({
-      text: result.text,
-      question: "What paragraphs are present?",
-    }),
-  );
-  assert.equal(result.text.split(/\n\s*\n/).filter(Boolean).length, 100);
-  assert.ok(!result.text.includes("Paragraph 119"));
+  assert.equal(result.truncated, false);
+  assert.equal(result.text.split(/\n\s*\n/).filter(Boolean).length, 120);
+  assert.ok(result.text.includes("Paragraph 119"));
 });
 test("an empty semantic main falls back to visible document text", () => {
   assert.equal(
@@ -438,7 +432,7 @@ test("redirect DNS rejects private resolution before fetching that target", asyn
   );
   assert.deepEqual(fetched, ["https://modepot.io/"]);
 });
-test("three redirects can succeed and character truncation preserves exact source prefix", async () => {
+test("three redirects can succeed and complete UTF-8 text is preserved", async () => {
   let calls = 0;
   const text = "é".repeat(10001);
   const result = await read("modepot.io", async () =>
@@ -451,6 +445,6 @@ test("three redirects can succeed and character truncation preserves exact sourc
   );
   assert.equal(calls, 4);
   assert.equal(result.redirects.length, 3);
-  assert.equal(result.text, text.slice(0, 10000));
-  assert.equal(result.truncated, true);
+  assert.equal(result.text, text);
+  assert.equal(result.truncated, false);
 });

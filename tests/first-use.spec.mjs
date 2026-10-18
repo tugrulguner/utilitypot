@@ -12,7 +12,7 @@ const tools = [
   ["meeting-time-finder", "working hours", "#p0-zone", "#results"],
   ["entity-extractor", "repeated names", "#source-text", "#extra-results"],
   ["text-to-mermaid", "approval steps", "#source-text", "#extra-results"],
-  ["ask-a-webpage", "privacy passage", "#source-text", "#extra-results"],
+  ["ask-a-webpage", "privacy question", "#source-text", "#extra-results"],
 ];
 for (const [slug, label, input, result] of tools) {
   test(`${slug}: descriptive sample, no requests, explicit replacement`, async ({
@@ -266,7 +266,13 @@ for (const slug of ["ask-a-webpage", "entity-extractor"])
             confidence: {},
             plan:
               slug === "ask-a-webpage"
-                ? answeredSource(route.request().postDataJSON().input.text)
+                ? answeredSource(
+                    route
+                      .request()
+                      .postDataJSON()
+                      .input.passages.map((p) => p.text)
+                      .join(""),
+                  )
                 : {
                     entities: [
                       { type: "Person", text: "Ada", start: 0, end: 3 },

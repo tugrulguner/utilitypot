@@ -1,4 +1,5 @@
 import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
+import { fulfillSourceAnswerFixture } from "./helpers/source-answer-fixture.mjs";
 import { test, expect } from "@playwright/test";
 import { approvalGraph } from "./workflow-fixtures.mjs";
 const tools = [
@@ -20,6 +21,10 @@ for (const width of [1280, 1050, 390])
       await page.route("**/api/utilities/interpret", async (route) => {
         calls++;
         const { tool, input } = route.request().postDataJSON();
+        const text =
+          tool === "qa"
+            ? await page.locator("#source-text").inputValue()
+            : input.text;
         const plan =
           tool === "entities"
             ? { entities: [{ type: "Person", text: "Ada", start: 0, end: 3 }] }
@@ -27,18 +32,24 @@ for (const width of [1280, 1050, 390])
               ? { graph: approvalGraph }
               : {
                   status: "answered",
-                  excerpts: [
-                    { text: input.text, start: 0, end: input.text.length },
-                  ],
+                  excerpts: [{ text, start: 0, end: text.length }],
                 };
-        await fulfillEntityDocumentFixture(route, {
-          json: {
-            source: "jev",
-            model: "layout-regression-fixture",
-            plan,
-            confidence: {},
+        await (
+          tool === "qa"
+            ? fulfillSourceAnswerFixture
+            : fulfillEntityDocumentFixture
+        )(
+          route,
+          {
+            json: {
+              source: "jev",
+              model: "layout-regression-fixture",
+              plan,
+              confidence: {},
+            },
           },
-        });
+          () => page.locator("#source-text").inputValue(),
+        );
       });
       await page.goto(`/tools/${slug}/`);
       await page.evaluate(() => document.fonts.ready);

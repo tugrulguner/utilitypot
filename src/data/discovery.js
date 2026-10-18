@@ -141,13 +141,13 @@ export const guides = {
       "Interested in application-owned operations and bounded agent choices?",
   },
   "ask-a-webpage": {
-    title: "Ask a webpage — find exact supporting passages",
+    title: "Ask a page or text — source-backed answers",
     description:
-      "Ask a question about pasted text or a public webpage. Review exact source passages and answer-presence labels; no generated essays or fact verification.",
+      "Ask questions about a webpage or pasted text. Read a source-assembled answer with supporting details, steps, conditions and inspectable citations.",
     steps: [
-      "Paste source text or enter a public HTTP/HTTPS page URL, then ask a focused question.",
-      "Read the disclosure and request evidence. Use pasted text when a page is blocked or unsupported.",
-      "Review answer presence, exact passages and source coverage before downloading the evidence.",
+      "Paste text or enter a public HTTP/HTTPS page URL, then ask your question.",
+      "Request an answer assembled from the source. Use pasted text when a page is blocked or unsupported.",
+      "Read the answer and supporting details, inspect citations and copy or download the answer.",
     ],
     example:
       "Ask “Does this text say whether inputs are stored?” about a privacy passage. An unrelated passage should be marked not answered, not treated as proof.",

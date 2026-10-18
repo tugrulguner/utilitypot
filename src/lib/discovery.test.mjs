@@ -154,31 +154,35 @@ test("completed result focuses even in view, and scrolls only when needed", asyn
     source.indexOf("  function show("),
     source.indexOf("  function download("),
   );
-  for (const rect of [
-    { top: 10, bottom: 300 },
-    { top: -10, bottom: 300 },
-    { top: 10, bottom: 900 },
-  ]) {
-    const focus = [],
-      scroll = [];
-    const results = {
-      hidden: true,
-      getBoundingClientRect: () => rect,
-      focus: (options) => focus.push(options),
-      scrollIntoView: (options) => scroll.push(options),
-    };
-    const elements = {
-      "extra-results": results,
-      "extra-output": {},
-      "extra-visual": { replaceChildren() {} },
-    };
-    runInNewContext(show + ';show("result", "result.txt");', {
-      $: (id) => elements[id],
-      window: { innerHeight: 844 },
-    });
-    assert.equal(results.hidden, false);
-    assert.equal(focus.length, 1);
-    assert.equal(focus[0].preventScroll, true);
-    assert.equal(scroll.length, rect.top < 0 || rect.bottom > 844 ? 1 : 0);
-  }
+  for (const reducedMotion of [false, true])
+    for (const rect of [
+      { top: 10, bottom: 300 },
+      { top: -10, bottom: 300 },
+      { top: 10, bottom: 900 },
+    ]) {
+      const focus = [],
+        scroll = [];
+      const results = {
+        hidden: true,
+        getBoundingClientRect: () => rect,
+        focus: (options) => focus.push(options),
+        scrollIntoView: (options) => scroll.push(options),
+      };
+      const elements = {
+        "extra-results": results,
+        "extra-output": {},
+        "extra-visual": { replaceChildren() {} },
+      };
+      runInNewContext(show + ';show("result", "result.txt");', {
+        $: (id) => elements[id],
+        window: { innerHeight: 844 },
+        matchMedia: () => ({ matches: reducedMotion }),
+      });
+      assert.equal(results.hidden, false);
+      assert.equal(focus.length, 1);
+      assert.equal(focus[0].preventScroll, true);
+      assert.equal(scroll.length, rect.top < 0 || rect.bottom > 844 ? 1 : 0);
+      if (scroll.length)
+        assert.equal(scroll[0].behavior, reducedMotion ? "auto" : "smooth");
+    }
 });

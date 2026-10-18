@@ -1,0 +1,273 @@
+.utility-app[data-extra-utility="qa"] .source-answer {
+  --answer-accent: #8f2861;
+  color: var(--ink);
+  padding: clamp(0.25rem, 1vw, 0.75rem);
+  min-width: 0;
+}
+[data-theme="dark"] .utility-app[data-extra-utility="qa"] .source-answer {
+  --answer-accent: #f28cbe;
+}
+.source-answer-header {
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid var(--line);
+}
+.source-answer .answer-eyebrow {
+  margin: 0 0 0.6rem;
+  color: var(--answer-accent);
+  font-size: 0.75rem;
+  letter-spacing: 0.13em;
+  font-weight: 750;
+}
+.utility-app .source-answer .answer-title {
+  margin: 0 0 0.65rem;
+  font-size: clamp(1.65rem, 3vw, 2.25rem);
+  line-height: 1.14;
+  letter-spacing: -0.035em;
+}
+.source-answer .answer-question {
+  margin: 0;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  line-height: 1.5;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.answer-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.answer-context a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.answer-kind {
+  padding-left: 1rem;
+  border-left: 1px solid var(--line);
+}
+.answer-body {
+  padding-top: 1.6rem;
+  min-width: 0;
+}
+.answer-prose {
+  max-width: 72ch;
+  min-width: 0;
+}
+.source-answer .answer-point {
+  position: relative;
+  margin: 0 0 1.15rem;
+}
+.source-answer .answer-paragraph {
+  margin: 0 0 0.65rem;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.source-answer .answer-lead {
+  padding-bottom: 0.6rem;
+}
+.source-answer .is-lead .answer-paragraph {
+  font-size: clamp(1.15rem, 2.1vw, 1.35rem);
+  line-height: 1.65;
+  letter-spacing: -0.01em;
+  font-weight: 550;
+}
+.source-answer .answer-section {
+  margin-top: 1.75rem;
+}
+.utility-app .source-answer .answer-section h3 {
+  font-size: 1.08rem;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.85rem;
+}
+.answer-section-caveat,
+.answer-section-conflict {
+  border-top: 1px solid var(--line);
+  padding-top: 1.2rem;
+}
+.answer-citation {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 26px;
+  min-height: 26px;
+  margin-top: 0.1rem;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid color-mix(in srgb, var(--answer-accent) 40%, var(--line));
+  border-radius: 6px;
+  color: var(--answer-accent);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.answer-citation:hover,
+.answer-citation:focus-visible {
+  outline: 2px solid var(--answer-accent);
+  outline-offset: 2px;
+  background: var(--control);
+}
+.answer-list {
+  margin: 0.5rem 0 1rem;
+  padding-left: 1.4rem;
+  font-size: 1rem;
+  line-height: 1.75;
+}
+.answer-list li {
+  padding-left: 0.3rem;
+  margin-bottom: 0.5rem;
+  overflow-wrap: anywhere;
+}
+.source-answer .answer-code {
+  max-width: 100%;
+  overflow: auto;
+  padding: 1rem;
+  background: var(--control);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  line-height: 1.6;
+  white-space: pre;
+}
+.answer-paragraph code {
+  background: var(--control);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.05em 0.25em;
+  overflow-wrap: anywhere;
+}
+.source-answer .answer-source-heading {
+  font-size: 1rem;
+  margin: 1rem 0 0.65rem;
+}
+.answer-sources {
+  margin-top: 1.6rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+}
+.answer-sources > summary,
+.answer-processing > summary,
+.answer-snapshot > summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  padding: 0.5rem 0;
+}
+.answer-source-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+}
+.answer-source-item {
+  padding: 1rem;
+  margin-bottom: 0.85rem;
+  background: var(--control);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+.answer-source-item.is-selected,
+.answer-source-item:focus {
+  outline: 2px solid var(--answer-accent);
+  outline-offset: 3px;
+}
+.answer-source-number {
+  color: var(--answer-accent);
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+.answer-source-text {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.answer-source-position {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.answer-notice {
+  padding: 0.8rem 1rem;
+  margin: 1.25rem 0 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  background: var(--control);
+}
+.answer-empty {
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--muted);
+}
+.answer-processing {
+  margin-top: 1.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+.answer-processing p {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.answer-processing pre {
+  max-width: 100%;
+  max-height: 25rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.8rem;
+}
+.answer-snapshot {
+  margin-top: 1rem;
+}
+.source-answer .answer-evidence-download {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+}
+@media (min-width: 1100px) {
+  .answer-body:has(.answer-sources[open]) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.42fr);
+    gap: 1.75rem;
+    align-items: start;
+  }
+  .answer-body:has(.answer-sources[open]) .answer-sources {
+    margin: 0;
+    padding-top: 0;
+    border-top: 0;
+  }
+}
+@media (max-width: 480px) {
+  .source-answer .answer-paragraph {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+  .source-answer .is-lead .answer-paragraph {
+    font-size: 1.15rem;
+  }
+  .answer-context {
+    gap: 0.5rem;
+  }
+  .answer-kind {
+    padding-left: 0.6rem;
+  }
+}
+@media (forced-colors: active) {
+  .source-answer {
+    --answer-accent: LinkText !important;
+  }
+  .answer-citation,
+  .answer-source-item {
+    border: 1px solid CanvasText;
+  }
+}

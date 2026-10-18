@@ -4,6 +4,7 @@ import {
   approvalGraph,
   answeredSource,
 } from "./workflow-fixtures.mjs";
+import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
 import { test, expect } from "@playwright/test";
 const slugs = [
   "csv-to-nested-json",
@@ -185,9 +186,14 @@ for (const status of ["answered", "partial", "not-answered"])
   test(`webpage ${status}: fixture result discovery respects answer presence`, async ({
     page,
   }) => {
-    await page.route("**/api/utilities/interpret", (route) => {
-      const text = route.request().postDataJSON().input.text;
-      return route.fulfill({
+    await page.route("**/api/utilities/interpret", async (route) => {
+      const text = await route
+        .request()
+        .frame()
+        .page()
+        .locator("#source-text")
+        .inputValue();
+      return fulfillEntityDocumentFixture(route, {
         json: {
           source: "jev",
           model: "discovery-test-fixture",
@@ -206,9 +212,9 @@ for (const status of ["answered", "partial", "not-answered"])
     await page.getByRole("button", { name: /^Load example:/ }).click();
     await page.locator("#extra-ask").click();
     await expect(page.locator("#extra-results")).toBeVisible();
-    if (status === "answered")
-      await expect(page.locator("[data-result-discovery]")).toBeVisible();
-    else await expect(page.locator("[data-result-discovery]")).toBeHidden();
+    if (status === "not-answered")
+      await expect(page.locator("[data-result-discovery]")).toBeHidden();
+    else await expect(page.locator("[data-result-discovery]")).toBeVisible();
     await page.locator("#instructions").fill("Changed question");
     await expect(page.locator("[data-result-discovery]")).toBeHidden();
   });
@@ -220,11 +226,18 @@ test("edited source cancels pending fixture result discovery", async ({
   const gate = new Promise((resolve) => (release = resolve));
   await page.route("**/api/utilities/interpret", async (route) => {
     await gate;
-    await route.fulfill({
+    await fulfillEntityDocumentFixture(route, {
       json: {
         source: "jev",
         model: "discovery-test-fixture",
-        plan: answeredSource(route.request().postDataJSON().input.text),
+        plan: answeredSource(
+          await route
+            .request()
+            .frame()
+            .page()
+            .locator("#source-text")
+            .inputValue(),
+        ),
         confidence: {},
       },
     });

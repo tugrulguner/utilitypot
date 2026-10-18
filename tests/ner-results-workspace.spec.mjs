@@ -48,7 +48,18 @@ for (const width of [1280, 390]) {
     page.on("request", (r) => {
       if (r.url().includes("/api/utilities/")) api++;
     });
+    await page.addInitScript(() => {
+      const scrollIntoView = Element.prototype.scrollIntoView;
+      Element.prototype.scrollIntoView = function (options) {
+        if (this.id === "extra-results")
+          window.__resultRevealBehavior = options?.behavior;
+        return scrollIntoView.call(this, options);
+      };
+    });
     await showManual(page);
+    expect(await page.evaluate(() => window.__resultRevealBehavior)).toBe(
+      "auto",
+    );
     const workspace = page.locator(".entity-workspace");
     await expect(
       workspace.getByRole("heading", { name: "Person (3)", exact: true }),

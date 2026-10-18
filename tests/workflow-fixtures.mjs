@@ -1,5 +1,6 @@
 // Explicit synthetic UI fixtures, never evidence of hosted Jev semantics.
 import { fulfillEntityDocumentFixture } from "./helpers/entity-document-fixture.mjs";
+import { fulfillSourceAnswerFixture } from "./helpers/source-answer-fixture.mjs";
 export const exampleEntities = [
   { type: "Person", text: "Ada", start: 0, end: 3 },
   { type: "Organization", text: "Acme Labs", start: 13, end: 22 },
@@ -18,13 +19,17 @@ export const approvalGraph = {
   ],
 };
 export async function fixturePlan(page, plan, confidence = {}) {
-  await page.route("**/api/utilities/interpret", (route) =>
-    fulfillEntityDocumentFixture(
+  await page.route("**/api/utilities/interpret", (route) => {
+    const fulfill =
+      route.request().postDataJSON()?.tool === "entities"
+        ? fulfillEntityDocumentFixture
+        : fulfillSourceAnswerFixture;
+    return fulfill(
       route,
       { json: { source: "jev", model: "fixture", plan, confidence } },
       () => page.locator("#source-text").inputValue(),
-    ),
-  );
+    );
+  });
 }
 export async function exampleInterpretation(page, slug) {
   if (slug === "entity-extractor") {

@@ -147,7 +147,12 @@ test("captured ModePot answer stays successful when passage confidence is low", 
   let payload;
   await page.route("**/api/utilities/interpret", async (route) => {
     payload = route.request().postDataJSON();
-    const text = payload.input.text;
+    const text = await route
+      .request()
+      .frame()
+      .page()
+      .locator("#source-text")
+      .inputValue();
     await fulfillEntityDocumentFixture(route, {
       json: {
         source: "jev",
@@ -178,17 +183,17 @@ test("captured ModePot answer stays successful when passage confidence is low", 
     );
   await page.locator("#instructions").fill("What is this webpage about?");
   await page.getByRole("button", { name: "Find answer", exact: true }).click();
-  await expect(page.locator("#extra-results-title")).toHaveText(
-    "Source evidence",
-  );
-  await expect(page.locator("#extra-visual blockquote")).toHaveText(
+  await expect(page.locator("#extra-results-title")).toHaveText("Answer");
+  await expect(
+    page.locator("#extra-visual .answer-lead .answer-point"),
+  ).toContainText(
     "ModePot is an open-source workshop for modernizing software foundations—and inventing what comes next. AI-native and agent-friendly where they add real value.",
   );
   await expect(
-    page.locator("#extra-visual [data-evidence-outcome]"),
-  ).toContainText("Answer found in the source.");
-  await expect(page.locator(".evidence-selection-note")).toContainText(
-    "Several passages may fit; review the selected exact excerpt.",
+    page.locator("#extra-visual article.source-answer"),
+  ).toContainText("Your answer");
+  await expect(page.locator(".answer-processing")).toContainText(
+    "Jev’s selections and organization can be wrong.",
   );
   await expect(page.locator("#extra-status")).not.toHaveClass(/error/);
   await expect(page.locator("#extra-status")).not.toContainText("jev-1.13.0");
@@ -209,11 +214,11 @@ test("captured ModePot answer stays successful when passage confidence is low", 
   );
   await page.getByRole("button", { name: "Find answer", exact: true }).click();
   await expect(
-    page.locator("#extra-visual [data-evidence-outcome]"),
-  ).toHaveText("No answer found in the supplied source.");
+    page.locator("#extra-visual article.source-answer"),
+  ).toContainText("The answer isn’t supported here");
   await expect(
-    page.locator("#extra-visual [data-evidence-outcome]"),
-  ).toContainText("No answer found in the supplied source.");
+    page.locator("#extra-visual article.source-answer"),
+  ).toContainText("The answer isn’t supported here");
   await expect(page.locator("#extra-status")).not.toContainText(
     "Several passages may fit",
   );
@@ -241,14 +246,14 @@ test("partial reader results state partial evidence without error styling", asyn
   await page.locator("#source-text").fill("A relevant passage.");
   await page.locator("#instructions").fill("What happened?");
   await page.getByRole("button", { name: "Find answer", exact: true }).click();
-  await expect(page.locator("#extra-visual blockquote")).toHaveText(
-    "A relevant passage.",
-  );
   await expect(
-    page.locator("#extra-visual [data-evidence-outcome]"),
-  ).toContainText("Partial evidence found in the source.");
-  await expect(page.locator(".evidence-selection-note")).toContainText(
-    "Several passages may fit; review the selected exact excerpt.",
+    page.locator("#extra-visual .answer-lead .answer-point"),
+  ).toContainText("A relevant passage.");
+  await expect(
+    page.locator("#extra-visual article.source-answer"),
+  ).toContainText("Some aspects of the question may not be covered");
+  await expect(page.locator(".answer-processing")).toContainText(
+    "Jev’s selections and organization can be wrong.",
   );
   await expect(page.locator("#extra-status")).not.toHaveClass(/error/);
 });
@@ -274,7 +279,7 @@ test("reader interpretation API failures remain visible errors", async ({
   await expect(page.locator("#extra-ask")).toBeEnabled();
 });
 
-test("uncertain answerability is disclosed without calling a valid response an error", async ({
+test("legacy raw answerability remains inspectable without overriding declared fixture support", async ({
   page,
 }) => {
   await page.route("**/api/utilities/interpret", (route) =>
@@ -297,14 +302,17 @@ test("uncertain answerability is disclosed without calling a valid response an e
   await page.locator("#instructions").fill("What happened?");
   await page.getByRole("button", { name: "Find answer", exact: true }).click();
   await expect(
-    page.locator("#extra-visual [data-evidence-outcome]"),
-  ).toContainText("Possible answer — review this source evidence.");
+    page.locator("#extra-visual article.source-answer"),
+  ).toContainText("Your answer");
   await expect(
-    page.locator("#extra-visual [data-evidence-outcome]"),
+    page.locator("#extra-visual article.source-answer"),
   ).toBeVisible();
   await expect(page.locator("#extra-status")).not.toHaveClass(/error/);
-  await expect(page.locator("#extra-visual blockquote")).toHaveText(
-    "A relevant passage.",
+  await expect(
+    page.locator("#extra-visual .answer-lead .answer-point"),
+  ).toContainText("A relevant passage.");
+  await expect(page.locator(".answer-raw")).toContainText(
+    '"window0.answerability": 0.4',
   );
 });
 
