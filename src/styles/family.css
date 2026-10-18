@@ -339,3 +339,23 @@ body.utility-page {
 .utility-page .family-nav a {
   font-size: 0.92rem;
 }
+
+/* Personal links stay beside the creator credit, not in project navigation. */
+.utility-page .creator-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 0;
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.utility-page .creator-row > p {
+  margin: 0;
+  font: inherit;
+}
+.utility-page .creator-row .creator-credit {
+  margin: 0;
+  font: inherit;
+}
