@@ -1,5 +1,6 @@
 ---
 import FamilyDiscovery from "../components/FamilyDiscovery.astro";
+import CreatorSocials from "../components/CreatorSocials.astro";
 import tools from "../data/tools.json";
 import "@fontsource-variable/manrope";
 import "@fontsource/ibm-plex-mono/400.css";
@@ -130,22 +131,6 @@ const schema = {
           ModePot
         </a>
         <a href="https://github.com/tugrulguner/utilitypot">GitHub</a>
-        <a
-          href="https://www.linkedin.com/in/tugrulguner/"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="LinkedIn (opens in a new tab)"
-        >
-          LinkedIn
-        </a>
-        <a
-          href="https://x.com/Tugrul_Guner"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="X (opens in a new tab)"
-        >
-          X
-        </a>
         <a href="https://discord.gg/u3AANZr6RG">Community</a>
         <a
           href="https://tugrul.modepot.io/"
@@ -177,22 +162,6 @@ const schema = {
           ModePot
         </a>
         <a href="https://github.com/tugrulguner/utilitypot">GitHub</a>
-        <a
-          href="https://www.linkedin.com/in/tugrulguner/"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="LinkedIn (opens in a new tab)"
-        >
-          LinkedIn
-        </a>
-        <a
-          href="https://x.com/Tugrul_Guner"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="X (opens in a new tab)"
-        >
-          X
-        </a>
         <a href="https://discord.gg/u3AANZr6RG">Community</a>
         <a
           href="https://tugrul.modepot.io/"
@@ -241,17 +210,21 @@ const schema = {
           Explore the ModePot family →
         </a>
       </p>
-      <p>
-        Created by{" "}
-        <a
-          href="https://tugrul.modepot.io/"
-          class="ph-no-autocapture"
-          data-discovery-destination="creator"
-        >
-          Tugrul Guner
-        </a>{" "}
-        · <a href="/">Free tools</a> · <a href="/privacy/">Privacy & limits</a>
-      </p>
+      <div class="creator-row">
+        <p>
+          Created by{" "}
+          <a
+            href="https://tugrul.modepot.io/"
+            class="ph-no-autocapture"
+            data-discovery-destination="creator"
+          >
+            Tugrul Guner
+          </a>{" "}
+          · <a href="/">Free tools</a> ·{" "}
+          <a href="/privacy/">Privacy & limits</a>
+        </p>
+        <CreatorSocials />
+      </div>
       <p>
         <a
           href="https://github.com/tugrulguner/utilitypot/issues/new?title=UtilityPot%20feedback&body=Page%3A%20https%3A%2F%2Futilitypot.modepot.io%2F%20%0A%0APlease%20avoid%20including%20private%20data."

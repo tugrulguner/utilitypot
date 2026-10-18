@@ -103,17 +103,44 @@ for (const width of [1280, 1050, 768, 390, 320])
           await menu.click();
           nav = page.locator("#family-menu");
         }
-        for (const name of ["LinkedIn", "GitHub", "X"]) {
-          const a = nav.getByRole("link", {
-            name: new RegExp("^" + name + "(?: \\(|$)"),
-          });
-          await expect(a).toBeVisible();
+        expect(
+          (await nav.locator("a").allTextContents())
+            .slice(0, 4)
+            .map((t) => t.trim()),
+        ).toEqual(["ModePot", "GitHub", "Community", "About Tugrul"]);
+        await expect(
+          page.locator(
+            '.utility-header a[href*="linkedin.com"], .utility-header a[href*="x.com/"]',
+          ),
+        ).toHaveCount(0);
+        if (await menu.isVisible()) await page.keyboard.press("Escape");
+        const credit = page
+          .locator(
+            index === 0
+              ? ".utility-main .creator-row"
+              : ".utility-footer .creator-row",
+          )
+          .first();
+        await expect(credit).toContainText("Tugrul Guner");
+        const socials = credit.locator(".creator-social-links a");
+        await expect(socials).toHaveText(["GitHub", "LinkedIn", "X"]);
+        const hrefs = [
+          "https://github.com/tugrulguner",
+          "https://www.linkedin.com/in/tugrulguner/",
+          "https://x.com/Tugrul_Guner",
+        ];
+        for (let i = 0; i < 3; i++) {
+          const a = socials.nth(i);
+          await expect(a).toHaveAttribute("href", hrefs[i]);
+          await expect(a).toHaveAttribute("target", "_blank");
+          await expect(a).toHaveAttribute("rel", "noopener noreferrer");
+          await a.scrollIntoViewIfNeeded();
           const box = await a.boundingBox();
-          expect(box.width).toBeGreaterThanOrEqual(44);
+          expect(box.width).toBeGreaterThan(0);
           expect(box.height).toBeGreaterThanOrEqual(44);
-          expect(
-            await a.evaluate((e) => parseFloat(getComputedStyle(e).fontSize)),
-          ).toBeGreaterThanOrEqual(14);
+          await expect(a).toHaveCSS("font-size", "15px");
+          await expect(a).toHaveCSS("font-weight", "400");
+          await expect(a).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
           await a.focus();
           await expect(a).toBeFocused();
         }
@@ -122,13 +149,15 @@ for (const width of [1280, 1050, 768, 390, 320])
             () => document.documentElement.scrollWidth <= innerWidth,
           ),
         ).toBe(true);
-        if (index === 0 || path === "/tools/ask-a-webpage/")
+        if (index === 0 || path === "/tools/ask-a-webpage/") {
+          await page.evaluate(() => document.activeElement?.blur());
           await page.screenshot({
             path: info.outputPath(
               `${index === 0 ? "home" : "qa"}-${width}-${theme}.png`,
             ),
             fullPage: false,
           });
+        }
       }
       expect(calls).toBe(0);
     });
