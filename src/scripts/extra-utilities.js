@@ -384,7 +384,12 @@ if (root) {
     const rect = results.getBoundingClientRect();
     results.focus({ preventScroll: true });
     if (rect.top < 0 || rect.bottom > window.innerHeight) {
-      results.scrollIntoView({ block: "start", behavior: "smooth" });
+      results.scrollIntoView({
+        block: "start",
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
     }
   }
   function download() {
