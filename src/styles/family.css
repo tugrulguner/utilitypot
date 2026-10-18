@@ -325,8 +325,7 @@ body.utility-page {
   color: var(--muted);
 }
 /* Attribution belongs to the family, not the semantic gold/accent state. */
-.utility-page .utility-header .brand strong,
-.utility-page .utility-main .coordinate,
+.utility-page .utility-main .hero-copy > .coordinate,
 .utility-page .utility-footer a[href^="https://modepot.io"] {
   color: var(--cyan);
 }
