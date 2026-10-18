@@ -239,9 +239,7 @@ test("URL action reads then interprets once and preserves truncated coverage and
   await page.locator("#instructions").fill("What does Python support?");
   expect(calls).toEqual([]);
   await page.locator("#extra-ask").click();
-  await expect(page.locator(".answer-lead .answer-paragraph")).toHaveText(
-    source,
-  );
+  await expect(page.locator(".answer-lead .answer-text")).toHaveText(source);
   expect(calls).toEqual(["read", "interpret"]);
   await expect(page.locator("#source-coverage")).toContainText(
     /only part|truncated/i,

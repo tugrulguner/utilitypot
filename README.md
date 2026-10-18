@@ -28,6 +28,8 @@
 
 Start with your source and one outcome-named action, then investigate the readable result and copy/download. The converters, date cleanup and meeting calculator use explicit task settings and never call AI. Meetings use timezone-aware time fields, with optional exclusions. Entity and diagram corrections are ordinary post-result investigation, not alternative execution modes. Webpage questions combine source reading and evidence selection in one disclosed action. The three AI utilities explain what is sent to Jev/TypeSafe before you click; failures remain explicit and never silently switch execution methods.
 
+Ask a webpage reads only the supplied URL, not links on that page. Adjacent source paragraphs are packed into byte-bounded answer requests without dropping source text; long sources can still need multiple requests. The result puts a selected primary excerpt first, with inline citations and expandable supporting details. Readable answer downloads and exact source-data exports remain available.
+
 ## Local setup
 
 Use Node 22.19+ (CI uses Node 22).
@@ -68,7 +70,7 @@ Browser AI-success tests intercept requests with explicitly labeled fixtures. Th
 
 ## Server and deployment
 
-Astro generates static assets; a small Cloudflare Worker owns `/api/utilities/interpret` and `/api/utilities/read-page`. The provider endpoint and questions are server-authored, not a generic AI proxy. One request has at most 24 Choice questions across at most two provider stages, a 16 KB body cap, a 15-second timeout per provider stage and no automatic retries.
+Astro generates static assets; a small Cloudflare Worker owns `/api/utilities/interpret` and `/api/utilities/read-page`. The provider endpoint and questions are server-authored, not a generic AI proxy. Entity and diagram requests allow up to 24 typed questions; source-answer requests have a separate 32-question budget. The client request body is capped at 16 KB and each provider stage has a 15-second timeout. There are no automatic inference retries.
 
 The `UTILITY_RATE_LIMIT` and `UTILITY_GLOBAL_RATE_LIMIT` bindings allow 6/client and 30/aggregate requests per minute **per Cloudflare location**. They are eventually consistent abuse controls, not exact global spend caps. Read-page requests share the same limits. Missing bindings fail closed. Configure provider-side spend limits before enabling public AI.
 

@@ -28,14 +28,20 @@ function response(input, declared = facts) {
   for (const [key, q] of Object.entries(next.questions))
     b[key] = {
       choice:
-        Object.keys(q.criteria).find(
-          (k) =>
-            k !== "none" &&
-            q.criteria[k].text?.trim() ===
-              input.passages
-                .find((p) => p.id === q.instructions.passage_id)
-                ?.text.trim(),
-        ) ?? "none",
+        key === "answer_lead"
+          ? (input.passages.find((p) =>
+              declared.find(
+                (f) => f.role === "step" && p.text.trim() === f.text,
+              ),
+            )?.id ?? Object.keys(q.criteria)[0])
+          : (Object.keys(q.criteria).find(
+              (k) =>
+                k !== "none" &&
+                q.criteria[k].text?.trim() ===
+                  input.passages
+                    .find((p) => p.id === q.instructions.passage_id)
+                    ?.text.trim(),
+            ) ?? "none"),
     };
   return {
     source: "jev",

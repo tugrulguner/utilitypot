@@ -2,7 +2,7 @@ export const SOURCE_ANSWER_PROTOCOL = "source-answer-v1";
 export const SOURCE_ANSWER_MAX_QUESTIONS = 32;
 const SOURCE_LIMIT = 2 * 1024 * 1024;
 const MAX_QUESTION = 1000;
-const MAX_UNITS = 10;
+const MAX_UNITS = 9;
 const RELEVANCE_MIN = 0.65;
 const COMPLETE_MIN = 0.7;
 const roles = {
@@ -101,34 +101,64 @@ function payload(question, units) {
 }
 export function createSourceAnswerInterpretation(input) {
   validateDocument(input);
-  const units = sourceUnits(input.text),
+  const original = sourceUnits(input.text),
     windows = [];
-  let batch = [];
-  for (const unit of units) {
-    const proposed = [...batch, unit];
-    if (
-      batch.length &&
-      (proposed.length > MAX_UNITS ||
-        bytes(
-          JSON.stringify({
-            tool: "qa",
-            input: payload(input.question, proposed),
-          }),
-        ) > 16000)
-    ) {
-      windows.push(batch);
-      batch = [];
+  const overhead = bytes(
+    JSON.stringify({ tool: "qa", input: payload(input.question, []) }),
+  );
+  const budget = 16000 - overhead - MAX_UNITS * 140;
+  const combine = (items) => ({
+    start: items[0].start,
+    end: items.at(-1).end,
+    text: input.text.slice(items[0].start, items.at(-1).end),
+  });
+  const flush = (items) => {
+    if (!items.length) return;
+    const groups = [],
+      target = Math.ceil(
+        bytes(JSON.stringify(combine(items).text)) / MAX_UNITS,
+      );
+    let group = [];
+    for (const item of items) {
+      const proposed = [...group, item];
+      if (
+        group.length &&
+        groups.length < MAX_UNITS - 1 &&
+        bytes(JSON.stringify(combine(proposed).text)) > target
+      ) {
+        groups.push(combine(group));
+        group = [];
+      }
+      group.push(item);
     }
-    batch.push(unit);
+    if (group.length) groups.push(combine(group));
     if (
       bytes(
-        JSON.stringify({ tool: "qa", input: payload(input.question, batch) }),
-      ) > 16000
+        JSON.stringify({ tool: "qa", input: payload(input.question, groups) }),
+      ) > 16000 ||
+      groups.some((p) => bytes(JSON.stringify(p.text)) > 12000)
     )
       throw Error("A source block cannot fit safely in a request.");
+    windows.push(groups);
+  };
+  let batch = [],
+    cost = 0;
+  for (const unit of original) {
+    const addition =
+      bytes(JSON.stringify(unit.text)) +
+      (batch.length
+        ? bytes(input.text.slice(batch.at(-1).end, unit.start))
+        : 0);
+    if (batch.length && cost + addition > budget) {
+      flush(batch);
+      batch = [];
+      cost = 0;
+    }
+    batch.push(unit);
+    cost += addition;
   }
-  if (batch.length) windows.push(batch);
-  return { input, units, windows };
+  flush(batch);
+  return { input, units: windows.flat(), windows };
 }
 export function sourceAnswerQuestions(question, passages) {
   const questions = {};
@@ -328,6 +358,12 @@ export function createSourceAnswerWindow(input) {
       );
       const finish = (selections) => {
         selections = { ...automatic, ...selections };
+        const primaryPassage =
+          chosen.length === 1
+            ? chosen[0]
+            : chosen.find((p) => p.id === selections.answer_lead?.choice);
+        if (chosen.length > 1 && !primaryPassage)
+          throw Error("Invalid primary answer selection.");
         const excerpts = [];
         for (const p of chosen) {
           const choice = selections[`${p.id}_span`]?.choice;
@@ -342,6 +378,11 @@ export function createSourceAnswerWindow(input) {
             relevance: parent.relevance,
           });
         }
+        const primary =
+          primaryPassage &&
+          excerpts.find((e) => e.sourceId === sourceId(primaryPassage));
+        if (excerpts.length && !primary)
+          throw Error("Primary answer has no supported source span.");
         return {
           status: !excerpts.length
             ? "not-answered"
@@ -352,7 +393,7 @@ export function createSourceAnswerWindow(input) {
           excerpts,
           contexts,
           answer: {
-            lead: leadFor(excerpts, answers.intent.choice),
+            lead: primary ? [primary] : [],
             sections: sectionsFor(excerpts, answers.intent.choice),
             intent: answers.intent.choice,
           },
@@ -362,6 +403,7 @@ export function createSourceAnswerWindow(input) {
             processed: passages.length,
             completeProbability: answers.answer_complete.noul,
             intent: answers.intent.choice,
+            leadSourceId: primary?.sourceId ?? null,
           },
         };
       };
@@ -389,6 +431,18 @@ export function createSourceAnswerWindow(input) {
             },
           ]),
       );
+      if (chosen.length > 1)
+        questions.answer_lead = {
+          type: "choice",
+          instructions: {
+            question:
+              "Which accepted passage contains the clearest, most self-contained answer to the user's entire question? Prefer an explicit direct answer over isolated names, navigation, broad descriptions or incidental mentions. This chooses the primary answer, not merely another related passage.",
+            user_question: input.question,
+          },
+          criteria: Object.fromEntries(
+            chosen.map((p) => [p.id, { text: p.text }]),
+          ),
+        };
       return {
         state: { ...state, accepted_passages: chosen },
         questions,
@@ -396,6 +450,21 @@ export function createSourceAnswerWindow(input) {
       };
     },
   };
+}
+export function chooseSourceAnswerLead(best, plan, window) {
+  const items = plan.coverage.leadSourceId
+    ? plan.excerpts
+        .filter((e) => e.sourceId === plan.coverage.leadSourceId)
+        .slice(0, 1)
+    : leadFor(plan.excerpts, plan.coverage.intent);
+  const answered = plan.status === "answered",
+    probability = plan.coverage.completeProbability;
+  return items.length &&
+    (!best ||
+      Number(answered) > Number(best.answered) ||
+      (answered === best.answered && probability > best.probability))
+    ? { items, answered, probability, window, intent: plan.coverage.intent }
+    : best;
 }
 export async function answerSourceDocument(
   { text, question },
@@ -505,23 +574,12 @@ export async function answerSourceDocument(
         throw Error("Invalid source confidence.");
       confidence[`window${wi}.${key}`] = value;
     }
-    const windowLead = leadFor(current, c.intent),
-      answered = plan.status === "answered";
     if (
-      windowLead.length &&
-      (!bestLead ||
-        Number(answered) > Number(bestLead.answered) ||
-        (answered === bestLead.answered &&
-          c.completeProbability > bestLead.probability))
-    ) {
-      bestLead = {
-        items: windowLead,
-        answered,
-        probability: c.completeProbability,
-        window: wi,
-        intent: c.intent,
-      };
-    }
+      c.leadSourceId != null &&
+      !current.some((e) => e.sourceId === c.leadSourceId)
+    )
+      throw Error("Invalid primary answer provenance.");
+    bestLead = chooseSourceAnswerLead(bestLead, plan, wi);
     all.push(...current);
     contexts.push(...windowContexts);
     anyComplete ||=

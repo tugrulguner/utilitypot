@@ -97,6 +97,35 @@ for (const width of [1280, 1050, 768, 390, 320])
         expect(u.href).not.toContain("DO_NOT_TRANSFER");
         expect(u.href).not.toContain("PRIVATE_FRAGMENT");
         await expect(feedback).toHaveAttribute("target", "_blank");
+        if (index > 0) {
+          const entry = page.locator(
+            ".utility-main > .utility-support .feedback-entry",
+          );
+          await expect(entry).toBeVisible();
+          await expect(entry).toHaveAttribute("href", u.href);
+          await expect(entry).toHaveAttribute("target", "_blank");
+          await expect(entry).toHaveAttribute("rel", "noopener noreferrer");
+          await expect(entry).toHaveCSS("border-top-style", "solid");
+          const hit = await entry.evaluate((e) => {
+            const r = e.getBoundingClientRect(),
+              p = document.elementFromPoint(
+                r.x + r.width / 2,
+                r.y + r.height / 2,
+              );
+            return {
+              height: r.height,
+              right: r.right,
+              top: r.top,
+              hit: p === e || e.contains(p),
+            };
+          });
+          expect(hit.height).toBeGreaterThanOrEqual(28);
+          expect(hit.right).toBeLessThanOrEqual(width);
+          expect(hit.top).toBeLessThan(200);
+          expect(hit.hit).toBe(true);
+          await entry.focus();
+          await expect(entry).toBeFocused();
+        }
         const menu = page.locator("#family-menu-toggle");
         let nav = page.locator(".family-nav");
         if (await menu.isVisible()) {

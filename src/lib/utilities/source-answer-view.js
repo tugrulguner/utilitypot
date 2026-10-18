@@ -173,7 +173,6 @@ export function createSourceAnswerView(
   article.setAttribute("aria-label", "Answer and supporting details");
   const header = node("header", "source-answer-header");
   header.append(
-    node("p", "answer-eyebrow", "YOUR SOURCE, EXPLAINED"),
     node(
       "h2",
       "answer-title",
@@ -203,7 +202,6 @@ export function createSourceAnswerView(
     );
     meta.append(a);
   } else meta.append(node("span", "answer-origin", "Pasted text"));
-  meta.append(node("span", "answer-kind", "Source-assembled answer"));
   header.append(meta);
   article.append(header);
   if (plan.status === "partial" || truncated)
@@ -267,7 +265,11 @@ export function createSourceAnswerView(
       row.focus({ preventScroll: true });
       row.scrollIntoView({ block: "center", behavior: "auto" });
     });
-    block.append(citation);
+    const tail =
+      [...block.querySelectorAll(".answer-paragraph, li")].at(-1) || block;
+    const sourceText = node("span", "answer-text");
+    while (tail.firstChild) sourceText.append(tail.firstChild);
+    tail.append(sourceText, document.createTextNode(" "), citation);
     parent.append(block);
   };
   if (plan.status === "not-answered") {
@@ -287,6 +289,8 @@ export function createSourceAnswerView(
     lead.setAttribute("aria-label", "Main answer");
     for (const item of plan.answer.lead ?? []) addItem(lead, item, true);
     if (lead.childElementCount) prose.append(lead);
+    const more = node("details", "answer-more");
+    more.append(node("summary", "", "Supporting details & conditions"));
     for (const section of plan.answer.sections) {
       const part = node(
         "section",
@@ -294,15 +298,16 @@ export function createSourceAnswerView(
       );
       part.append(node("h3", "", section.title));
       for (const item of section.items) addItem(part, item);
-      if (part.childElementCount > 1) prose.append(part);
+      if (part.childElementCount > 1) more.append(part);
     }
     const extra = selectedItems.filter((item) => !rendered.has(spanKey(item)));
     if (extra.length) {
       const part = node("section", "answer-section");
       part.append(node("h3", "", "More supporting details"));
       extra.forEach((item) => addItem(part, item));
-      prose.append(part);
+      more.append(part);
     }
+    if (more.childElementCount > 1) prose.append(more);
   }
   body.append(prose, sources);
   article.append(body);

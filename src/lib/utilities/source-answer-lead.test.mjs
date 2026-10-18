@@ -1,31 +1,35 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { answerSourceDocument } from "./source-answer.js";
+import {
+  chooseSourceAnswerLead,
+  createSourceAnswerInterpretation,
+} from "./source-answer.js";
 const captured = JSON.parse(
   readFileSync(
     new URL("./fixtures/source-answer-lead-jev-1.13.0.json", import.meta.url),
     "utf8",
   ),
 );
-test("genuine-response replay puts the strongest whole-question answer ahead of source-prefix fragments", async () => {
-  let index = 0;
-  const result = await answerSourceDocument(
-    { text: captured.text, question: captured.question },
-    async (input) => {
-      const row = captured.windows[index++];
-      assert.deepEqual(input, row.input);
-      return structuredClone(row.response);
-    },
-  );
-  assert.equal(index, captured.windows.length);
+test("historical genuine responses retain strongest whole-question lead ordering (not a replay of newly packed requests)", () => {
+  let best;
+  for (const [i, row] of captured.windows.entries()) {
+    for (const e of row.response.plan.excerpts)
+      assert.equal(captured.text.slice(e.start, e.end), e.text);
+    best = chooseSourceAnswerLead(best, row.response.plan, i);
+  }
   assert.deepEqual(
-    result.plan.answer.lead.map((e) => e.text),
+    best.items.map((e) => e.text),
     [captured.expectedLead],
   );
-  assert.equal(
-    result.plan.excerpts.length,
-    captured.windows.reduce((n, w) => n + w.response.plan.excerpts.length, 0),
-  );
-  assert.equal(result.confidence["window12.answer_complete"], 0.9);
+  assert.equal(best.window, 12);
+  assert.equal(best.probability, 0.9);
+});
+test("the captured page now fits a single complete-source request; old responses are not reused for new questions", () => {
+  const spec = createSourceAnswerInterpretation({
+    text: captured.text,
+    question: captured.question,
+  });
+  assert.equal(spec.windows.length, 1);
+  assert.ok(spec.units.length <= 10);
 });

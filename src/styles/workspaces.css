@@ -30,18 +30,12 @@
 @media (min-width: 1050px) {
   .utility-main:has(> .utility-app[data-utility="dates"]) > .notice {
     grid-column: 1 / -1;
-    grid-row: 4;
+    grid-row: 5;
     margin-block: 0 0.5rem;
   }
-  .utility-main > .utility-app[data-utility="dates"] {
-    grid-row: 5;
-  }
+  .utility-main > .utility-app[data-utility="dates"],
   .utility-main:has(> .utility-app[data-utility="dates"]) > .discovery-rail {
-    grid-row: 5;
-  }
-  .utility-main:has(> .utility-app[data-utility="dates"] #results:not([hidden]))
-    > .discovery-rail {
-    grid-row: auto;
+    grid-row: 6;
   }
 }
 .utility-page .utility-app .workspace-header {
