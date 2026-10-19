@@ -15,6 +15,69 @@ function follow(text, intent = "overview") {
   });
 }
 
+test("dense sentence choices fall back without losing late paragraph selection", () => {
+  const paragraphs = Array.from(
+    { length: 80 },
+    (_, i) => `Block ${i} starts here. Another fact. Final detail.`,
+  );
+  const text = paragraphs.join("\n\n");
+  const stage = follow(text);
+  const options = Object.entries(stage.questions.u0_span.criteria).filter(
+    ([, candidate]) => typeof candidate === "object",
+  );
+  assert.ok(options.length <= 254);
+  assert.equal(
+    options.length,
+    paragraphs.length + 1,
+    "dense choices use blocks plus full context",
+  );
+  for (const paragraph of paragraphs) {
+    const option = options.find(
+      ([, candidate]) => candidate.text === paragraph,
+    );
+    assert.ok(
+      option,
+      "every paragraph, including the last, remains selectable",
+    );
+    const plan = stage.decode({ u0_span: { choice: option[0] } });
+    assert.equal(plan.answer.lead[0].text, paragraph);
+    assert.equal(
+      text.slice(plan.answer.lead[0].start, plan.answer.lead[0].end),
+      paragraph,
+    );
+    assert.equal(plan.contexts[0].text, text);
+  }
+});
+
+test("more than 84 source blocks retain complete non-whole candidate coverage", () => {
+  const paragraphs = Array.from(
+    { length: 170 },
+    (_, i) => `Unpunctuated source block ${i}`,
+  );
+  const text = paragraphs.join("\n\n");
+  const stage = follow(text);
+  const options = Object.entries(stage.questions.u0_span.criteria)
+    .filter(([, candidate]) => typeof candidate === "object")
+    .map(([choice]) => stage.decode({ u0_span: { choice } }).answer.lead[0]);
+  assert.ok(options.length <= 254);
+  let start = 0;
+  for (const paragraph of paragraphs) {
+    const end = start + paragraph.length;
+    assert.ok(
+      options.some(
+        (candidate) =>
+          candidate.text !== text &&
+          candidate.start <= start &&
+          candidate.end >= end,
+      ),
+      "grouped candidates cover every source block, not merely a prefix",
+    );
+    start = end + 2;
+  }
+  for (const candidate of options)
+    assert.equal(text.slice(candidate.start, candidate.end), candidate.text);
+});
+
 test("packed navigation cannot erase a punctuation-free paragraph candidate", () => {
   const answer = "An open-source workshop for simpler software foundations";
   const text = `GitHub\n\nContribution guide\n\n${answer}\n\nSponsor links`;
