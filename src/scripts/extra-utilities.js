@@ -2,6 +2,13 @@ import "../styles/entity-results.css";
 import "../styles/page-evidence.css";
 import { resultDiscovery } from "../lib/discovery.js";
 import {
+  failureCategory,
+  failureError,
+  failureOutcome,
+  failureProperties,
+  requestUtility,
+} from "../lib/utilities/analytics-failure.js";
+import {
   interpretationReview,
   appendInterpretationDetails,
 } from "../lib/utilities/interpretation-feedback.js";
@@ -65,12 +72,13 @@ if (root) {
     });
     return { id, action, discoveryRevision };
   };
-  const complete = (attempt, outcome) => {
+  const complete = (attempt, outcome, category) => {
     capture("utility_action_completed", {
       tool: analyticsTool,
       action: attempt.action,
       attempt_id: attempt.id,
       outcome,
+      ...failureProperties(outcome, category),
     });
     if (attempt.action === "read_page") return;
     discovery.complete(
@@ -606,18 +614,26 @@ if (root) {
     const attempt = begin("read_page");
     try {
       status("Reading the public page…");
-      const r = await fetch("/api/utilities/read-page", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: $("page-url").value }),
-        signal: AbortSignal.timeout(12000),
-      });
-      const data = await r.json();
+      const data = await requestUtility(
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: $("page-url").value }),
+          signal: AbortSignal.timeout(12000),
+        },
+        "Could not read the page.",
+        "/api/utilities/read-page",
+      );
       if (token !== revision) {
         complete(attempt, "cancelled");
         return false;
       }
-      if (!r.ok) throw Error(data.error || "Could not read the page.");
+      if (
+        typeof data.text !== "string" ||
+        !data.text.trim() ||
+        typeof data.url !== "string"
+      )
+        throw failureError("Could not read the page.", "invalid_response");
       $("source-text").value = data.text;
       fetchedUrl = data.url;
       fetchedMetadata = {
@@ -632,7 +648,9 @@ if (root) {
       complete(attempt, "success");
       return true;
     } catch (e) {
-      complete(attempt, "rejected");
+      const category =
+        token !== revision ? "cancelled" : failureCategory(e, "presentation");
+      complete(attempt, failureOutcome(category), category);
       throw e;
     }
   }
@@ -693,9 +711,9 @@ if (root) {
     }
     clear();
     forgetInterpretation();
-    const attempt = begin("ai_interpretation");
+    let attempt = null;
     let outcome = "unexpected_failure",
-      responseStatus = 0;
+      category = "validation";
     const token = revision,
       button = $("extra-ask") || $("create-diagram");
     button.disabled = true;
@@ -731,6 +749,7 @@ if (root) {
               ? "Choosing records and array handling…"
               : "Reading flowchart steps and connections…",
       );
+      attempt = begin("ai_interpretation");
       let data;
       if (["entities", "qa"].includes(tool)) {
         const controller = new AbortController();
@@ -759,21 +778,18 @@ if (root) {
               });
             signal.throwIfAborted();
             lastRequest = Date.now();
-            const response = await fetch("/api/utilities/interpret", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ tool, input: payload }),
-              signal: AbortSignal.any([signal, AbortSignal.timeout(35000)]),
-            });
-            responseStatus = response.status;
-            const body = await response.json();
-            if (!response.ok)
-              throw Error(
-                body.error ||
-                  (tool === "qa"
-                    ? "Could not prepare a source-backed answer."
-                    : "Could not extract names."),
-              );
+            const body = await requestUtility(
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ tool, input: payload }),
+                signal: AbortSignal.any([signal, AbortSignal.timeout(35000)]),
+              },
+              tool === "qa"
+                ? "Could not prepare a source-backed answer."
+                : "Could not extract names.",
+            );
+            category = "invalid_response";
             return body;
           },
           {
@@ -796,22 +812,23 @@ if (root) {
           editEntities();
         }
       } else {
-        const r = await fetch("/api/utilities/interpret", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tool, input }),
-          signal: AbortSignal.timeout(tool === "diagram" ? 35000 : 20000),
-        });
-        responseStatus = r.status;
-        data = await r.json();
-        if (!r.ok) throw Error(data.error || "Jev is unavailable.");
+        data = await requestUtility(
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tool, input }),
+            signal: AbortSignal.timeout(tool === "diagram" ? 35000 : 20000),
+          },
+          "Jev is unavailable.",
+        );
       }
       if (token !== revision) {
         outcome = "cancelled";
         return;
       }
       if (data.source !== "jev" || !data.plan)
-        throw Error("Unverified interpretation.");
+        throw failureError("Unverified interpretation.", "invalid_response");
+      category = "presentation";
       if (tool === "jsonCsv") {
         paths(data.plan.path);
         $("array-policy").value = manualArrayPolicy ?? data.plan.arrays;
@@ -853,8 +870,13 @@ if (root) {
       if (tool === "qa") {
         // The source-answer renderer owns the visible reading workspace; raw
         // evidence and processing metadata remain in its secondary JSON export.
-      } else if (!(await runLocal(false))) {
-        outcome = token !== revision ? "cancelled" : "rejected";
+      } else if (
+        !(await runLocal(false, (localOutcome) => {
+          outcome = localOutcome;
+          category = failureProperties(localOutcome).failure_category;
+        }))
+      ) {
+        if (token !== revision) outcome = "cancelled";
         return;
       }
       if (tool === "qa") {
@@ -871,11 +893,8 @@ if (root) {
         outcome = "cancelled";
         return;
       }
-      outcome =
-        e.name === "TimeoutError" ||
-        (responseStatus >= 400 && responseStatus < 500)
-          ? "rejected"
-          : "unexpected_failure";
+      category = failureCategory(e, category);
+      outcome = failureOutcome(category);
       if (token === revision) {
         if (tool === "entities" && reviewPlan) $("entity-review").open = true;
         if (tool === "diagram" && reviewPlan) {
@@ -895,7 +914,12 @@ if (root) {
         );
       }
     } finally {
-      complete(attempt, outcome);
+      if (attempt)
+        complete(
+          attempt,
+          outcome,
+          outcome === "cancelled" ? "cancelled" : category,
+        );
       button.disabled = false;
       if (["entities", "qa"].includes(tool) && token === revision)
         documentController = null;
@@ -903,7 +927,7 @@ if (root) {
   }
   $("extra-ask")?.addEventListener("click", askJev);
   $("extra-run")?.addEventListener("click", () => runLocal());
-  async function runLocal(emit = true) {
+  async function runLocal(emit = true, onFailure) {
     const attempt = emit ? begin("manual_run") : null;
     let outcome = "rejected";
     try {
@@ -1344,6 +1368,7 @@ if (root) {
       status(e.message, true);
       return false;
     } finally {
+      if (outcome !== "success") onFailure?.(outcome);
       if (attempt) complete(attempt, outcome);
     }
   }
