@@ -855,12 +855,20 @@ test("consumer failure categories stay bounded across HTTP, transport and respon
       category: "invalid_response",
       outcome: "unexpected_failure",
     })),
-    {
+    ...[
+      ["provider_fetch", "provider_failure"],
+      ["provider_body", "provider_failure"],
+      ["response_validation", "invalid_response"],
+      ["followup", "invalid_response"],
+      ["decode", "invalid_response"],
+      ["PRIVATE_ERROR_SENTINEL", "unknown"],
+      [undefined, "unknown"],
+    ].map(([phase, category]) => ({
       status: 503,
-      body: '{"code":"interpretation_unverified","phase":"decode"}',
-      category: "provider_failure",
+      body: JSON.stringify({ code: "interpretation_unverified", phase }),
+      category,
       outcome: "unexpected_failure",
-    },
+    })),
     {
       status: 200,
       body: "malformed json",

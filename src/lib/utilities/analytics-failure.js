@@ -68,6 +68,9 @@ export async function requestUtility(
   try {
     response = await fetch(path, options);
   } catch (error) {
+    // Fetch deliberately hides connectivity, CORS and browser-policy causes behind
+    // opaque errors. `network` means no usable HTTP response, not a diagnosed outage;
+    // request_rejected is reserved for an observable HTTP denial.
     throw failureError(
       error?.message || fallback,
       failureCategory(error, "network"),
@@ -95,7 +98,11 @@ export async function requestUtility(
     const category = invalidResponseCodes.has(data?.code)
       ? "invalid_response"
       : data?.code === "interpretation_unverified"
-        ? "provider_failure"
+        ? ["response_validation", "followup", "decode"].includes(data.phase)
+          ? "invalid_response"
+          : ["provider_fetch", "provider_body"].includes(data.phase)
+            ? "provider_failure"
+            : "unknown"
         : httpCategory;
     throw failureError(
       typeof data?.error === "string" ? data.error : fallback,
