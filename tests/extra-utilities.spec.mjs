@@ -191,7 +191,7 @@ test("captured ModePot answer stays successful when passage confidence is low", 
   );
   await expect(
     page.locator("#extra-visual article.source-answer"),
-  ).toContainText("Your answer");
+  ).not.toContainText("Your answer");
   await expect(page.locator(".answer-processing")).toContainText(
     "Jev’s selections and organization can be wrong.",
   );
@@ -215,10 +215,12 @@ test("captured ModePot answer stays successful when passage confidence is low", 
   await page.getByRole("button", { name: "Find answer", exact: true }).click();
   await expect(
     page.locator("#extra-visual article.source-answer"),
-  ).toContainText("The answer isn’t supported here");
+  ).toContainText("There isn’t enough relevant information in this source");
   await expect(
-    page.locator("#extra-visual article.source-answer"),
-  ).toContainText("The answer isn’t supported here");
+    page
+      .locator("#extra-results")
+      .getByRole("button", { name: "Change question", exact: true }),
+  ).toBeVisible();
   await expect(page.locator("#extra-status")).not.toContainText(
     "Several passages may fit",
   );
@@ -303,7 +305,7 @@ test("legacy raw answerability remains inspectable without overriding declared f
   await page.getByRole("button", { name: "Find answer", exact: true }).click();
   await expect(
     page.locator("#extra-visual article.source-answer"),
-  ).toContainText("Your answer");
+  ).not.toContainText("Your answer");
   await expect(
     page.locator("#extra-visual article.source-answer"),
   ).toBeVisible();

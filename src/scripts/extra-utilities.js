@@ -83,6 +83,14 @@ if (root) {
     $("extra-status").hidden = false;
     $("extra-status").textContent = s;
     $("extra-status").classList.toggle("error", error);
+    if (tool === "qa" && $("extra-report-problem")) {
+      $("extra-report-problem").hidden = !error;
+      if (error)
+        $("extra-report-problem").scrollIntoView({
+          block: "center",
+          behavior: "instant",
+        });
+    }
   };
   function clear() {
     discovery.reset();
@@ -860,6 +868,7 @@ if (root) {
       if (tool === "qa") {
         $("extra-status").textContent = "";
         $("extra-status").hidden = true;
+        $("extra-report-problem").hidden = true;
       } else if (tool !== "entities") {
         const review = interpretationReview(tool, data.confidence);
         if (review) status(`${$("extra-status").textContent} ${review}`);

@@ -24,6 +24,7 @@
 .utility-app .result-toolbar {
   scroll-margin-block: 1rem;
 }
+
 .utility-page .utility-app[data-utility="csv"] .input-surface {
   padding: 0.75rem;
 }
