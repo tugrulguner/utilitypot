@@ -368,6 +368,8 @@ test("manual validation and presentation failures classify distinctly across uti
     const completions = decodedEvents(posts).filter(
       (e) => e.event === "utility_action_completed",
     );
+    expect(completions[0].properties.failure_category).toBe("presentation");
+    expect(completions[1].properties).not.toHaveProperty("failure_category");
     expect(completions[0].properties.attempt_id).not.toBe(
       completions[1].properties.attempt_id,
     );
@@ -645,6 +647,285 @@ test("a throwing analytics capture cannot block a local operation or its present
     if (slug === "fix-excel-dates")
       await expect(page.locator("#result-view table tbody tr")).toHaveCount(5);
     else await expect(page.locator("#extra-visual tr")).toHaveCount(3);
+  }
+});
+
+test("URL prerequisite failure emits read completion without starting interpretation", async ({
+  page,
+  context,
+}) => {
+  const posts = await installSink(context, page);
+  await page.goto("/tools/ask-a-webpage/");
+  await page.waitForFunction(() => window.posthog?.__loaded);
+  await page.getByRole("tab", { name: "Public URL", exact: true }).click();
+  await page.locator("#page-url").fill("https://docs.python.org/3/");
+  await page.locator("#instructions").fill("What is Python?");
+  await page.route("**/api/utilities/read-page", (route) =>
+    fulfillEntityDocumentFixture(route, {
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "Unavailable" }),
+    }),
+  );
+  await page.getByRole("button", { name: "Find answer" }).click();
+  await expect
+    .poll(
+      () =>
+        decodedEvents(posts).filter(
+          (e) => e.event === "utility_action_completed",
+        ).length,
+    )
+    .toBe(1);
+  const events = decodedEvents(posts);
+  expect(
+    events
+      .filter((e) => e.event === "utility_action_started")
+      .map((e) => e.properties.action),
+  ).toEqual(["read_page"]);
+  expect(
+    events
+      .filter((e) => e.event === "utility_action_completed")
+      .map((e) => e.properties.action),
+  ).toEqual(["read_page"]);
+  expect(
+    events.find((e) => e.event === "utility_action_completed").properties,
+  ).toMatchObject({
+    outcome: "unexpected_failure",
+    failure_category: "service_unavailable",
+  });
+});
+
+test("a malformed page-read response cannot start an interpretation", async ({
+  page,
+  context,
+}) => {
+  await installSink(context, page);
+  await page.goto("/tools/ask-a-webpage/");
+  await page.waitForFunction(() => window.posthog?.__loaded);
+  await page.evaluate(() => {
+    window.__captured = [];
+    window.posthog.capture = (event, properties) =>
+      window.__captured.push({ event, properties });
+  });
+  await page.getByRole("tab", { name: "Public URL", exact: true }).click();
+  await page.locator("#page-url").fill("https://example.org/");
+  await page.locator("#instructions").fill("What does this explain?");
+  await page.route("**/api/utilities/read-page", (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: "{}" }),
+  );
+  let interpretations = 0;
+  await page.route("**/api/utilities/interpret", (route) => {
+    interpretations++;
+    return route.abort();
+  });
+  await page.getByRole("button", { name: "Find answer" }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          window.__captured.filter(
+            (e) => e.event === "utility_action_completed",
+          ).length,
+      ),
+    )
+    .toBe(1);
+  expect(interpretations).toBe(0);
+  const events = await page.evaluate(() => window.__captured);
+  expect(events.map((e) => e.properties.action)).toEqual([
+    "read_page",
+    "read_page",
+  ]);
+  expect(events[1].properties).toMatchObject({
+    outcome: "unexpected_failure",
+    failure_category: "invalid_response",
+    attempt_id: events[0].properties.attempt_id,
+  });
+});
+
+test("AI presentation failure is not relabeled as visitor rejection by the local wrapper", async ({
+  page,
+  context,
+}) => {
+  await installSink(context, page);
+  await page.goto("/tools/text-to-mermaid/");
+  await page.waitForFunction(() => window.posthog?.__loaded);
+  await page.getByRole("button", { name: /^Load example:/ }).click();
+  await page.evaluate(() => {
+    window.__captured = [];
+    window.posthog.capture = (event, properties) =>
+      window.__captured.push({ event, properties });
+    const visual = document.querySelector("#extra-visual");
+    const append = visual.append.bind(visual);
+    window.__renderFault = 0;
+    visual.append = (...nodes) => {
+      if (nodes.some((node) => node.classList?.contains("diagram-viewport"))) {
+        window.__renderFault++;
+        throw new Error("PRIVATE_ERROR_SENTINEL");
+      }
+      return append(...nodes);
+    };
+  });
+  await page.route("**/api/utilities/interpret", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        source: "jev",
+        model: "fixture",
+        confidence: {},
+        plan: {
+          graph: {
+            nodes: [
+              { id: "n0", label: "Start", type: "terminal" },
+              { id: "n1", label: "Done", type: "terminal" },
+            ],
+            edges: [{ from: "n0", to: "n1", label: "" }],
+          },
+        },
+      }),
+    }),
+  );
+  await page.locator("#create-diagram").click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          window.__captured.filter(
+            (e) => e.event === "utility_action_completed",
+          ).length,
+      ),
+    )
+    .toBe(1);
+  const events = await page.evaluate(() => window.__captured);
+  expect(events.map((e) => e.event)).toEqual([
+    "utility_action_started",
+    "utility_action_completed",
+  ]);
+  expect(await page.evaluate(() => window.__renderFault)).toBe(1);
+  expect(events[1].properties).toMatchObject({
+    outcome: "unexpected_failure",
+    failure_category: "presentation",
+    attempt_id: events[0].properties.attempt_id,
+  });
+  expect(JSON.stringify(events)).not.toContain("PRIVATE_ERROR_SENTINEL");
+});
+
+test("consumer failure categories stay bounded across HTTP, transport and response failures", async ({
+  page,
+  context,
+}) => {
+  await installSink(context, page);
+  for (const fixture of [
+    {
+      status: 422,
+      body: '{"error":"PRIVATE_ERROR_SENTINEL"}',
+      category: "request_rejected",
+      outcome: "rejected",
+    },
+    {
+      status: 429,
+      body: "rate limited",
+      category: "rate_limited",
+      outcome: "rejected",
+    },
+    { status: 504, body: "timeout", category: "timeout", outcome: "rejected" },
+    {
+      status: 503,
+      body: '{"error":"Unavailable"}',
+      category: "service_unavailable",
+      outcome: "unexpected_failure",
+    },
+    {
+      status: 500,
+      body: "<html>PRIVATE_ERROR_SENTINEL</html>",
+      category: "service_unavailable",
+      outcome: "unexpected_failure",
+    },
+    ...[
+      "entity_starts_invalid",
+      "entity_boundaries_invalid",
+      "entity_span_invalid",
+      "provider_response_invalid",
+      "provider_choices_invalid",
+      "provider_probabilities_invalid",
+      "provider_usage_invalid",
+    ].map((code) => ({
+      status: 503,
+      body: JSON.stringify({ code }),
+      category: "invalid_response",
+      outcome: "unexpected_failure",
+    })),
+    {
+      status: 503,
+      body: '{"code":"interpretation_unverified","phase":"decode"}',
+      category: "provider_failure",
+      outcome: "unexpected_failure",
+    },
+    {
+      status: 200,
+      body: "malformed json",
+      category: "invalid_response",
+      outcome: "unexpected_failure",
+    },
+    {
+      status: 200,
+      body: '{"source":"jev","plan":null}',
+      category: "invalid_response",
+      outcome: "unexpected_failure",
+    },
+    { network: true, category: "network", outcome: "unexpected_failure" },
+    { timeout: true, category: "timeout", outcome: "rejected" },
+  ]) {
+    await page.goto("/tools/ask-a-webpage/");
+    await page.waitForFunction(() => window.posthog?.__loaded);
+    await page.getByRole("button", { name: /^Load example:/ }).click();
+    await page.evaluate(({ timeout }) => {
+      window.__captured = [];
+      window.posthog.capture = (event, properties) =>
+        window.__captured.push({ event, properties });
+      if (timeout) {
+        const original = window.fetch;
+        window.fetch = (url, ...args) =>
+          String(url).includes("/api/utilities/interpret")
+            ? Promise.reject(
+                new DOMException("PRIVATE_ERROR_SENTINEL", "TimeoutError"),
+              )
+            : original(url, ...args);
+      }
+    }, fixture);
+    await page.route("**/api/utilities/interpret", (route) =>
+      fixture.network
+        ? route.abort("failed")
+        : route.fulfill({
+            status: fixture.status ?? 200,
+            contentType: "application/json",
+            body: fixture.body ?? "{}",
+          }),
+    );
+    await page.getByRole("button", { name: "Find answer" }).click();
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            window.__captured.filter(
+              (e) => e.event === "utility_action_completed",
+            ).length,
+        ),
+      )
+      .toBe(1);
+    const events = await page.evaluate(() => window.__captured);
+    expect(events.map((e) => e.event)).toEqual([
+      "utility_action_started",
+      "utility_action_completed",
+    ]);
+    expect(events[1].properties).toMatchObject({
+      action: "ai_interpretation",
+      outcome: fixture.outcome,
+      failure_category: fixture.category,
+      attempt_id: events[0].properties.attempt_id,
+    });
+    expect(JSON.stringify(events)).not.toContain("PRIVATE_ERROR_SENTINEL");
+    await page.unroute("**/api/utilities/interpret");
   }
 });
 

@@ -78,6 +78,8 @@ The production Worker is `utilitypot-site`, independent of `modepot-site` and Li
 
 The compatibility date is supported by the bundled workerd runtime. No application input database, cookies, or session replay is introduced. PostHog page and coarse action analytics use a pseudonymous browser identifier in local storage and respect persisted SDK opt-out; pageview URLs retain only public paths, referrers are origin-only, and query strings, fragments, campaign identifiers and persisted acquisition values are removed. Events never include form values, provider context/results, or output. Copy/download events record user action intent, not successful clipboard or file transfer. See the user-visible `/privacy/` page for limits and third-party processing disclosures.
 
+Action completions add only a bounded `failure_category` on failure: validation, request rejection, network, timeout, rate limit, service availability, unverified provider output, invalid response, presentation, cancellation or unknown. No exception text or response body enters analytics. A failed webpage read is a separate `read_page` attempt and does not create an AI interpretation attempt; successful operations retain their existing event contract. These events describe execution, not semantic answer quality or automatic alerts.
+
 ## Scope and limitations
 
 Typed output does not guarantee semantic correctness. Names/categories, mappings, graph edges and source evidence require review. Cloudflare hosts request metadata; TypeSafe processes explicitly submitted AI context under its own terms. The application does not persist input histories or log raw provider bodies.

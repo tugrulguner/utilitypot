@@ -1,5 +1,6 @@
 import "../styles/meeting-workspace.css";
 import { resultDiscovery } from "../lib/discovery.js";
+import { failureProperties } from "../lib/utilities/analytics-failure.js";
 import { exampleReplacementGuard } from "../lib/utilities/example-replacement.js";
 import { groupCsv } from "../lib/utilities/outcome.js";
 import Papa from "papaparse";
@@ -57,6 +58,7 @@ if (root) {
       action: attempt.action,
       attempt_id: attempt.id,
       outcome,
+      ...failureProperties(outcome),
     });
     discovery.complete(
       outcome,
