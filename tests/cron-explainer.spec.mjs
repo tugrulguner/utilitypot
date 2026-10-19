@@ -49,6 +49,21 @@ for (const width of [1280, 390, 320])
       await expect(runs.first()).toContainText("UTC+05:30");
       await expect(result).toContainText("America/New_York");
       await expect(result).toContainText("Asia/Kolkata");
+      await expect(runs.first().locator("time")).not.toContainText("GMT");
+      await expect(page.locator("#cron-notes")).not.toBeVisible();
+      await expect(page.locator("#cron-reference")).not.toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Copy run times", exact: true }),
+      ).toBeInViewport();
+      await expect(
+        page.getByRole("button", { name: "Download run times", exact: true }),
+      ).toBeInViewport();
+      await expect(runs.first().locator(".cron-schedule-time")).toHaveText(
+        "09:00 UTC-05:00",
+      );
+      await expect(runs.nth(1).locator(".cron-schedule-time")).toHaveText(
+        "09:00 UTC-04:00",
+      );
       await context.grantPermissions(["clipboard-read", "clipboard-write"]);
       await page
         .getByRole("button", { name: "Copy run times", exact: true })
@@ -78,7 +93,20 @@ for (const width of [1280, 390, 320])
           expect(b.height).toBeGreaterThanOrEqual(44);
         }
       }
-      await result.scrollIntoViewIfNeeded();
+      const interpretation = result.locator("details > summary");
+      await interpretation.click();
+      await expect(page.locator("#cron-notes")).toBeVisible();
+      await expect(page.locator("#cron-reference")).toContainText(
+        "Calculated strictly after",
+      );
+      await interpretation.click();
+      await result.evaluate((e) =>
+        e.scrollIntoView({ block: "start", behavior: "instant" }),
+      );
+      await expect(page.locator(".skip-link")).not.toBeInViewport();
+      await page.screenshot({
+        path: info.outputPath(`cron-result-${width}-${theme}.png`),
+      });
       await page.screenshot({
         path: info.outputPath(`cron-${width}-${theme}.png`),
         fullPage: true,
