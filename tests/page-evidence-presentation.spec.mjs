@@ -79,7 +79,7 @@ test("not-answered and partial outcomes remain uncertainty rather than errors", 
   page,
 }) => {
   for (const [status, span, label] of [
-    ["not-answered", [], "isn’t supported"],
+    ["not-answered", [], "There isn’t enough relevant information"],
     ["partial", [["Observed", "direct"]], "Some aspects"],
   ]) {
     const source = "Observed text.";
@@ -119,8 +119,8 @@ test("low raw confidence does not override declared answered status", async ({
   await page.locator("#source-text").fill(source);
   await page.locator("#instructions").fill("A review question");
   await page.locator("#extra-ask").click();
-  await expect(page.locator(".source-answer .answer-title")).toHaveText(
-    "Your answer",
+  await expect(page.locator(".source-answer .answer-question")).toHaveText(
+    "A review question",
   );
   await expect(page.locator(".answer-raw")).toContainText("0.03");
 });

@@ -23,7 +23,7 @@ export function sourceAnswerMarkdown(
   ];
   if (plan.status === "not-answered")
     lines.push(
-      "The source does not provide a supported answer to this question.",
+      "There isn’t enough relevant information in this source to answer that question.",
       "",
     );
   const seen = new Set();
@@ -172,15 +172,6 @@ export function createSourceAnswerView(
   const article = node("article", "source-answer ph-no-autocapture");
   article.setAttribute("aria-label", "Answer and supporting details");
   const header = node("header", "source-answer-header");
-  header.append(
-    node(
-      "h2",
-      "answer-title",
-      plan.status === "not-answered"
-        ? "The answer isn’t supported here"
-        : "Your answer",
-    ),
-  );
   const questionLine = node("p", "answer-question", question);
   header.append(questionLine);
   const meta = node("div", "answer-context");
@@ -361,7 +352,9 @@ export function createSourceAnswerView(
     a.click();
     setTimeout(() => URL.revokeObjectURL(href), 1000);
   });
-  process.append(evidence);
+  const exportRow = node("div", "answer-export-row");
+  exportRow.append(evidence);
+  process.append(exportRow);
   article.append(process);
   return article;
 }

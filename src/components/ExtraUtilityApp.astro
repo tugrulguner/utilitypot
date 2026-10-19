@@ -4,6 +4,7 @@ interface Props {
   tool: "jsonCsv" | "entities" | "diagram" | "qa";
 }
 const { tool } = Astro.props;
+const readerIssueUrl = `https://github.com/tugrulguner/utilitypot/issues/new?title=${encodeURIComponent("[Ask a page or text] Problem report")}&body=${encodeURIComponent("Tool: Ask a page or text\nPage: https://utilitypot.modepot.io/tools/ask-a-webpage/\n\nDescribe what went wrong. Please avoid including private source text or questions.")}`;
 const examples = {
   jsonCsv: [
     "Load example: orders",
@@ -327,6 +328,19 @@ const examples = {
   <p id="extra-status" class="utility-status" role="status" aria-live="polite">
     Enter your source or load an example.
   </p>
+  {tool === "qa" && (
+    <a
+      id="extra-report-problem"
+      class="utility-report-problem ph-no-autocapture"
+      data-ph-no-autocapture="true"
+      hidden
+      target="_blank"
+      rel="noopener noreferrer"
+      href={readerIssueUrl}
+    >
+      Report this problem
+    </a>
+  )}
   {tool === "entities" && (
     <details id="entity-review" class="panel" hidden>
       <summary>Correct accepted mentions</summary>
@@ -357,34 +371,52 @@ const examples = {
 
   <section
     id="extra-results"
-    class="panel"
+    class:list={["panel", { "reader-result": tool === "qa" }]}
     tabindex="-1"
     aria-labelledby="extra-results-title"
     hidden
   >
-    <header class="result-toolbar">
-      <h2
-        id="extra-results-title"
-        class={tool === "qa" ? "sr-only" : undefined}
-      >
-        {tool === "jsonCsv"
-          ? "Spreadsheet preview"
-          : tool === "entities"
-            ? "Named entities in context"
-            : tool === "diagram"
-              ? "Your flowchart"
-              : "Answer"}
+    {tool === "qa" && (
+      <h2 id="extra-results-title" class="reader-answer-heading">
+        Answer
       </h2>
-      <div class="actions">
-        <button disabled data-startup-was-enabled="true" id="extra-download">
-          {tool === "qa" ? "Download answer" : "Download result"}
-        </button>
+    )}
+    {tool !== "qa" && (
+      <header class="result-toolbar">
+        <h2 id="extra-results-title">
+          {tool === "jsonCsv"
+            ? "Spreadsheet preview"
+            : tool === "entities"
+              ? "Named entities in context"
+              : tool === "diagram"
+                ? "Your flowchart"
+                : "Answer"}
+        </h2>
+        <div class="actions">
+          <button disabled data-startup-was-enabled="true" id="extra-download">
+            Download result
+          </button>
+          <button disabled data-startup-was-enabled="true" id="extra-copy">
+            Copy result
+          </button>
+        </div>
+      </header>
+    )}
+    <div id="extra-visual" class="result-inspector" />
+    {tool === "qa" && (
+      <div
+        class="reader-result-toolbar"
+        role="group"
+        aria-label="Use this answer"
+      >
         <button disabled data-startup-was-enabled="true" id="extra-copy">
-          {tool === "qa" ? "Copy answer" : "Copy result"}
+          Copy answer
+        </button>
+        <button disabled data-startup-was-enabled="true" id="extra-download">
+          Download answer
         </button>
       </div>
-    </header>
-    <div id="extra-visual" class="result-inspector" />
+    )}
     <details>
       <summary>
         {tool === "qa" ? "Answer Markdown" : "Export code view"}
