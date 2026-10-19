@@ -1,0 +1,45 @@
+---
+import CronApp from "../../components/CronApp.astro";
+import ToolDiscovery from "../../components/ToolDiscovery.astro";
+import UtilityLayout from "../../layouts/UtilityLayout.astro";
+import { guides } from "../../data/discovery.js";
+---
+
+<UtilityLayout
+  title="When will this cron run?"
+  description="Read your cron expression and see the next five runs in your timezone."
+  seoDescription={guides["cron-explainer"].description}
+  searchTitle={guides["cron-explainer"].title}
+  slug="cron-explainer"
+>
+  <CronApp />
+  <ToolDiscovery slug="cron-explainer" />
+  <details class="prose tool-help">
+    <summary>Supported syntax, timezones &amp; limits</summary>
+    <h2>Five fields, no guessing</h2>
+    <p>
+      Use minute, hour, day of month, month and day of week, in that order.
+      Supports numbers, wildcards, lists, ascending ranges, steps and
+      month/weekday names. Sunday can be 0 or 7. Seconds, years, macros and
+      Quartz-specific syntax are not supported.
+    </p>
+    <h2>The scheduler's timezone is not necessarily yours</h2>
+    <p>
+      Both timezone fields initially use your browser timezone. Change the
+      schedule timezone to the one configured on your server, then choose where
+      to display the same instants. This tool does not inspect or change your
+      server. Run times include dates and UTC offsets so timezone changes are
+      visible.
+    </p>
+    <h2>Preview, not an execution guarantee</h2>
+    <p>
+      The five occurrences are strictly after the calculation time, with a
+      bounded 32-year search so sparse schedules such as leap days can still
+      show five runs. Invalid or insufficient schedules produce an explicit
+      error. Timezone rules come from your browser, and actual scheduler
+      behavior can differ at daylight-saving transitions. Review the result
+      notes and your scheduler's documentation. Nothing is installed, scheduled,
+      uploaded or saved by this tool.
+    </p>
+  </details>
+</UtilityLayout>

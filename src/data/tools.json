@@ -21,6 +21,13 @@
     "processing": "In your browser"
   },
   {
+    "slug": "cron-explainer",
+    "title": "When will this cron run?",
+    "description": "Explain a cron expression and see the next five runs in your timezone.",
+    "tool": "cron",
+    "processing": "In your browser"
+  },
+  {
     "slug": "json-to-csv",
     "title": "JSON to CSV",
     "description": "Turn a JSON file into spreadsheet rows and columns.",

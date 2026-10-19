@@ -1,0 +1,77 @@
+.cron-workspace .cron-expression {
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  letter-spacing: 0.025em;
+}
+.cron-workspace input {
+  width: 100%;
+  min-width: 0;
+}
+.cron-zones > div {
+  min-width: 0;
+}
+.cron-zones .notice {
+  margin-top: 0.5rem;
+}
+.cron-result h2 {
+  margin-bottom: 0.6rem;
+}
+.cron-explanation {
+  font-size: 1.15rem;
+  line-height: 1.6;
+}
+.cron-runs {
+  padding-left: 1.5rem;
+  margin-block: 1.5rem;
+}
+.cron-runs li {
+  padding: 0.9rem 0 0.9rem 0.35rem;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+.cron-runs li::marker {
+  color: var(--gold);
+  font-weight: 600;
+}
+.cron-runs time {
+  display: block;
+  font-weight: 600;
+  line-height: 1.65;
+  font-variant-numeric: tabular-nums;
+}
+.cron-runs li > span {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.cron-fields {
+  margin: 1rem 0;
+}
+.cron-fields > div {
+  padding-block: 0.65rem;
+  border-bottom: 1px solid var(--line);
+}
+.cron-fields dt {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.cron-fields dd {
+  margin: 0.35rem 0 0;
+  line-height: 1.6;
+}
+.cron-result details {
+  margin-top: 1rem;
+}
+@media (max-width: 600px) {
+  .cron-zones {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .cron-workspace .workspace-toolbar {
+    align-items: flex-start;
+  }
+}

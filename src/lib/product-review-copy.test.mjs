@@ -6,7 +6,15 @@ test("task directory tells visitors which tools are local or use AI", async () =
   const tools = JSON.parse(
     await readFile(new URL("../data/tools.json", import.meta.url), "utf8"),
   );
-  assert.equal(tools.length, 7);
+  assert.equal(tools.length, 8);
+  assert.equal(
+    tools.filter((tool) => tool.processing === "In your browser").length,
+    5,
+  );
+  assert.equal(
+    tools.find((tool) => tool.slug === "cron-explainer")?.processing,
+    "In your browser",
+  );
   for (const tool of tools)
     assert.equal(
       tool.processing,
