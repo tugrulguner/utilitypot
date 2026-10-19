@@ -1,0 +1,127 @@
+---
+import FamilyDiscovery from "./FamilyDiscovery.astro";
+import "../styles/cron-workspace.css";
+---
+
+<section
+  data-utility="cron"
+  data-processing="local"
+  class="utility-app cron-workspace ph-no-capture ph-no-autocapture"
+>
+  <form id="cron-form" class="panel">
+    <header class="workspace-header workspace-toolbar">
+      <div>
+        <p class="workspace-kicker">CRON → LOCAL RUN TIMES</p>
+        <h2>Check your schedule</h2>
+      </div>
+      <button id="load-example" type="button" disabled>
+        Load example: weekdays
+      </button>
+    </header>
+    <label for="cron-expression">Cron expression</label>
+    <input
+      id="cron-expression"
+      class="cron-expression"
+      maxlength="160"
+      placeholder="0 9 * * MON-FRI"
+      aria-describedby="cron-format"
+      autocomplete="off"
+      spellcheck="false"
+    />
+    <p id="cron-format" class="notice">
+      Five fields: minute · hour · day of month · month · day of week.
+    </p>
+    <div class="utility-grid cron-zones">
+      <div>
+        <label for="cron-schedule-zone">Schedule timezone</label>
+        <input
+          id="cron-schedule-zone"
+          list="cron-zones"
+          maxlength="80"
+          autocomplete="off"
+          spellcheck="false"
+          aria-describedby="cron-schedule-help"
+        />
+        <p id="cron-schedule-help" class="notice">
+          Use your server or scheduler’s timezone. Cron expressions do not
+          contain one.
+        </p>
+      </div>
+      <div>
+        <label for="cron-display-zone">Show run times in</label>
+        <input
+          id="cron-display-zone"
+          list="cron-zones"
+          maxlength="80"
+          autocomplete="off"
+          spellcheck="false"
+          aria-describedby="cron-display-help"
+        />
+        <p id="cron-display-help" class="notice">
+          Defaults to your browser timezone. Choose another IANA timezone to
+          compare.
+        </p>
+      </div>
+    </div>
+    <datalist id="cron-zones">
+      <option value="UTC" />
+      <option value="America/New_York" />
+      <option value="Europe/London" />
+      <option value="Asia/Kolkata" />
+    </datalist>
+    <div class="actions">
+      <button id="run" type="submit" class="primary" disabled>
+        Show next five runs
+      </button>
+    </div>
+    <p class="notice">
+      Private, browser-local calculation. No AI, uploads or scheduling changes.
+    </p>
+  </form>
+  <p
+    id="utility-status"
+    class="utility-status"
+    role="status"
+    aria-live="polite"
+  >
+    Enter a schedule or load the weekday example.
+  </p>
+  <section
+    id="results"
+    class="panel cron-result"
+    tabindex="-1"
+    aria-labelledby="results-title"
+    hidden
+  >
+    <h2 id="results-title">Next five runs</h2>
+    <p id="cron-explanation" class="cron-explanation" />
+    <p id="cron-result-zones" class="notice" />
+    <ol id="cron-runs" class="cron-runs" />
+    <div class="actions">
+      <button id="copy" disabled>
+        Copy run times
+      </button>
+      <button id="download" disabled>
+        Download run times
+      </button>
+    </div>
+    <p id="cron-reference" class="notice" />
+    <details>
+      <summary>How the expression is read</summary>
+      <dl id="cron-fields" class="cron-fields" />
+    </details>
+    <div id="cron-notes" class="notice" />
+    <FamilyDiscovery surface="result" />
+  </section>
+</section>
+<p id="cron-startup" class="notice" role="status">
+  JavaScript is required to calculate run times. If controls stay disabled,
+  check your connection and reload. Your expression stays here and can still be
+  copied.
+</p>
+<noscript>
+  <p class="notice error">Enable JavaScript to use this browser-local tool.</p>
+</noscript>
+<script>
+  import "../scripts/cron.js";
+</script>
