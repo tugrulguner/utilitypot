@@ -1,6 +1,7 @@
 import { explainCron } from "../lib/utilities/cron.js";
 import { resultDiscovery } from "../lib/discovery.js";
 import { failureProperties } from "../lib/utilities/analytics-failure.js";
+import { exampleReplacementGuard } from "../lib/utilities/example-replacement.js";
 const root = document.querySelector('[data-utility="cron"]');
 if (root) {
   const $ = (id) => root.querySelector(`#${id}`),
@@ -42,7 +43,11 @@ if (root) {
     });
   const detected = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
   for (const id of ["cron-schedule-zone", "cron-display-zone"])
-    if (!$(id).value) $(id).value = detected;
+    if (!$(id).value) {
+      $(id).value = detected;
+      $(id).defaultValue = detected;
+    }
+  const allowExampleReplacement = exampleReplacementGuard(root);
   let zones = [
     "UTC",
     detected,
@@ -59,6 +64,7 @@ if (root) {
     ...[...new Set(zones)].sort().map((zone) => new Option(zone, zone)),
   );
   $("load-example").addEventListener("click", () => {
+    if (!allowExampleReplacement()) return;
     invalidate();
     $("cron-expression").value = "0 9 * * MON-FRI";
     $("cron-schedule-zone").value = "UTC";

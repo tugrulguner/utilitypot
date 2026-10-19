@@ -55,3 +55,39 @@ test("cron remains honest and disabled without JavaScript", async ({
   await expect(page.locator("#results")).toBeHidden();
   await context.close();
 });
+
+test("cron sample replacement preserves user settings when cancelled", async ({
+  page,
+}) => {
+  await page.goto("/tools/cron-explainer/");
+  await page.getByLabel("Cron expression", { exact: true }).fill("17 4 * * *");
+  await page
+    .getByLabel("Schedule timezone", { exact: true })
+    .fill("America/Chicago");
+  let dialogs = 0;
+  page.on("dialog", async (dialog) => {
+    dialogs++;
+    await dialog.dismiss();
+  });
+  await page
+    .getByRole("button", { name: "Load example: weekdays", exact: true })
+    .click();
+  await expect.poll(() => dialogs).toBe(1);
+  await expect(page.getByLabel("Cron expression", { exact: true })).toHaveValue(
+    "17 4 * * *",
+  );
+  await expect(
+    page.getByLabel("Schedule timezone", { exact: true }),
+  ).toHaveValue("America/Chicago");
+  page.removeAllListeners("dialog");
+  page.once("dialog", (dialog) => dialog.accept());
+  await page
+    .getByRole("button", { name: "Load example: weekdays", exact: true })
+    .click();
+  await expect(page.getByLabel("Cron expression", { exact: true })).toHaveValue(
+    "0 9 * * MON-FRI",
+  );
+  await expect(
+    page.getByLabel("Schedule timezone", { exact: true }),
+  ).toHaveValue("UTC");
+});
