@@ -1,4 +1,5 @@
 import { explainCron } from "../lib/utilities/cron.js";
+import { presentCronRun } from "../lib/utilities/cron-presentation.js";
 import { resultDiscovery } from "../lib/discovery.js";
 import { failureProperties } from "../lib/utilities/analytics-failure.js";
 import { exampleReplacementGuard } from "../lib/utilities/example-replacement.js";
@@ -97,15 +98,37 @@ if (root) {
       outcome = "unexpected_failure";
       $("cron-explanation").textContent = plan.explanation;
       $("cron-result-zones").textContent =
-        `Scheduled in ${plan.scheduleZone} · Showing ${plan.displayZone}`;
+        plan.scheduleZone === plan.displayZone
+          ? `Showing and scheduled in ${plan.displayZone}`
+          : `Showing ${plan.displayZone} · Schedule: ${plan.scheduleZone}`;
       $("cron-runs").replaceChildren(
         ...plan.runs.map((run) => {
+          const view = presentCronRun(
+            run.iso,
+            plan.displayZone,
+            plan.scheduleZone,
+          );
           const li = document.createElement("li"),
-            time = element("time", run.display);
+            time = document.createElement("time");
+          const date = element("span", view.date),
+            clock = element("span", view.clock + " "),
+            offset = element("span", view.offset);
+          date.className = "cron-run-date";
+          clock.className = "cron-run-clock";
+          offset.className = "cron-run-offset";
+          clock.append(offset);
+          time.append(date, document.createTextNode(" "), clock);
           time.dateTime = run.iso;
           li.append(time);
-          if (plan.scheduleZone !== plan.displayZone)
-            li.append(element("span", `In schedule timezone: ${run.schedule}`));
+          if (view.schedule) {
+            const comparison = element("span", view.schedule);
+            comparison.className = "cron-schedule-time";
+            comparison.setAttribute(
+              "aria-label",
+              `Schedule time: ${view.schedule}`,
+            );
+            li.append(comparison);
+          }
           return li;
         }),
       );

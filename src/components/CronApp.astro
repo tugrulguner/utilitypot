@@ -93,24 +93,29 @@ import "../styles/cron-workspace.css";
     aria-labelledby="results-title"
     hidden
   >
-    <h2 id="results-title">Next five runs</h2>
+    <div class="cron-result-header">
+      <h2 id="results-title">Next five runs</h2>
+      <div class="actions">
+        <button id="copy" aria-label="Copy run times" disabled>
+          Copy
+        </button>
+        <button id="download" aria-label="Download run times" disabled>
+          Download
+        </button>
+      </div>
+    </div>
     <p id="cron-explanation" class="cron-explanation" />
     <p id="cron-result-zones" class="notice" />
     <ol id="cron-runs" class="cron-runs" />
-    <div class="actions">
-      <button id="copy" disabled>
-        Copy run times
-      </button>
-      <button id="download" disabled>
-        Download run times
-      </button>
-    </div>
-    <p id="cron-reference" class="notice" />
+    <p class="notice">
+      Preview only. Your scheduler’s clock-change rules may differ.
+    </p>
     <details>
       <summary>How the expression is read</summary>
       <dl id="cron-fields" class="cron-fields" />
+      <p id="cron-reference" class="notice" />
+      <div id="cron-notes" class="notice" />
     </details>
-    <div id="cron-notes" class="notice" />
     <FamilyDiscovery surface="result" />
   </section>
 </section>

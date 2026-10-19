@@ -14,18 +14,32 @@
   margin-top: 0.5rem;
 }
 .cron-result h2 {
-  margin-bottom: 0.6rem;
+  margin: 0;
+}
+.cron-result-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.cron-result-header .actions {
+  margin: 0;
+  gap: 0.5rem;
 }
 .cron-explanation {
-  font-size: 1.15rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+#cron-result-zones {
+  overflow-wrap: anywhere;
 }
 .cron-runs {
   padding-left: 1.5rem;
-  margin-block: 1.5rem;
+  margin-block: 1rem;
 }
 .cron-runs li {
-  padding: 0.9rem 0 0.9rem 0.35rem;
+  padding: 0.65rem 0 0.65rem 0.35rem;
   border-bottom: 1px solid var(--line);
   overflow-wrap: anywhere;
 }
@@ -34,14 +48,29 @@
   font-weight: 600;
 }
 .cron-runs time {
-  display: block;
-  font-weight: 600;
-  line-height: 1.65;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.15rem;
+  line-height: 1.45;
   font-variant-numeric: tabular-nums;
+}
+.cron-run-date {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.cron-run-clock {
+  font-weight: 600;
+}
+.cron-run-offset {
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 .cron-runs li > span {
   display: block;
-  margin-top: 0.3rem;
+  text-align: right;
+  margin-top: 0.15rem;
   font-size: 0.85rem;
   line-height: 1.6;
   color: var(--muted);
@@ -67,6 +96,12 @@
   margin-top: 1rem;
 }
 @media (max-width: 600px) {
+  .cron-runs time {
+    grid-template-columns: 1fr;
+  }
+  .cron-runs li > span {
+    text-align: left;
+  }
   .cron-zones {
     grid-template-columns: 1fr;
     gap: 0.5rem;

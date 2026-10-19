@@ -20,6 +20,8 @@
 
 ### Fixed
 
+- Compact cron results with one UTC offset per time, concise schedule comparisons that retain date rollover, header-level exports and collapsed interpretation details. Scheduling and full text exports are unchanged.
+
 - Present complete exact source spans in conditioned entity-end choices instead of isolated tokens, preserving source bounds, review and the two-stage question budget.
 - Parse real HTML charset declarations instead of raw tag-like text, and use the hosted Worker’s supported manual redirect mode for DNS requests without following resolver redirects.
 
