@@ -31,20 +31,21 @@ test("family overview, assets and creator remain discoverable", async ({
     "content",
     "https://utilitypot.modepot.io/utilitypot-social-v2.png?v=family-attribution-3",
   );
-  await expect(page.locator("#tools article")).toHaveCount(7);
+  await expect(page.locator("#tools article")).toHaveCount(8);
   await expect(page.locator(".product-hero img")).toHaveAttribute(
     "alt",
     /Focused browser tools for data, text, diagrams and planning/,
   );
   await expect(page.locator(".product-hero")).toContainText(
-    "Four tools work entirely in your browser; three use bounded AI only after you ask.",
+    "Five tools work entirely in your browser; three use bounded AI only after you ask.",
   );
   const cards = await page.locator("#tools article").allTextContents();
-  expect(cards).toHaveLength(7);
+  expect(cards).toHaveLength(8);
   for (const description of [
     "Group repeated CSV rows into nested JSON",
     "Clean up supported date text",
     "Compare availability across cities",
+    "Explain a cron expression and see the next five runs in your timezone",
     "Turn a JSON file into spreadsheet rows and columns",
     "Extract people, organizations and custom categories from text",
     "Turn up to eight listed steps into a flowchart",
@@ -52,7 +53,7 @@ test("family overview, assets and creator remain discoverable", async ({
   ])
     expect(cards.some((card) => card.includes(description))).toBe(true);
   expect(cards.filter((card) => card.includes("In your browser"))).toHaveLength(
-    4,
+    5,
   );
   expect(cards.filter((card) => card.includes("Uses AI"))).toHaveLength(3);
 });
