@@ -87,13 +87,13 @@ if (root) {
       attempt.discoveryRevision,
     );
   };
-  const status = (s, error = false) => {
+  const status = (s, error = false, reveal = tool === "qa") => {
     $("extra-status").hidden = false;
     $("extra-status").textContent = s;
     $("extra-status").classList.toggle("error", error);
-    if (tool === "qa" && $("extra-report-problem")) {
+    if ($("extra-report-problem")) {
       $("extra-report-problem").hidden = !error;
-      if (error)
+      if (error && reveal)
         $("extra-report-problem").scrollIntoView({
           block: "center",
           behavior: "instant",
@@ -1374,7 +1374,7 @@ if (root) {
     } catch (e) {
       $("extra-results").hidden = true;
       output = "";
-      status(e.message, true);
+      status(e.message, true, true);
       return false;
     } finally {
       if (outcome !== "success") onFailure?.(outcome);

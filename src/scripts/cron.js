@@ -23,6 +23,9 @@ if (root) {
   const status = (text, error = false) => {
     $("utility-status").textContent = text;
     $("utility-status").classList.toggle("error", error);
+    const report = $("utility-report-problem");
+    report.hidden = !error;
+    if (error) report.scrollIntoView({ block: "center", behavior: "instant" });
   };
   const invalidate = () => {
     output = "";

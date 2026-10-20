@@ -86,45 +86,55 @@ for (const width of [1280, 1050, 768, 390, 320])
               return getComputedStyle(e).color === expected;
             }),
           ).toBe(true);
-        const feedback = page.locator(".feedback-link a").first(),
-          u = new URL(await feedback.getAttribute("href"));
+        const footerFeedback = page.locator(".utility-footer .feedback-link a");
+        await expect(footerFeedback).toHaveCount(1);
+        const u = new URL(await footerFeedback.getAttribute("href"));
         expect(u.origin + u.pathname).toBe(
           "https://github.com/tugrulguner/utilitypot/issues/new",
         );
         expect(u.searchParams.get("body")).toContain(
-          "https://utilitypot.modepot.io" + path,
+          "https://utilitypot.modepot.io/",
         );
+        if (index > 0) expect(u.searchParams.get("body")).not.toContain(path);
         expect(u.href).not.toContain("DO_NOT_TRANSFER");
         expect(u.href).not.toContain("PRIVATE_FRAGMENT");
-        await expect(feedback).toHaveAttribute("target", "_blank");
+        await expect(footerFeedback).toHaveAttribute("target", "_blank");
+        await expect(footerFeedback).toHaveAttribute(
+          "rel",
+          "noopener noreferrer",
+        );
+        await expect(
+          page.locator(".utility-main > .utility-support"),
+        ).toHaveCount(0);
+        await expect(page.locator(".utility-main .feedback-link")).toHaveCount(
+          0,
+        );
         if (index > 0) {
-          const entry = page.locator(
-            ".utility-main > .utility-support .feedback-entry",
+          const reports = page.locator(
+            'a[data-tool-feedback="result"], a[data-tool-feedback="error"]',
           );
-          await expect(entry).toBeVisible();
-          await expect(entry).toHaveAttribute("href", u.href);
-          await expect(entry).toHaveAttribute("target", "_blank");
-          await expect(entry).toHaveAttribute("rel", "noopener noreferrer");
-          await expect(entry).toHaveCSS("border-top-style", "solid");
-          const hit = await entry.evaluate((e) => {
-            const r = e.getBoundingClientRect(),
-              p = document.elementFromPoint(
-                r.x + r.width / 2,
-                r.y + r.height / 2,
-              );
-            return {
-              height: r.height,
-              right: r.right,
-              top: r.top,
-              hit: p === e || e.contains(p),
-            };
-          });
-          expect(hit.height).toBeGreaterThanOrEqual(28);
-          expect(hit.right).toBeLessThanOrEqual(width);
-          expect(hit.top).toBeLessThan(200);
-          expect(hit.hit).toBe(true);
-          await entry.focus();
-          await expect(entry).toBeFocused();
+          await expect(reports).toHaveCount(2);
+          for (const report of await reports.all()) {
+            const href = await report.getAttribute("href");
+            expect(href).toMatch(
+              /^https:\/\/github\.com\/tugrulguner\/utilitypot\/issues\/new\?/,
+            );
+            expect(href).not.toContain("DO_NOT_TRANSFER");
+            expect(href).not.toContain("PRIVATE_FRAGMENT");
+            expect(href).not.toContain("secret");
+            await expect(report).toHaveAttribute("target", "_blank");
+            await expect(report).toHaveAttribute("rel", "noopener noreferrer");
+            const body = new URL(href).searchParams.get("body");
+            expect(body).toContain("https://utilitypot.modepot.io" + path);
+            expect(body).not.toContain("DO_NOT_TRANSFER");
+            expect(body).not.toContain("PRIVATE_FRAGMENT");
+          }
+          await expect(
+            page.locator('[data-tool-feedback="result"]'),
+          ).toBeHidden();
+          await expect(
+            page.locator('[data-tool-feedback="error"]'),
+          ).toBeHidden();
         }
         const menu = page.locator("#family-menu-toggle");
         let nav = page.locator(".family-nav");

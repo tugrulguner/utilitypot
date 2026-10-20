@@ -66,9 +66,15 @@ if (root) {
       attempt.discoveryRevision,
     );
   };
-  const status = (text, error = false) => {
+  const status = (text, error = false, reveal = false) => {
     $("utility-status").textContent = text;
     $("utility-status").classList.toggle("error", error);
+    const report = $("utility-report-problem");
+    if (report) {
+      report.hidden = !error;
+      if (error && reveal)
+        report.scrollIntoView({ block: "center", behavior: "instant" });
+    }
   };
   const invalidate = () => {
     discovery.reset();
@@ -697,7 +703,7 @@ if (root) {
     } catch (e) {
       output = "";
       $("results").hidden = true;
-      status(e.message, true);
+      status(e.message, true, true);
       return false;
     } finally {
       if (attempt) complete(attempt, outcome);
