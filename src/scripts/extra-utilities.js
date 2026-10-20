@@ -920,6 +920,7 @@ if (root) {
                     ? " No matches were accepted. Check the text and try again."
                     : ""),
           true,
+          true,
         );
       }
     } finally {
