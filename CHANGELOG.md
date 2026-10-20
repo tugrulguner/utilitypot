@@ -20,6 +20,8 @@
 
 ### Fixed
 
+- Refresh UtilityPot README and social artwork to show all five browser-local and three AI-assisted tools.
+
 - Put tool-specific issue reports beside result exports and error messages across all eight utilities. Remove the detached top-of-tool feedback button and duplicate page-level prompt; retain one generic site-feedback link in the footer. Reports contain only static tool/page context, and passive input validation does not move the viewport away from the editor.
 
 - Compact cron results with one UTC offset per time, concise schedule comparisons that retain date rollover, header-level exports and collapsed interpretation details. Scheduling and full text exports are unchanged.
