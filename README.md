@@ -1,6 +1,6 @@
 # UtilityPot
 
-<p align="center"><img src="utilitypot.png?v=public-positioning-2" alt="UtilityPot — Focused browser tools for data, text, diagrams and planning. Review AI-assisted results; no arbitrary generated code." width="600"></p>
+<p align="center"><img src="utilitypot.png?v=inventory-artwork-1" alt="UtilityPot — Focused browser tools for data, text, diagrams and planning. Review AI-assisted results; no arbitrary generated code." width="600"></p>
 
 <p align="center">Part of <a href="https://modepot.io/">ModePot</a>. &nbsp; <a href="https://utilitypot.modepot.io/">Project website</a> &nbsp; <a href="https://tugrul.modepot.io/">Created by Tugrul Guner</a></p>
 
@@ -53,7 +53,7 @@ For optional local inference, create a gitignored `.dev.vars` containing `TYPESA
 
 The cron tool has deterministic scheduling regressions in `src/lib/utilities/cron.test.mjs` and real browser interaction/export checks in `tests/cron-explainer.spec.mjs` and `tests/cron-privacy.spec.mjs`. These run without AI or a server credential. They cover separate timezones, clock changes, leap-day schedules, invalid input, clipboard/download parity and zero API requests. Its preview follows the pinned cron-parser implementation, not a promise that every cron daemon handles DST identically.
 
-For the original local4/AI3 workflows, run `UX_ORIGIN=<approved hosted origin> UX_RESULTS_DIR=<dedicated evidence directory> node scripts/focused-workspace-product-qa.mjs`. The runner accepts production or an approved immutable Worker preview, makes real, potentially billable Jev calls at least 13.5 seconds apart, and checks zero-API local computation, source spans, investigation controls and actual downloads. It saves every case, response, failure and screenshot; it does not mock requests or retry inference. Temporary previews must be approved and restored separately.
+For the current five browser-local and three AI-assisted workflows, run `UX_ORIGIN=<approved hosted origin> UX_RESULTS_DIR=<dedicated evidence directory> node scripts/focused-workspace-product-qa.mjs`. The runner accepts production or an approved immutable Worker preview, makes real, potentially billable Jev calls at least 13.5 seconds apart, and checks zero-API local computation, source spans, investigation controls and actual downloads. It saves every case, response, failure and screenshot; it does not mock requests or retry inference. Temporary previews must be approved and restored separately.
 
 The [public-readiness report](docs/public-readiness.md), [generated ledger](docs/public-readiness-evidence.json), older 23-scenario `fresh-ux-product-qa.mjs` runner and [original live QA report](docs/live-product-qa.md) describe earlier workflows. They do not qualify this redesign or declare its deployment. Fixture-green CI is not live semantic qualification.
 

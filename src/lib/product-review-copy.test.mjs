@@ -29,7 +29,7 @@ test("task directory tells visitors which tools are local or use AI", async () =
   assert.match(home, /class="coordinate tool-processing">\{processing\}/);
   assert.match(home, /Add your input\. Preview the result\./);
   assert.match(home, /bounded\s+AI\s+only\s+after\s+you\s+ask/);
-  assert.match(home, /utilitypot-lockup-v2\.png\?v=family-attribution-3/);
+  assert.match(home, /utilitypot-lockup-v2\.png\?v=inventory-artwork-1/);
   assert.match(home, /Created by/);
 });
 test("date limitations appear before the input rather than only inside hidden help", async () => {
