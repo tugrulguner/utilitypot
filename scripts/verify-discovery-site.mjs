@@ -2,6 +2,19 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { parseDocument, DomUtils } from "htmlparser2";
 import { guides, projects } from "../src/data/discovery.js";
+import tools from "../src/data/tools.json" with { type: "json" };
+const registrySlugs = tools.map(({ slug }) => slug).sort();
+assert.deepEqual(
+  Object.keys(guides).sort(),
+  registrySlugs,
+  "guide registry must match tools registry",
+);
+const sitemap = await readFile("dist/sitemap.xml", "utf8");
+for (const slug of registrySlugs)
+  assert.ok(
+    sitemap.includes(`https://utilitypot.modepot.io/tools/${slug}/`),
+    `sitemap missing ${slug}`,
+  );
 const all = (root, predicate) =>
   DomUtils.findAll(predicate, root.children || []);
 const attr = (root, name, value) =>

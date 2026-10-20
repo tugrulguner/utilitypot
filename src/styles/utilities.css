@@ -561,6 +561,9 @@
   font-size: 1.1rem;
   margin: 0.25rem 0 0.5rem;
 }
+.tool-guide [data-related-tools] a {
+  color: var(--cyan);
+}
 .tool-discovery p {
   font-size: 0.9rem;
   line-height: 1.6;
