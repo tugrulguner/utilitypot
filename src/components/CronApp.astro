@@ -1,5 +1,6 @@
 ---
 import FamilyDiscovery from "./FamilyDiscovery.astro";
+import ToolFeedback from "./ToolFeedback.astro";
 import "../styles/cron-workspace.css";
 ---
 
@@ -86,6 +87,7 @@ import "../styles/cron-workspace.css";
   >
     Enter a schedule or load the weekday example.
   </p>
+  <ToolFeedback tool="cron" context="error" id="utility-report-problem" />
   <section
     id="results"
     class="panel cron-result"
@@ -102,6 +104,7 @@ import "../styles/cron-workspace.css";
         <button id="download" aria-label="Download run times" disabled>
           Download
         </button>
+        <ToolFeedback tool="cron" context="result" />
       </div>
     </div>
     <p id="cron-explanation" class="cron-explanation" />

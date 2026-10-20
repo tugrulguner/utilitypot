@@ -335,29 +335,28 @@
   }
 }
 
-/* Keep a direct issue route visible without turning it into a promotion panel. */
-.utility-support {
-  display: flex;
-  justify-content: flex-end;
-  grid-column: 1;
-  margin: 0 0 4px;
-}
-.utility-support .feedback-entry {
+/* Reporting belongs beside the result or error, not above the input. */
+.utility-app .tool-feedback-link {
   display: inline-flex;
   align-items: center;
-  min-height: 28px;
-  padding: 2px 8px;
-  border: 1px solid var(--ink);
-  border-radius: 4px;
+  gap: 0.25rem;
+  min-height: 44px;
+  max-width: 100%;
   font-family: inherit;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 20px;
-  color: var(--ink);
-  background: var(--night-soft);
-  text-decoration: none;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
-.utility-support .feedback-entry:focus-visible {
+.utility-app .tool-feedback-link[hidden] {
+  display: none;
+}
+.utility-app .tool-feedback-error {
+  margin: -0.25rem 0 0.75rem;
+}
+.utility-app .tool-feedback-link:focus-visible {
   outline: 2px solid var(--cyan);
   outline-offset: 3px;
 }
@@ -372,7 +371,7 @@
   font-size: clamp(1.75rem, 4vw, 2.65rem);
   margin: 0.35rem 0 0.5rem;
 }
-.utility-main:has(> .utility-support) .utility-app > .panel:first-child {
+.utility-main .utility-app > .panel:first-child {
   margin-top: 0;
 }
 .utility-page .utility-main:has(.utility-app) > .utility-intro {
@@ -688,7 +687,7 @@
     column-gap: 1.25rem;
     align-items: start;
   }
-  .utility-main:has(> .discovery-rail) > .utility-support,
+
   .utility-main:has(> .discovery-rail) > .family-discovery,
   .utility-main:has(> .discovery-rail) > h1,
   .utility-main:has(> .discovery-rail) > .utility-intro {
@@ -696,11 +695,11 @@
   }
   .utility-main > .utility-app {
     grid-column: 1;
-    grid-row: 5;
+    grid-row: 4;
   }
   .utility-main > .discovery-rail {
     grid-column: 2;
-    grid-row: 5;
+    grid-row: 4;
     margin-top: 1rem;
   }
   .utility-main > .tool-guide,

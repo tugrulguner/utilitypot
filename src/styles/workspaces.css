@@ -31,12 +31,12 @@
 @media (min-width: 1050px) {
   .utility-main:has(> .utility-app[data-utility="dates"]) > .notice {
     grid-column: 1 / -1;
-    grid-row: 5;
+    grid-row: 4;
     margin-block: 0 0.5rem;
   }
   .utility-main > .utility-app[data-utility="dates"],
   .utility-main:has(> .utility-app[data-utility="dates"]) > .discovery-rail {
-    grid-row: 6;
+    grid-row: 5;
   }
 }
 .utility-page .utility-app .workspace-header {

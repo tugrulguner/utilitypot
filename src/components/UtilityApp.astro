@@ -1,5 +1,6 @@
 ---
 import FamilyDiscovery from "./FamilyDiscovery.astro";
+import ToolFeedback from "./ToolFeedback.astro";
 interface Props {
   tool: "csv" | "dates" | "meeting";
 }
@@ -281,6 +282,7 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
   >
     Paste your source or load an example. Local actions stay in your browser.
   </p>
+  <ToolFeedback tool={tool} context="error" id="utility-report-problem" />
   <section
     id="results"
     class="panel"
@@ -303,6 +305,7 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
         <button disabled data-startup-was-enabled="true" id="copy">
           Copy result
         </button>
+        <ToolFeedback tool={tool} context="result" />
       </div>
     </header>
     <div id="result-view" class="result-inspector" />
