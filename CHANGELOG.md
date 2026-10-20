@@ -20,6 +20,8 @@
 
 ### Fixed
 
+- Restore WCAG AA contrast for related-tool links in Light, Dark and Auto themes, include the cron explainer in the sitemap, and enforce guide/sitemap parity with the tool registry.
+
 - Refresh UtilityPot README and social artwork to show all five browser-local and three AI-assisted tools.
 
 - Put tool-specific issue reports beside result exports and error messages across all eight utilities. Remove the detached top-of-tool feedback button and duplicate page-level prompt; retain one generic site-feedback link in the footer. Reports contain only static tool/page context, and passive input validation does not move the viewport away from the editor.
