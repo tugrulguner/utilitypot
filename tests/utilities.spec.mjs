@@ -37,9 +37,7 @@ test("CSV example converts locally and downloads actual grouped JSON", async ({
     "3 source rows to 2 parent records",
   );
   const download = page.waitForEvent("download");
-  await page
-    .getByRole("button", { name: "Download result", exact: true })
-    .click();
+  await page.locator("#download, #extra-download").click();
   const d = await download;
   const out = JSON.parse(await fs.readFile(await d.path(), "utf8"));
   expect(out[0].Customer).toBe("001");
@@ -78,7 +76,7 @@ test("meeting windows compute local times and export a matching calendar instant
   );
   const download = page.waitForEvent("download");
   await page
-    .getByRole("button", { name: "Add to calendar", exact: true })
+    .getByRole("button", { name: "Download calendar (.ics)", exact: true })
     .click();
   const d = await download;
   expect(await fs.readFile(await d.path(), "utf8")).toContain(

@@ -52,9 +52,7 @@ test("JSON to CSV downloads actual nested values locally", async ({ page }) => {
   await page.getByRole("button", { name: "Convert" }).click();
   await expect(page.locator("#extra-output")).toContainText("customer.name");
   const promise = page.waitForEvent("download");
-  await page
-    .getByRole("button", { name: "Download result", exact: true })
-    .click();
+  await page.locator("#download, #extra-download").click();
   const d = await promise;
   expect(await fs.readFile(await d.path(), "utf8")).toContain("001,Ada,12");
 });
@@ -85,14 +83,14 @@ for (const [label, entities, expected] of [
       { type: "Person", text: "Nora", start: 0, end: 4 },
       { type: "Organization", text: "Acme", start: 15, end: 19 },
     ],
-    "2 unique entities; 2 mentions across 2 categories. Review each exact source occurrence.",
+    "2 name groups · 2 mentions · 2 categories",
   ],
   [
     "one",
     [{ type: "Person", text: "Nora", start: 0, end: 4 }],
-    "1 unique entity; 1 mention across 1 category. Review each exact source occurrence.",
+    "1 name group · 1 mention · 1 category",
   ],
-  ["none", [], "No matching names or terms found for the selected categories."],
+  ["none", [], "No names or terms found in the selected categories."],
 ]) {
   test(`entity results show useful ${label} match feedback, not model workflow`, async ({
     page,
@@ -111,7 +109,7 @@ for (const [label, entities, expected] of [
     await page.locator("#source-text").fill("Nora joined at Acme.");
     await page.locator("#extra-ask").click();
     await expect(page.locator("#extra-results")).toBeVisible();
-    await expect(page.locator("#extra-status")).toHaveText(expected);
+    await expect(page.locator("#entity-result-summary")).toHaveText(expected);
     await expect(page.locator("#extra-status")).not.toHaveClass(/error/);
     await expect(page.locator("#extra-status")).not.toContainText(
       /Jev|proposal|offset|jev-/,

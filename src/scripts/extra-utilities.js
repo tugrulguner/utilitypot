@@ -1,4 +1,5 @@
 import "../styles/entity-results.css";
+import "../styles/diagram-results.css";
 import "../styles/page-evidence.css";
 import { resultDiscovery } from "../lib/discovery.js";
 import {
@@ -38,8 +39,23 @@ if (root) {
   const tool = root.getAttribute("data-extra-utility"),
     $ = (id) => root.querySelector(`#${id}`);
   let manualArrayPolicy = null;
+  let diagramThemeObserver = null;
+  let entityLayoutCleanup = null;
+  let diagramRenderSerial = 0;
   const readerActions = root.querySelector(".reader-result-toolbar");
   function clearVisual() {
+    entityLayoutCleanup?.();
+    entityLayoutCleanup = null;
+    if ($("entity-result-summary")) {
+      $("entity-result-summary").hidden = true;
+      $("entity-result-summary").textContent = "";
+    }
+    diagramThemeObserver?.disconnect();
+    diagramThemeObserver = null;
+    if ($("diagram-svg-download")) {
+      $("diagram-svg-download").disabled = true;
+      $("diagram-svg-download").onclick = null;
+    }
     // Retain the original action nodes and their listeners across edits/re-runs.
     if (readerActions && $("extra-visual").contains(readerActions))
       $("extra-visual").after(readerActions);
@@ -403,7 +419,6 @@ if (root) {
       (text.length > 50000 ? "\n… download contains the full result." : "");
     clearVisual();
     $("extra-results").hidden = false;
-    if (tool !== "qa") revealResult();
   }
   function revealResult() {
     const results = $("extra-results");
@@ -1144,10 +1159,14 @@ if (root) {
           const chip = document.createElement("span");
           chip.className = "entity-category-chip";
           chip.dataset.categorySlot = categorySlots.get(category);
-          chip.textContent = `${category} · ${[...entities.values()].reduce((sum, ns) => sum + ns.length, 0)}`;
+          const mentionCount = [...entities.values()].reduce(
+            (sum, ns) => sum + ns.length,
+            0,
+          );
+          chip.textContent = `${category} · ${mentionCount} ${mentionCount === 1 ? "mention" : "mentions"}`;
           legend.append(chip);
           const heading = document.createElement("h3");
-          heading.textContent = `${category} (${[...entities.values()].reduce((sum, ns) => sum + ns.length, 0)})`;
+          heading.textContent = chip.textContent;
           group.append(heading);
           for (const [name, occurrences] of entities) {
             const item = document.createElement("div");
@@ -1242,7 +1261,20 @@ if (root) {
           legend.hidden = true;
           selection.hidden = true;
         }
-        workspace.append(index, sourcePanel);
+        const stacked = matchMedia("(max-width: 1100px)");
+        const arrange = () => {
+          const focused = document.activeElement;
+          const keepFocus = workspace.contains(focused);
+          // Keep visual, reading and tab order aligned when switching layouts.
+          workspace.append(
+            ...(stacked.matches ? [sourcePanel, index] : [index, sourcePanel]),
+          );
+          if (keepFocus) focused.focus({ preventScroll: true });
+        };
+        arrange();
+        stacked.addEventListener("change", arrange);
+        entityLayoutCleanup = () =>
+          stacked.removeEventListener("change", arrange);
         $("extra-visual").append(workspace);
         if (entityProcessing) {
           appendInterpretationDetails(
@@ -1266,9 +1298,13 @@ if (root) {
           items.map((e) => `${e.type}\u0000${e.text}`),
         ).size;
         const categoryCount = new Set(items.map((e) => e.type)).size;
+        $("entity-result-summary").textContent = items.length
+          ? `${uniqueCount} ${uniqueCount === 1 ? "name group" : "name groups"} · ${items.length} ${items.length === 1 ? "mention" : "mentions"} · ${categoryCount} ${categoryCount === 1 ? "category" : "categories"}`
+          : "No names or terms found in the selected categories.";
+        $("entity-result-summary").hidden = false;
         status(
           items.length
-            ? `${uniqueCount} unique ${uniqueCount === 1 ? "entity" : "entities"}; ${items.length} ${items.length === 1 ? "mention" : "mentions"} across ${categoryCount} ${categoryCount === 1 ? "category" : "categories"}. Review each exact source occurrence.`
+            ? "Extraction complete. Review each exact source occurrence."
             : "No matching names or terms found for the selected categories.",
         );
       }
@@ -1281,14 +1317,25 @@ if (root) {
         const code = mermaidSource(graph);
         outcome = "unexpected_failure";
         const { default: mermaid } = await import("mermaid");
-        mermaid.initialize({
-          startOnLoad: false,
-          securityLevel: "strict",
-          htmlLabels: false,
-          theme: "dark",
-          flowchart: { htmlLabels: false },
-        });
-        const { svg } = await mermaid.render(`diagram-${Date.now()}`, code);
+        const currentTheme = () =>
+          document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+        const renderSvg = async (theme) => {
+          mermaid.initialize({
+            startOnLoad: false,
+            securityLevel: "strict",
+            htmlLabels: false,
+            theme: theme === "dark" ? "dark" : "default",
+            flowchart: { htmlLabels: false },
+          });
+          return (
+            await mermaid.render(
+              `diagram-${Date.now()}-${++diagramRenderSerial}`,
+              code,
+            )
+          ).svg;
+        };
+        let activeTheme = currentTheme();
+        let svg = await renderSvg(activeTheme);
         if (token !== revision) {
           outcome = "cancelled";
           return;
@@ -1297,14 +1344,23 @@ if (root) {
         const frame = document.createElement("iframe");
         frame.title = "Rendered Mermaid flowchart";
         frame.setAttribute("sandbox", "");
-        frame.srcdoc = `<!doctype html><html><head><style>svg{display:block}</style></head><body style="margin:0;background:#0b101b;color:white">${svg}</body></html>`;
+        const paintFrame = () => {
+          const background = getComputedStyle(root)
+            .getPropertyValue("--night-soft")
+            .trim();
+          frame.srcdoc = `<!doctype html><html><head><style>svg{display:block}</style></head><body style="margin:0;background:${background}">${svg}</body></html>`;
+          frame.dataset.diagramTheme = activeTheme;
+        };
+        paintFrame();
         frame.style.cssText = "display:block;width:100%;height:480px;border:0";
-        const viewBox = new DOMParser()
-          .parseFromString(svg, "image/svg+xml")
-          .documentElement.getAttribute("viewBox")
-          ?.trim()
-          .split(/[\s,]+/)
-          .map(Number);
+        const svgBox = (markup) =>
+          new DOMParser()
+            .parseFromString(markup, "image/svg+xml")
+            .documentElement.getAttribute("viewBox")
+            ?.trim()
+            .split(/[\s,]+/)
+            .map(Number);
+        let viewBox = svgBox(svg);
         if (
           viewBox?.length === 4 &&
           viewBox.every(Number.isFinite) &&
@@ -1326,6 +1382,8 @@ if (root) {
           "Flowchart inspection — scroll horizontally at actual size",
         );
         viewport.append(frame);
+        let naturalSize = false;
+        let resize = () => {};
         if (
           viewBox?.length === 4 &&
           viewBox.every(Number.isFinite) &&
@@ -1340,7 +1398,8 @@ if (root) {
           fit.type = actual.type = "button";
           fit.textContent = "Fit width";
           actual.textContent = "Actual size";
-          const resize = (natural) => {
+          resize = (natural) => {
+            naturalSize = natural;
             frame.style.width = natural ? `${viewBox[2]}px` : "100%";
             frame.style.maxWidth = natural ? "none" : `${viewBox[2]}px`;
             fit.setAttribute("aria-pressed", String(!natural));
@@ -1351,11 +1410,17 @@ if (root) {
           resize(false);
           controls.append(fit, actual);
           $("extra-visual").append(controls);
+          const hint = document.createElement("p");
+          hint.id = "diagram-size-hint";
+          hint.className = "diagram-size-hint";
+          hint.textContent = "Small labels? Choose Actual size and scroll.";
+          viewport.setAttribute("aria-describedby", hint.id);
+          $("extra-visual").append(hint);
         }
         $("extra-visual").append(viewport);
-        const b = document.createElement("button");
-        b.textContent = "Download SVG";
-        b.addEventListener("click", () => {
+        const b = $("diagram-svg-download");
+        b.disabled = false;
+        b.onclick = () => {
           capture("utility_output_download_requested", {
             tool: analyticsTool,
             action: "svg_download",
@@ -1368,8 +1433,48 @@ if (root) {
           a.download = "utilitypot-flowchart.svg";
           a.click();
           setTimeout(() => URL.revokeObjectURL(url), 1000);
+        };
+        let generation = 0;
+        let themeWork = Promise.resolve();
+        diagramThemeObserver = new MutationObserver(() => {
+          const theme = currentTheme();
+          const requested = ++generation;
+          if (theme === activeTheme) return;
+          // Theme changes repaint only the accepted graph; no interpretation.
+          themeWork = themeWork
+            .then(async () => {
+              if (requested !== generation || token !== revision) return;
+              const next = await renderSvg(theme);
+              if (requested !== generation || token !== revision) return;
+              svg = next;
+              activeTheme = theme;
+              const dimensions = svgBox(svg);
+              if (
+                dimensions?.length === 4 &&
+                dimensions.every(Number.isFinite) &&
+                dimensions[2] > 0 &&
+                dimensions[3] > 0
+              ) {
+                viewBox = dimensions;
+                frame.style.aspectRatio = `${viewBox[2]} / ${viewBox[3]}`;
+                frame.dataset.intrinsicWidth = String(viewBox[2]);
+                resize(naturalSize);
+              }
+              paintFrame();
+            })
+            .catch(() => {
+              if (requested === generation && token === revision)
+                status(
+                  "Could not update the preview theme. The existing diagram is unchanged.",
+                  true,
+                  false,
+                );
+            });
         });
-        $("extra-visual").append(b);
+        diagramThemeObserver.observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ["data-theme"],
+        });
         const issues = graphRoleIssues(graph);
         if (issues.length) {
           const warning = document.createElement("p");
@@ -1384,6 +1489,8 @@ if (root) {
         status("Flowchart created. Review the step types and connections.");
       }
       if (tool === "entities") $("entity-review").hidden = false;
+      // Measure only after the preview and its status have their final height.
+      revealResult();
       outcome = "success";
       return true;
     } catch (e) {

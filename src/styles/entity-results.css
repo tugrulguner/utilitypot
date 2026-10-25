@@ -67,10 +67,9 @@
   --entity-tint: var(--entity-tint-3);
 }
 .entity-index-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
   gap: 0.4rem;
   border-inline-start: 3px solid var(--entity-color);
   padding-inline-start: 0.65rem;
@@ -84,6 +83,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.25rem;
+  max-inline-size: 6rem;
+}
+.utility-app[data-extra-utility="entities"] .entity-result-summary {
+  margin: 0.5rem 0 0.85rem;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.5;
 }
 .entity-index-item .entity-occurrence {
   min-width: 44px;

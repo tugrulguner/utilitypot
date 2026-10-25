@@ -77,7 +77,7 @@ export function compactMeetingSlot(slot, baseDate, locale) {
     })
     .join(" · ");
 }
-export function presentMeetingSlot(slot, locale) {
+export function presentMeetingSlot(slot, locale, { hourCycle } = {}) {
   return slot.local.map((person) => {
     const resolved = resolveMeetingZone(person.zone);
     const label = person.name.trim() || person.cityLabel || resolved.label;
@@ -85,6 +85,7 @@ export function presentMeetingSlot(slot, locale) {
       new Intl.DateTimeFormat(locale, {
         dateStyle: "medium",
         timeStyle: "short",
+        ...(hourCycle ? { hourCycle } : {}),
         timeZone: resolved.zone,
       }).format(new Date(value.split("[")[0]));
     return {

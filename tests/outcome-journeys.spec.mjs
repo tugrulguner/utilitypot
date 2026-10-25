@@ -68,13 +68,7 @@ for (const width of [1280, 390]) {
           : 0,
       );
       const pending = page.waitForEvent("download");
-      await page
-        .getByRole("button", {
-          name:
-            slug === "ask-a-webpage" ? "Download answer" : "Download result",
-          exact: true,
-        })
-        .click();
+      await page.locator("#download, #extra-download").click();
       const file = await pending;
       expect(
         (await fs.readFile(await file.path(), "utf8")).length,

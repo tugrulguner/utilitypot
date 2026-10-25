@@ -431,7 +431,7 @@ test("UX-05 Boston is discoverable on mobile and keeps its city label when expli
   await expect(page.locator("#result-view")).toContainText("Boston");
   const calendar = page.waitForEvent("download");
   await page
-    .getByRole("button", { name: "Add to calendar", exact: true })
+    .getByRole("button", { name: "Download calendar (.ics)", exact: true })
     .click();
   const calendarFile = await calendar;
   const calendarPath = testInfo.outputPath(calendarFile.suggestedFilename());
@@ -453,7 +453,7 @@ test("UX-05 Boston is discoverable on mobile and keeps its city label when expli
   await expect(page.locator("#result-view")).toContainText("Boston");
   const updated = await downloadText(
     page,
-    'button:has-text("Add to calendar")',
+    'button:has-text("Download calendar (.ics)")',
   );
   expect(updated).toContain("DTSTART:20270211T140000Z");
   expect(calls).toBe(0);

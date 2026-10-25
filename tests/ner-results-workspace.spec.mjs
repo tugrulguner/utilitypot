@@ -62,10 +62,16 @@ for (const width of [1280, 390]) {
     );
     const workspace = page.locator(".entity-workspace");
     await expect(
-      workspace.getByRole("heading", { name: "Person (3)", exact: true }),
+      workspace.getByRole("heading", {
+        name: "Person · 3 mentions",
+        exact: true,
+      }),
     ).toBeVisible();
     await expect(
-      workspace.getByRole("heading", { name: "Organization (3)", exact: true }),
+      workspace.getByRole("heading", {
+        name: "Organization · 3 mentions",
+        exact: true,
+      }),
     ).toBeVisible();
     const groupBounds = await page
       .locator(".entity-index > section")

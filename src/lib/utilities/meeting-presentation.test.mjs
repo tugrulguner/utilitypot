@@ -14,6 +14,21 @@ test("resolves familiar city names and explicit IANA IDs", () => {
   assert.equal(resolveMeetingZone("Asia/Kolkata").zone, "Asia/Kolkata");
   assert.equal(resolveMeetingZone("Europe/Paris").zone, "Europe/Paris");
 });
+test("selected meeting presentation can use 24-hour time without losing its local date", () => {
+  const slot = {
+    local: [
+      {
+        name: "",
+        zone: "Europe/London",
+        start: "2026-11-03T09:00:00+00:00[Europe/London]",
+        end: "2026-11-03T09:30:00+00:00[Europe/London]",
+      },
+    ],
+  };
+  const result = presentMeetingSlot(slot, "en-US", { hourCycle: "h23" })[0];
+  assert.match(result.start, /Nov 3, 2026, 09:00/);
+  assert.equal(result.zone, "Europe/London");
+});
 test("rejects ambiguous and unknown city names", () => {
   assert.throws(() => resolveMeetingZone("Springfield"), /ambiguous|Unknown/i);
   assert.throws(

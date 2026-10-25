@@ -82,6 +82,7 @@ if (root) {
     output = "";
     slots = [];
     $("results").hidden = true;
+    $("results").querySelector("[data-calendar-action]")?.remove();
   };
   root.addEventListener("input", (e) => {
     if (e.target.closest("#results")) return;
@@ -150,6 +151,7 @@ if (root) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   function show(text, name, type = "text/plain") {
+    $("results").querySelector("[data-calendar-action]")?.remove();
     output = text;
     filename = name;
     mime = type;
@@ -456,12 +458,12 @@ if (root) {
               .filter(([, v]) => !Array.isArray(v))
               .map(([k, v]) => `${k}: ${v}`)
               .join(" · ") || "Parent record") +
-            ` · ${childCount} items`;
+            ` · ${childCount} ${childCount === 1 ? "child row" : "child rows"}`;
           item.append(title);
           for (const [key, value] of Object.entries(parent)) {
             if (Array.isArray(value)) {
               const caption = document.createElement("p");
-              caption.textContent = `${key}: ${value.length} items`;
+              caption.textContent = key;
               item.append(caption);
               const table = document.createElement("table");
               const headers = [...new Set(value.flatMap(Object.keys))];
@@ -502,7 +504,20 @@ if (root) {
         const label = document.createElement("summary");
         label.textContent = "JSON code view";
         code.append(label, ...$("result-view").childNodes);
-        $("result-view").replaceChildren(tree, code);
+        const summary = document.createElement("p");
+        summary.className = "csv-result-summary";
+        const childRows = result.reduce(
+          (sum, parent) =>
+            sum +
+            Object.values(parent).reduce(
+              (count, value) =>
+                count + (Array.isArray(value) ? value.length : 0),
+              0,
+            ),
+          0,
+        );
+        summary.textContent = `${result.length} ${result.length === 1 ? "parent record" : "parent records"} · ${childRows} ${childRows === 1 ? "child row" : "child rows"}`;
+        $("result-view").replaceChildren(summary, tree, code);
         status(
           `Converted ${rows.length} source rows to ${result.length} parent records locally. Values were preserved as strings. Preview shows up to 100 parents and children per group; download includes all rows.`,
         );
@@ -536,7 +551,12 @@ if (root) {
           const tr = document.createElement("tr");
           for (const k of ["original", "normalized", "status", "note"]) {
             const td = document.createElement("td");
-            td.textContent = r[k];
+            if (k === "status") {
+              const badge = document.createElement("span");
+              badge.className = `date-status date-status-${r.status}`;
+              badge.textContent = r[k];
+              td.append(badge);
+            } else td.textContent = r[k];
             tr.append(td);
           }
           body.append(tr);
@@ -557,7 +577,13 @@ if (root) {
             const term = document.createElement("dt"),
               value = document.createElement("dd");
             term.textContent = label;
+            term.className = `date-field-${key}`;
+            value.className = `date-value-${key}`;
             value.textContent = row[key] || "—";
+            if (key === "status") {
+              value.classList.add("date-status", `date-status-${row.status}`);
+              value.setAttribute("aria-label", `Status: ${row.status}`);
+            }
             card.append(term, value);
           }
           cards.append(card);
@@ -594,6 +620,16 @@ if (root) {
         };
         filter.addEventListener("change", applyDateFilter);
         $("result-view").replaceChildren(filter, wrapper, cards);
+        const counts = Object.fromEntries(
+          ["converted", "review", "partial", "invalid"].map((state) => [
+            state,
+            result.filter((row) => row.status === state).length,
+          ]),
+        );
+        const summary = document.createElement("p");
+        summary.className = "date-result-summary";
+        summary.textContent = `${result.length} date values · ${counts.converted} normalized · ${counts.review} ambiguous · ${counts.partial} partial · ${counts.invalid} invalid`;
+        $("result-view").prepend(summary);
         status(
           `Processed ${result.length} rows locally. ${result.filter((r) => r.status === "review").length} need review; ${result.filter((r) => r.status === "invalid").length} are invalid. Preview shows at most 100 rows; download includes every row.`,
         );
@@ -615,9 +651,10 @@ if (root) {
           `Found ${slots.length} feasible slots. Times are computed locally, not by AI.`,
         );
         if (slots.length) {
+          $("results").querySelector("[data-calendar-action]")?.remove();
           const technical = document.createElement("details");
           const summary = document.createElement("summary");
-          summary.textContent = "Technical times and all options";
+          summary.textContent = "All available options · technical times";
           technical.append(summary, ...$("result-view").childNodes);
           const label = document.createElement("label");
           label.htmlFor = "slot-choice";
@@ -653,6 +690,8 @@ if (root) {
             const list = document.createElement("ul");
             for (const person of presentMeetingSlot(
               slots[Number(select.value)],
+              undefined,
+              { hourCycle: "h23" },
             )) {
               const row = document.createElement("li"),
                 who = document.createElement("strong"),
@@ -670,7 +709,9 @@ if (root) {
           select.addEventListener("change", renderChoice);
           renderChoice();
           const b = document.createElement("button");
-          b.textContent = "Add to calendar";
+          b.textContent = "Download calendar (.ics)";
+          b.className = "primary";
+          b.dataset.calendarAction = "true";
           b.addEventListener("click", () =>
             download(
               calendarEvent(slots[Number(select.value)], duration),
@@ -683,9 +724,9 @@ if (root) {
             label,
             select,
             comparison,
-            b,
             technical,
           );
+          $("results").querySelector(".result-toolbar .actions").prepend(b);
         }
       }
       const panel = $("results");
@@ -725,7 +766,10 @@ if (root) {
         status("Result copied.");
       }
     } catch {
-      status("Clipboard is unavailable. Use Download result instead.", true);
+      status(
+        `Clipboard is unavailable. Use ${tool === "csv" ? "Download JSON" : "Download result"} instead.`,
+        true,
+      );
     }
   });
   // Preserve text entered or restored before the module attached its listeners.
