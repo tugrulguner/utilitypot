@@ -142,7 +142,15 @@ export function sourceAnswerData(
 }
 export function createSourceAnswerView(
   result,
-  { question, text, url = "", truncated = false, retrieval, onChangeQuestion },
+  {
+    question,
+    text,
+    url = "",
+    truncated = false,
+    retrieval,
+    onChangeQuestion,
+    actions,
+  },
 ) {
   const { plan } = result;
   if (!plan?.answer || !Array.isArray(plan.excerpts))
@@ -171,10 +179,17 @@ export function createSourceAnswerView(
   const indices = new Map(all.map((item, i) => [contextKey(item), i + 1]));
   const article = node("article", "source-answer ph-no-autocapture");
   article.setAttribute("aria-label", "Answer and supporting details");
+  article.dataset.answerStatus = plan.status;
   const header = node("header", "source-answer-header");
   const questionLine = node("p", "answer-question", question);
-  header.append(questionLine);
+  const questionRow = node("div", "answer-question-row");
+  questionRow.append(
+    node("span", "answer-meta-label", "Question"),
+    questionLine,
+  );
+  header.append(questionRow);
   const meta = node("div", "answer-context");
+  meta.append(node("span", "answer-meta-label", "Source"));
   if (url) {
     const parsed = new URL(url);
     if (
@@ -194,17 +209,16 @@ export function createSourceAnswerView(
     meta.append(a);
   } else meta.append(node("span", "answer-origin", "Pasted text"));
   header.append(meta);
-  article.append(header);
-  if (plan.status === "partial" || truncated)
-    article.append(
-      node(
-        "p",
-        "answer-notice",
-        truncated
-          ? "Only the retrieved portion of this page was available. Some details may be missing."
-          : "Some aspects of the question may not be covered by the selected source material. Check the supporting details and limits below.",
-      ),
-    );
+  const notice =
+    plan.status === "partial" || truncated
+      ? node(
+          "p",
+          "answer-notice",
+          truncated
+            ? "Only the retrieved portion of this page was available. Some details may be missing."
+            : "Some aspects of the question may not be covered by the selected source material. Check the supporting details and limits below.",
+        )
+      : null;
   const body = node("div", "answer-body"),
     prose = node("div", "answer-prose"),
     sources = node("details", "answer-sources");
@@ -263,6 +277,7 @@ export function createSourceAnswerView(
     tail.append(sourceText, document.createTextNode(" "), citation);
     parent.append(block);
   };
+  let supportingDetails = null;
   if (plan.status === "not-answered") {
     prose.append(
       node(
@@ -298,10 +313,15 @@ export function createSourceAnswerView(
       extra.forEach((item) => addItem(part, item));
       more.append(part);
     }
-    if (more.childElementCount > 1) prose.append(more);
+    if (more.childElementCount > 1) supportingDetails = more;
   }
-  body.append(prose, sources);
+  body.append(prose);
   article.append(body);
+  if (notice) article.append(notice);
+  if (actions) article.append(actions);
+  article.append(header);
+  if (supportingDetails) article.append(supportingDetails);
+  article.append(sources);
   const process = node("details", "answer-processing");
   process.append(node("summary", "", "Reading & processing details"));
   const coverage = plan.coverage ?? {};

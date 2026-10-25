@@ -38,6 +38,13 @@ if (root) {
   const tool = root.getAttribute("data-extra-utility"),
     $ = (id) => root.querySelector(`#${id}`);
   let manualArrayPolicy = null;
+  const readerActions = root.querySelector(".reader-result-toolbar");
+  function clearVisual() {
+    // Retain the original action nodes and their listeners across edits/re-runs.
+    if (readerActions && $("extra-visual").contains(readerActions))
+      $("extra-visual").after(readerActions);
+    $("extra-visual").replaceChildren();
+  }
   let reviewPlan = "";
   let documentController = null;
   let entityProcessing = null;
@@ -109,7 +116,7 @@ if (root) {
     $("extra-status").hidden = false;
     $("extra-results").hidden = true;
     if (["entities", "qa"].includes(tool)) {
-      $("extra-visual").replaceChildren();
+      clearVisual();
       $("extra-output").textContent = "";
     }
   }
@@ -394,8 +401,11 @@ if (root) {
     $("extra-output").textContent =
       text.slice(0, 50000) +
       (text.length > 50000 ? "\n… download contains the full result." : "");
-    $("extra-visual").replaceChildren();
+    clearVisual();
     $("extra-results").hidden = false;
+    if (tool !== "qa") revealResult();
+  }
+  function revealResult() {
     const results = $("extra-results");
     const rect = results.getBoundingClientRect();
     results.focus({ preventScroll: true });
@@ -868,6 +878,7 @@ if (root) {
             retrieval: sourceUrl
               ? { redirects: fetchedMetadata?.redirects ?? [] }
               : undefined,
+            actions: readerActions,
             onChangeQuestion: () => {
               $("instructions").focus();
               $("instructions").scrollIntoView({ block: "center" });
@@ -891,6 +902,9 @@ if (root) {
         $("extra-status").textContent = "";
         $("extra-status").hidden = true;
         $("extra-report-problem").hidden = true;
+        // Reveal only after the answer is rendered and the loading notice is
+        // removed, so its layout shift cannot scroll the Answer heading away.
+        revealResult();
       } else if (tool !== "entities") {
         const review = interpretationReview(tool, data.confidence);
         if (review) status(`${$("extra-status").textContent} ${review}`);

@@ -154,35 +154,52 @@ test("completed result focuses even in view, and scrolls only when needed", asyn
     source.indexOf("  function show("),
     source.indexOf("  function download("),
   );
+  const clearVisual = source.slice(
+    source.indexOf("  function clearVisual("),
+    source.indexOf("  let reviewPlan"),
+  );
   for (const reducedMotion of [false, true])
-    for (const rect of [
-      { top: 10, bottom: 300 },
-      { top: -10, bottom: 300 },
-      { top: 10, bottom: 900 },
-    ]) {
-      const focus = [],
-        scroll = [];
-      const results = {
-        hidden: true,
-        getBoundingClientRect: () => rect,
-        focus: (options) => focus.push(options),
-        scrollIntoView: (options) => scroll.push(options),
-      };
-      const elements = {
-        "extra-results": results,
-        "extra-output": {},
-        "extra-visual": { replaceChildren() {} },
-      };
-      runInNewContext(show + ';show("result", "result.txt");', {
-        $: (id) => elements[id],
-        window: { innerHeight: 844 },
-        matchMedia: () => ({ matches: reducedMotion }),
-      });
-      assert.equal(results.hidden, false);
-      assert.equal(focus.length, 1);
-      assert.equal(focus[0].preventScroll, true);
-      assert.equal(scroll.length, rect.top < 0 || rect.bottom > 844 ? 1 : 0);
-      if (scroll.length)
-        assert.equal(scroll[0].behavior, reducedMotion ? "auto" : "smooth");
-    }
+    for (const tool of ["jsonCsv", "qa"])
+      for (const rect of [
+        { top: 10, bottom: 300 },
+        { top: -10, bottom: 300 },
+        { top: 10, bottom: 900 },
+      ]) {
+        const focus = [],
+          scroll = [];
+        const results = {
+          hidden: true,
+          getBoundingClientRect: () => rect,
+          focus: (options) => focus.push(options),
+          scrollIntoView: (options) => scroll.push(options),
+        };
+        const elements = {
+          "extra-results": results,
+          "extra-output": {},
+          "extra-visual": { replaceChildren() {} },
+        };
+        let beforeReveal = null;
+        runInNewContext(
+          clearVisual +
+            show +
+            ';show("result", "result.txt"); recordBeforeReveal(); if(tool === "qa") revealResult();',
+          {
+            $: (id) => elements[id],
+            readerActions: null,
+            tool,
+            recordBeforeReveal: () => {
+              beforeReveal = focus.length;
+            },
+            window: { innerHeight: 844 },
+            matchMedia: () => ({ matches: reducedMotion }),
+          },
+        );
+        assert.equal(results.hidden, false);
+        assert.equal(beforeReveal, tool === "qa" ? 0 : 1);
+        assert.equal(focus.length, 1);
+        assert.equal(focus[0].preventScroll, true);
+        assert.equal(scroll.length, rect.top < 0 || rect.bottom > 844 ? 1 : 0);
+        if (scroll.length)
+          assert.equal(scroll[0].behavior, reducedMotion ? "auto" : "smooth");
+      }
 });

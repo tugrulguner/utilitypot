@@ -40,7 +40,7 @@ test("populated reader has one answer surface with compact actions and evidence 
   const article = page.locator(".source-answer");
   await expect(article).toBeVisible();
   await expect(
-    page.locator("#extra-results > .reader-result-toolbar"),
+    page.locator("#extra-results .reader-result-toolbar"),
   ).toBeVisible();
   await expect(article.locator(".answer-title")).toHaveCount(0);
   await expect(article.locator(".answer-question")).toHaveCount(1);
@@ -60,14 +60,14 @@ test("populated reader has one answer surface with compact actions and evidence 
     border: getComputedStyle(el).borderTopWidth,
     answerBeforeActions: !!(
       document
-        .querySelector("#extra-visual")
+        .querySelector(".answer-lead")
         .compareDocumentPosition(
           document.querySelector(".reader-result-toolbar"),
         ) & Node.DOCUMENT_POSITION_FOLLOWING
     ),
   }));
-  expect(surface.background).toBe("rgba(0, 0, 0, 0)");
-  expect(surface.border).toBe("0px");
+  expect(surface.background).not.toBe("rgba(0, 0, 0, 0)");
+  expect(surface.border).toBe("3px");
   expect(surface.answerBeforeActions).toBe(true);
   for (const id of ["extra-copy", "extra-download"]) {
     expect(
