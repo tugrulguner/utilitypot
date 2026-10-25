@@ -1,4 +1,5 @@
 import { CronExpressionParser } from "cron-parser";
+import { Temporal } from "@js-temporal/polyfill";
 
 const MONTHS = "JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC".split(" ");
 const DAYS = "SUN MON TUE WED THU FRI SAT".split(" ");
@@ -10,6 +11,38 @@ const FIELD_META = [
   ["Day of week", 0, 7, DAYS],
 ];
 const MAX_HORIZON_YEARS = 32;
+const MAX_WEEK_RUNS = 11000;
+
+function parseWeekStart(value, zone) {
+  if (value === undefined) return null;
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value))
+    throw new Error("Week starting must be a valid date in YYYY-MM-DD format.");
+  let date;
+  try {
+    date = Temporal.PlainDate.from(value, { overflow: "reject" });
+  } catch {
+    throw new Error("Week starting must be a valid date in YYYY-MM-DD format.");
+  }
+  if (date.year < 1900 || value > "9999-12-24")
+    throw new Error(
+      "Week starting must be a valid date from 1900-01-01 through 9999-12-24.",
+    );
+  const start = date.toZonedDateTime({
+    timeZone: zone,
+    plainTime: Temporal.PlainTime.from("00:00"),
+  });
+  const endDate = date.add({ days: 7 });
+  const end = endDate.toZonedDateTime({
+    timeZone: zone,
+    plainTime: Temporal.PlainTime.from("00:00"),
+  });
+  return {
+    date,
+    endDate,
+    start: new Date(start.epochMilliseconds),
+    end: new Date(end.epochMilliseconds),
+  };
+}
 
 function validZone(zone, name) {
   if (
@@ -171,6 +204,7 @@ export function explainCron({
   scheduleZone,
   displayZone,
   now = new Date(),
+  weekStart,
 } = {}) {
   if (typeof expression !== "string" || !expression.trim())
     throw new Error("Enter a five-field cron expression.");
@@ -182,44 +216,78 @@ export function explainCron({
   const instant = now instanceof Date ? new Date(now) : new Date(now);
   if (!Number.isFinite(instant.getTime()))
     throw new Error("Reference time must be a valid date or ISO timestamp.");
+  const selectedWeek = parseWeekStart(weekStart, scheduleZone);
   const normalized = fields.map(validateField);
   let interval;
-  try {
-    interval = CronExpressionParser.parse(normalized.join(" "), {
-      currentDate: instant,
-      tz: scheduleZone,
-      strict: false,
-      endDate: new Date(
-        Date.UTC(
-          instant.getUTCFullYear() + MAX_HORIZON_YEARS,
-          instant.getUTCMonth(),
-          instant.getUTCDate(),
-          instant.getUTCHours(),
-          instant.getUTCMinutes(),
-          instant.getUTCSeconds(),
+  if (!selectedWeek)
+    try {
+      interval = CronExpressionParser.parse(normalized.join(" "), {
+        currentDate: instant,
+        tz: scheduleZone,
+        strict: false,
+        endDate: new Date(
+          Date.UTC(
+            instant.getUTCFullYear() + MAX_HORIZON_YEARS,
+            instant.getUTCMonth(),
+            instant.getUTCDate(),
+            instant.getUTCHours(),
+            instant.getUTCMinutes(),
+            instant.getUTCSeconds(),
+          ),
         ),
-      ),
-    });
-  } catch {
-    throw new Error(
-      "Cron expression is invalid or cannot provide five runs within 32 years.",
-    );
-  }
-  const runs = [];
-  try {
-    while (runs.length < 5) {
-      const date = interval.next().toDate();
-      if (date <= instant || runs.some((run) => run.iso === date.toISOString()))
-        continue;
-      const run = formatRun(date, displayZone);
-      run.schedule = formatRun(date, scheduleZone).display;
-      runs.push(run);
+      });
+    } catch {
+      throw new Error(
+        "Cron expression is invalid or cannot provide five runs within 32 years.",
+      );
     }
-  } catch {
-    throw new Error(
-      "Cannot find five runs within 32 years of the reference time. Check the calendar fields.",
-    );
-  }
+  const runs = [];
+  if (selectedWeek) {
+    try {
+      interval = CronExpressionParser.parse(normalized.join(" "), {
+        currentDate: new Date(selectedWeek.start.getTime() - 1),
+        tz: scheduleZone,
+        strict: false,
+        endDate: selectedWeek.end,
+      });
+      while (true) {
+        let date;
+        try {
+          date = interval.next().toDate();
+        } catch (error) {
+          if (/out of the time span range|out of range/i.test(error.message))
+            break;
+          throw error;
+        }
+        if (date >= selectedWeek.end) break;
+        if (runs.length >= MAX_WEEK_RUNS)
+          throw new Error("Selected week exceeds the 11000-run preview limit.");
+        const run = formatRun(date, displayZone);
+        run.schedule = formatRun(date, scheduleZone).display;
+        runs.push(run);
+      }
+    } catch (error) {
+      if (/11000-run/.test(error.message)) throw error;
+      throw new Error(`Cannot enumerate selected week: ${error.message}`);
+    }
+  } else
+    try {
+      while (runs.length < 5) {
+        const date = interval.next().toDate();
+        if (
+          date <= instant ||
+          runs.some((run) => run.iso === date.toISOString())
+        )
+          continue;
+        const run = formatRun(date, displayZone);
+        run.schedule = formatRun(date, scheduleZone).display;
+        runs.push(run);
+      }
+    } catch {
+      throw new Error(
+        "Cannot find five runs within 32 years of the reference time. Check the calendar fields.",
+      );
+    }
   const restrictedDom = !interval.fields.dayOfMonth.isWildcard;
   const restrictedDow = !interval.fields.dayOfWeek.isWildcard;
   const notes = [];
@@ -251,6 +319,14 @@ export function explainCron({
     ),
     fields: descriptions,
     runs,
+    preview: selectedWeek
+      ? {
+          startDate: selectedWeek.date.toString(),
+          endDate: selectedWeek.endDate.toString(),
+          startIso: selectedWeek.start.toISOString(),
+          endIso: selectedWeek.end.toISOString(),
+        }
+      : null,
     scheduleZone,
     displayZone,
     notes,

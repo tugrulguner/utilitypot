@@ -7,7 +7,7 @@ import { guides } from "../../data/discovery.js";
 
 <UtilityLayout
   title="When will this cron run?"
-  description="Read your cron expression and see the next five runs in your timezone."
+  description="Read your cron expression and preview the next five runs or a clock-change week."
   seoDescription={guides["cron-explainer"].description}
   searchTitle={guides["cron-explainer"].title}
   slug="cron-explainer"
@@ -33,13 +33,17 @@ import { guides } from "../../data/discovery.js";
     </p>
     <h2>Preview, not an execution guarantee</h2>
     <p>
-      The five occurrences are strictly after the calculation time, with a
-      bounded 32-year search so sparse schedules such as leap days can still
-      show five runs. Invalid or insufficient schedules produce an explicit
-      error. Timezone rules come from your browser, and actual scheduler
-      behavior can differ at daylight-saving transitions. Review the result
-      notes and your scheduler's documentation. Nothing is installed, scheduled,
-      uploaded or saved by this tool.
+      Next five runs starts strictly after the calculation time, with a bounded
+      32-year search for sparse schedules such as leap days. Selected week shows
+      every occurrence over seven calendar days from your chosen date in the
+      schedule timezone, including the starting midnight and excluding the next
+      week's midnight. A clock-change week may be shorter or longer than 168
+      hours. Weeks with no occurrences are shown explicitly. Dense previews
+      display 100 runs at a time; copy and download include every occurrence.
+      Timezone rules come from your browser, and actual scheduler behavior can
+      differ at daylight-saving transitions. Review the result notes and your
+      scheduler's documentation. Nothing is installed, scheduled, uploaded or
+      saved by this tool.
     </p>
   </details>
 </UtilityLayout>

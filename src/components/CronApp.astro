@@ -70,6 +70,32 @@ import "../styles/cron-workspace.css";
       <option value="Europe/London" />
       <option value="Asia/Kolkata" />
     </datalist>
+    <div class="utility-grid cron-zones cron-preview-settings">
+      <div>
+        <label for="cron-preview">Preview</label>
+        <select id="cron-preview">
+          <option value="next" selected>
+            Next five runs
+          </option>
+          <option value="week">Selected week</option>
+        </select>
+      </div>
+      <div id="cron-week-settings" hidden>
+        <label for="cron-week-start">Week starting</label>
+        <input
+          id="cron-week-start"
+          type="date"
+          min="1900-01-01"
+          max="9999-12-24"
+          aria-describedby="cron-week-help"
+          disabled
+        />
+        <p id="cron-week-help" class="notice">
+          Seven calendar days from this date, in the schedule timezone. Use this
+          to inspect a clock-change week.
+        </p>
+      </div>
+    </div>
     <div class="actions">
       <button id="run" type="submit" class="primary" disabled>
         Show next five runs
@@ -109,7 +135,12 @@ import "../styles/cron-workspace.css";
     </div>
     <p id="cron-explanation" class="cron-explanation" />
     <p id="cron-result-zones" class="notice" />
+    <p id="cron-range" class="notice" hidden />
     <ol id="cron-runs" class="cron-runs" />
+    <button id="cron-more" type="button" hidden>
+      Show more runs
+    </button>
+    <p id="cron-visible-count" class="notice" hidden />
     <p class="notice">
       Preview only. Your scheduler’s clock-change rules may differ.
     </p>

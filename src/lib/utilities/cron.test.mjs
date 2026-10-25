@@ -204,3 +204,75 @@ test("explains parser OR behavior for stepped day fields and states DST variabil
     /repeated fall-back wall times occur once/i,
   );
 });
+
+test("selected week includes inclusive local midnight through exclusive seven-day end across DST", () => {
+  const result = explainCron({
+    expression: "0 0 * * *",
+    scheduleZone: "America/New_York",
+    displayZone: "UTC",
+    weekStart: "2026-03-08",
+    now: "2026-01-01T00:00:00Z",
+  });
+  assert.deepEqual(result.preview, {
+    startDate: "2026-03-08",
+    endDate: "2026-03-15",
+    startIso: "2026-03-08T05:00:00.000Z",
+    endIso: "2026-03-15T04:00:00.000Z",
+  });
+  assert.equal(result.runs.length, 7);
+  assert.equal(result.runs[0].iso, result.preview.startIso);
+  assert.ok(result.runs.every((r) => r.iso < result.preview.endIso));
+});
+
+test("selected weeks handle fall back and Lord Howe half-hour transition", () => {
+  const run = (weekStart, scheduleZone, expression = "0 0 * * *") =>
+    explainCron({
+      expression,
+      scheduleZone,
+      displayZone: "UTC",
+      weekStart,
+      now: "2026-01-01T00:00:00Z",
+    });
+  assert.equal(
+    run("2026-11-01", "America/New_York").preview.endIso,
+    "2026-11-08T05:00:00.000Z",
+  );
+  assert.equal(
+    run("2026-04-05", "Australia/Lord_Howe").preview.endIso,
+    "2026-04-11T13:30:00.000Z",
+  );
+});
+
+test("selected-week validation, sparse zero runs, exact boundaries and dense completeness", () => {
+  const base = {
+    expression: "0 0 * * *",
+    scheduleZone: "UTC",
+    displayZone: "UTC",
+    now: "2026-01-01T00:00:00Z",
+  };
+  for (const weekStart of [
+    "2026-2-01",
+    "2026-02-30",
+    "1800-01-01",
+    "10000-01-01",
+  ]) {
+    assert.throws(
+      () => explainCron({ ...base, weekStart }),
+      /weekStart.*YYYY-MM-DD|valid date/i,
+    );
+  }
+  assert.equal(
+    explainCron({ ...base, weekStart: "2026-02-01", expression: "0 0 31 * *" })
+      .runs.length,
+    0,
+  );
+  const dense = explainCron({
+    ...base,
+    weekStart: "2026-03-01",
+    expression: "* * * * *",
+  });
+  assert.equal(dense.runs.length, 10080);
+  assert.equal(dense.runs[0].iso, "2026-03-01T00:00:00.000Z");
+  assert.equal(dense.runs.at(-1).iso, "2026-03-07T23:59:00.000Z");
+  assert.equal(explainCron(base).preview, null);
+});

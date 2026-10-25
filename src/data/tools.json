@@ -23,7 +23,7 @@
   {
     "slug": "cron-explainer",
     "title": "When will this cron run?",
-    "description": "Explain a cron expression and see the next five runs in your timezone.",
+    "description": "Explain a cron expression and preview upcoming runs or a selected week across timezones.",
     "tool": "cron",
     "processing": "In your browser"
   },

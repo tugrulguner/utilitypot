@@ -45,7 +45,7 @@ test("family overview, assets and creator remain discoverable", async ({
     "Group repeated CSV rows into nested JSON",
     "Clean up supported date text",
     "Compare availability across cities",
-    "Explain a cron expression and see the next five runs in your timezone",
+    "Explain a cron expression and preview upcoming runs or a selected week across timezones",
     "Turn a JSON file into spreadsheet rows and columns",
     "Extract people, organizations and custom categories from text",
     "Turn up to eight listed steps into a flowchart",
