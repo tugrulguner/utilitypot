@@ -111,6 +111,36 @@ test("meeting result promotes selected-time calendar export and keeps option tex
   await expect(page.locator("[data-calendar-action]")).toHaveCount(0);
 });
 
+test("meeting re-run with no overlap removes previous slot UI", async ({
+  page,
+}) => {
+  await page.goto("/tools/meeting-time-finder/");
+  await page.locator("#meeting-date").fill("2026-11-03");
+  for (const i of [0, 1]) {
+    await page.locator(`#p${i}-zone`).fill("London");
+    const participant = page.locator(".participant").nth(i);
+    const hours = participant.locator(".participant-hours");
+    if (!(await hours.evaluate((el) => el.open)))
+      await hours.locator("> summary").click();
+    await participant.locator('[data-field="start"]').fill("09:00");
+    await participant.locator('[data-field="end"]').fill("10:00");
+  }
+  await page.locator("#run").click();
+  await expect(page.locator("#slot-choice")).toBeVisible();
+  await expect(page.locator("[data-calendar-action]")).toBeVisible();
+  const later = page.locator(".participant").nth(1);
+  await later.locator('[data-field="start"]').fill("11:00");
+  await later.locator('[data-field="end"]').fill("12:00");
+  await page.locator("#run").click();
+  await expect(page.locator("#results")).toBeVisible();
+  await expect(page.locator("#result-view")).toContainText(
+    "No overlapping time",
+  );
+  await expect(page.locator("#slot-choice")).toHaveCount(0);
+  await expect(page.locator("#result-view h3")).toHaveCount(0);
+  await expect(page.locator("[data-calendar-action]")).toHaveCount(0);
+});
+
 test("date result renders at desktop and narrow widths in both themes", async ({
   page,
 }, info) => {
