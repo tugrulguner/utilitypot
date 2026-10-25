@@ -20,6 +20,8 @@
 
 ### Fixed
 
+- Distinguish source-backed answers with a dedicated result panel, a restrained accented answer surface and immediately adjacent copy/download actions. Keep question/source context secondary, preserve action controls across edits and reveal the completed result only after loading content is removed. Source wording, citations, exports and inference are unchanged.
+
 - Restore WCAG AA contrast for related-tool links in Light, Dark and Auto themes, include the cron explainer in the sitemap, and enforce guide/sitemap parity with the tool registry.
 
 - Refresh UtilityPot README and social artwork to show all five browser-local and three AI-assisted tools.
