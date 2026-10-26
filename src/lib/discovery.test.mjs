@@ -182,10 +182,12 @@ test("completed result focuses even in view, and scrolls only when needed", asyn
         runInNewContext(
           clearVisual +
             show +
-            ';show("result", "result.txt"); recordBeforeReveal(); if(tool === "qa") revealResult();',
+            ';show("result", "result.txt"); recordBeforeReveal(); revealResult();',
           {
             $: (id) => elements[id],
             readerActions: null,
+            diagramThemeObserver: null,
+            entityLayoutCleanup: null,
             tool,
             recordBeforeReveal: () => {
               beforeReveal = focus.length;
@@ -195,7 +197,7 @@ test("completed result focuses even in view, and scrolls only when needed", asyn
           },
         );
         assert.equal(results.hidden, false);
-        assert.equal(beforeReveal, tool === "qa" ? 0 : 1);
+        assert.equal(beforeReveal, 0);
         assert.equal(focus.length, 1);
         assert.equal(focus[0].preventScroll, true);
         assert.equal(scroll.length, rect.top < 0 || rect.bottom > 844 ? 1 : 0);

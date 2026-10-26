@@ -124,7 +124,7 @@ test("real CDN SDK emits sanitized pageview and bounded manual action events", a
     .toBeTruthy();
   await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.getByRole("button", { name: "Fix dates" }).click();
-  await page.getByRole("button", { name: "Download result" }).click();
+  await page.locator("#download, #extra-download").click();
   await expect
     .poll(
       () =>
@@ -550,7 +550,7 @@ test("calendar, SVG, and result download intents are attributed exactly once", a
 }) => {
   const posts = await installSink(context, page);
   for (const [slug, specialized, action] of [
-    ["meeting-time-finder", "Add to calendar", "calendar_download"],
+    ["meeting-time-finder", "Download calendar (.ics)", "calendar_download"],
     ["text-to-mermaid", "Download SVG", "svg_download"],
   ]) {
     const before = decodedEvents(posts).filter(
@@ -565,9 +565,14 @@ test("calendar, SVG, and result download intents are attributed exactly once", a
     const meeting = slug === "meeting-time-finder";
     if (meeting) await page.locator("#run").click();
     else await exampleInterpretation(page, slug);
-    for (const name of [specialized, "Download result"]) {
+    for (const control of [
+      meeting
+        ? page.getByRole("button", { name: /calendar/i })
+        : page.getByRole("button", { name: specialized, exact: true }),
+      page.locator("#download, #extra-download"),
+    ]) {
       const download = page.waitForEvent("download");
-      await page.getByRole("button", { name, exact: true }).click();
+      await control.click();
       await download;
     }
     await expect
@@ -608,7 +613,7 @@ test("copy success includes its bounded tool dimension", async ({
   });
   await page.getByRole("button", { name: /^Load example:/ }).click();
   await page.getByRole("button", { name: "Fix dates" }).click();
-  await page.getByRole("button", { name: "Copy result", exact: true }).click();
+  await page.locator("#copy, #extra-copy").click();
   await expect
     .poll(() =>
       page.evaluate(

@@ -382,15 +382,31 @@ const examples = {
                 : "Answer"}
         </h2>
         <div class="actions">
+          {tool === "diagram" && (
+            <button id="diagram-svg-download" class="primary" disabled>
+              Download SVG
+            </button>
+          )}
           <button disabled data-startup-was-enabled="true" id="extra-download">
-            Download result
+            {tool === "diagram"
+              ? "Download Mermaid"
+              : tool === "jsonCsv"
+                ? "Download CSV"
+                : "Download JSON"}
           </button>
           <button disabled data-startup-was-enabled="true" id="extra-copy">
-            Copy result
+            {tool === "diagram"
+              ? "Copy Mermaid"
+              : tool === "jsonCsv"
+                ? "Copy CSV"
+                : "Copy JSON"}
           </button>
           <ToolFeedback tool={tool} context="result" />
         </div>
       </header>
+    )}
+    {tool === "entities" && (
+      <p id="entity-result-summary" class="entity-result-summary" hidden />
     )}
     <div id="extra-visual" class="result-inspector" />
     {tool === "qa" && (

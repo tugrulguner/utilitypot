@@ -25,7 +25,7 @@ test("changing the selected meeting preserves results and exports that exact slo
   await expect(page.locator("#results")).toBeVisible();
   const downloaded = page.waitForEvent("download");
   await page
-    .getByRole("button", { name: "Add to calendar", exact: true })
+    .getByRole("button", { name: "Download calendar (.ics)", exact: true })
     .click();
   const file = await downloaded;
   const fs = await import("node:fs/promises");
@@ -60,7 +60,7 @@ test("meeting finder accepts city labels, rejects ambiguity, and renders readabl
   );
   await expect(page.locator("#slot-choice")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Add to calendar" }),
+    page.getByRole("button", { name: "Download calendar (.ics)" }),
   ).toBeVisible();
   await page.locator("#p0-zone").fill("Springfield");
   await page.getByRole("button", { name: "Find times" }).click();

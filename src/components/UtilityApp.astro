@@ -300,10 +300,18 @@ import { meetingCities } from "../lib/utilities/meeting-presentation.js";
       </h2>
       <div class="actions">
         <button disabled data-startup-was-enabled="true" id="download">
-          Download result
+          {tool === "csv"
+            ? "Download JSON"
+            : tool === "dates"
+              ? "Download CSV"
+              : "Download all options (.txt)"}
         </button>
         <button disabled data-startup-was-enabled="true" id="copy">
-          Copy result
+          {tool === "csv"
+            ? "Copy JSON"
+            : tool === "dates"
+              ? "Copy CSV"
+              : "Copy all options"}
         </button>
         <ToolFeedback tool={tool} context="result" />
       </div>

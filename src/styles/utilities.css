@@ -305,6 +305,68 @@
   line-height: 1.5;
 }
 
+.utility-app[data-utility="csv"] .csv-result-summary {
+  margin: 0.25rem 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.utility-app[data-utility="csv"] #result-view > div > details > summary {
+  overflow-wrap: anywhere;
+}
+.utility-app[data-utility="csv"] #result-view > div > details > p {
+  margin: 0.25rem 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.utility-app[data-utility="dates"] .date-status {
+  display: inline-block;
+  width: fit-content;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  border-color: currentColor;
+}
+.utility-app[data-utility="dates"] {
+  --date-good: #126445;
+  --date-review: #855a00;
+  --date-invalid: #a32636;
+  --date-partial: #415f91;
+}
+[data-theme="dark"] .utility-app[data-utility="dates"] {
+  --date-good: #8bdbb1;
+  --date-review: #f1c56b;
+  --date-invalid: #ffb5ba;
+  --date-partial: #a9c5fb;
+}
+.utility-app[data-utility="dates"] .date-status-converted {
+  color: var(--date-good);
+}
+.utility-app[data-utility="dates"] .date-status-review {
+  color: var(--date-review);
+}
+.utility-app[data-utility="dates"] .date-status-invalid {
+  color: var(--date-invalid);
+}
+.utility-app[data-utility="dates"] .date-status-partial {
+  color: var(--date-partial);
+}
+.utility-app[data-utility="dates"] .date-result-summary {
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+.utility-app[data-utility="meeting"]
+  .result-toolbar
+  .actions
+  [data-calendar-action] {
+  order: -1;
+  border-color: var(--gold);
+}
+
 .utility-app .date-records {
   display: none;
 }
@@ -318,7 +380,7 @@
   }
   .utility-app .date-record {
     display: grid;
-    grid-template-columns: 6.5rem minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
     margin: 0;
     padding: 0.85rem;
@@ -332,6 +394,43 @@
     margin: 0;
     min-width: 0;
     overflow-wrap: anywhere;
+  }
+  .utility-app[data-utility="dates"] .date-field-original {
+    grid-area: 1 / 1;
+  }
+  .utility-app[data-utility="dates"] .date-field-normalized {
+    grid-area: 1 / 2;
+  }
+  .utility-app[data-utility="dates"] .date-value-original {
+    grid-area: 2 / 1;
+  }
+  .utility-app[data-utility="dates"] .date-value-normalized {
+    grid-area: 2 / 2;
+    font-weight: 600;
+  }
+  .utility-app[data-utility="dates"] .date-field-status {
+    grid-area: 3 / 1;
+    align-self: center;
+  }
+  .utility-app[data-utility="dates"] .date-value-status {
+    grid-area: 3 / 2;
+  }
+  .utility-app[data-utility="dates"] .date-field-note {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .utility-app[data-utility="dates"] .date-value-note {
+    grid-area: 4 / 1 / auto / -1;
+    font-size: 0.8125rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .utility-app[data-utility="dates"] .date-record dt {
+    font-size: 0.8125rem;
+    color: var(--muted);
   }
 }
 
