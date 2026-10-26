@@ -70,3 +70,45 @@ test("actual Worker and extracted artifact execute cron locally and export its f
   for (const value of values) expect(text).toContain(value);
   expect(api).toBe(0);
 });
+
+for (const [date, first, last] of [
+  ["2026-03-04", "2026-03-04T14:00:00.000Z", "2026-03-10T13:00:00.000Z"],
+  ["2026-10-28", "2026-10-28T13:00:00.000Z", "2026-11-03T14:00:00.000Z"],
+])
+  test(`actual Worker and extracted artifact preview clock-change week ${date}`, async ({
+    page,
+  }) => {
+    let api = 0;
+    page.on("request", (r) => {
+      if (new URL(r.url()).pathname.startsWith("/api/")) api++;
+    });
+    await page.goto("/tools/cron-explainer/");
+    await page.getByLabel("Cron expression", { exact: true }).fill("0 9 * * *");
+    await page
+      .getByLabel("Schedule timezone", { exact: true })
+      .fill("America/New_York");
+    await page.getByLabel("Show run times in", { exact: true }).fill("UTC");
+    await page.getByLabel("Preview", { exact: true }).selectOption("week");
+    await page.getByLabel("Week starting", { exact: true }).fill(date);
+    await page
+      .getByRole("button", { name: "Show selected week", exact: true })
+      .click();
+    const times = page.locator("#cron-runs time");
+    await expect(times).toHaveCount(7);
+    await expect(times.first()).toHaveAttribute("datetime", first);
+    await expect(times.last()).toHaveAttribute("datetime", last);
+    await expect(page.locator("#cron-runs")).toContainText("UTC-05:00");
+    await expect(page.locator("#cron-runs")).toContainText("UTC-04:00");
+    const event = page.waitForEvent("download");
+    await page
+      .getByRole("button", { name: "Download run times", exact: true })
+      .click();
+    const { readFile } = await import("node:fs/promises");
+    const text = await readFile(await (await event).path(), "utf8");
+    expect(text.match(/^\d+\. /gm)).toHaveLength(7);
+    expect(text).toContain(first);
+    expect(text).toContain(last);
+    expect(text).toContain("inclusive");
+    expect(text).toContain("exclusive");
+    expect(api).toBe(0);
+  });

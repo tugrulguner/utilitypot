@@ -4,6 +4,8 @@
 
 ### Added
 
+- Selected-week cron previews: inspect seven calendar days in the schedule timezone, including daylight-saving transitions. Show every occurrence with dates/UTC offsets, explicit empty weeks and complete copy/download exports; dense weeks display in batches.
+
 - Browser-local cron explainer with separate schedule/display timezones, plain-language five-field interpretation, the next five runs with UTC offsets, and copy/text download. Explicit DST-preview policy; no AI or job installation.
 
 - General public hostname page reading with bare-hostname HTTPS defaults, bounded DNS and redirect validation, strictly-public Cloudflare routing, UTF-8/size/time limits and distinct safe failure messages.

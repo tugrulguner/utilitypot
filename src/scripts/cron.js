@@ -8,7 +8,9 @@ if (root) {
   const $ = (id) => root.querySelector(`#${id}`),
     result = $("results"),
     discovery = resultDiscovery(root.querySelector("[data-result-discovery]"));
-  let output = "";
+  let output = "",
+    activePlan = null,
+    visibleRuns = 0;
   const capture = (event, properties) => {
     try {
       globalThis.posthog?.capture(
@@ -29,6 +31,9 @@ if (root) {
   };
   const invalidate = () => {
     output = "";
+    activePlan = null;
+    visibleRuns = 0;
+    $("cron-more").hidden = true;
     result.hidden = true;
     $("copy").disabled = true;
     $("download").disabled = true;
@@ -39,12 +44,21 @@ if (root) {
     n.textContent = text;
     return n;
   };
-  for (const input of root.querySelectorAll("input"))
+  const syncPreview = () => {
+    const week = $("cron-preview").value === "week";
+    $("cron-week-settings").hidden = !week;
+    $("cron-week-start").disabled = !week;
+    $("cron-week-start").required = week;
+    $("run").textContent = week ? "Show selected week" : "Show next five runs";
+  };
+  for (const input of root.querySelectorAll("input, select"))
     input.addEventListener("input", () => {
       invalidate();
+      syncPreview();
       input.removeAttribute("aria-invalid");
-      status("Schedule changed. Show the next five runs to recalculate.");
+      status("Schedule changed. Show run times to recalculate.");
     });
+  syncPreview();
   const detected = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
   for (const id of ["cron-schedule-zone", "cron-display-zone"])
     if (!$(id).value) {
@@ -96,6 +110,9 @@ if (root) {
         scheduleZone: $("cron-schedule-zone").value,
         displayZone: $("cron-display-zone").value,
         now,
+        ...($("cron-preview").value === "week"
+          ? { weekStart: $("cron-week-start").value }
+          : {}),
       });
       category = "presentation";
       outcome = "unexpected_failure";
@@ -104,37 +121,9 @@ if (root) {
         plan.scheduleZone === plan.displayZone
           ? `Showing and scheduled in ${plan.displayZone}`
           : `Showing ${plan.displayZone} · Schedule: ${plan.scheduleZone}`;
-      $("cron-runs").replaceChildren(
-        ...plan.runs.map((run) => {
-          const view = presentCronRun(
-            run.iso,
-            plan.displayZone,
-            plan.scheduleZone,
-          );
-          const li = document.createElement("li"),
-            time = document.createElement("time");
-          const date = element("span", view.date),
-            clock = element("span", view.clock + " "),
-            offset = element("span", view.offset);
-          date.className = "cron-run-date";
-          clock.className = "cron-run-clock";
-          offset.className = "cron-run-offset";
-          clock.append(offset);
-          time.append(date, document.createTextNode(" "), clock);
-          time.dateTime = run.iso;
-          li.append(time);
-          if (view.schedule) {
-            const comparison = element("span", view.schedule);
-            comparison.className = "cron-schedule-time";
-            comparison.setAttribute(
-              "aria-label",
-              `Schedule time: ${view.schedule}`,
-            );
-            li.append(comparison);
-          }
-          return li;
-        }),
-      );
+      $("cron-runs").replaceChildren();
+      activePlan = plan;
+      appendRuns();
       $("cron-fields").replaceChildren(
         ...plan.fields.map((field) => {
           const row = document.createElement("div");
@@ -148,13 +137,26 @@ if (root) {
       $("cron-notes").replaceChildren(
         ...plan.notes.map((note) => element("p", note)),
       );
+      const range = plan.preview;
+      const rangeText = range
+        ? `${range.startDate} through ${new Date(new Date(range.endDate + "T00:00:00Z").getTime() - 86400000).toISOString().slice(0, 10)} · ${plan.scheduleZone} · ${plan.runs.length ? `${plan.runs.length.toLocaleString("en-US")} runs` : "No runs in this week"}`
+        : "";
+      $("results-title").textContent = range
+        ? "Selected week"
+        : "Next five runs";
+      $("cron-range").textContent = rangeText;
+      $("cron-range").hidden = !range;
+      const reference = range
+        ? `Range: ${range.startIso} inclusive to ${range.endIso} exclusive. Seven calendar days in ${plan.scheduleZone}.`
+        : `Calculated strictly after ${now.toISOString()}.`;
       $("cron-reference").textContent =
-        `Calculated strictly after ${now.toISOString()}. Preview only; this tool does not create a job.`;
+        `${reference} Preview only; this tool does not create a job.`;
       output = [
         `Cron: ${plan.expression}`,
         `Schedule timezone: ${plan.scheduleZone}`,
         `Display timezone: ${plan.displayZone}`,
-        `Starting after: ${now.toISOString()}`,
+        range ? rangeText : `Starting after: ${now.toISOString()}`,
+        ...(range ? [reference] : []),
         "",
         plan.explanation,
         "",
@@ -168,7 +170,11 @@ if (root) {
       result.hidden = false;
       $("copy").disabled = false;
       $("download").disabled = false;
-      status("Five upcoming runs calculated locally. No job was created.");
+      status(
+        range
+          ? `${plan.runs.length.toLocaleString("en-US")} runs in the selected week calculated locally. No job was created.`
+          : "Five upcoming runs calculated locally. No job was created.",
+      );
       result.focus({ preventScroll: true });
       result.scrollIntoView({
         block: "start",
@@ -193,6 +199,57 @@ if (root) {
         ...failureProperties(outcome, category),
       });
       discovery.complete(outcome, !result.hidden, revision);
+    }
+  });
+  const appendRuns = () => {
+    if (!activePlan) return;
+    const plan = activePlan;
+    const batch = plan.runs.slice(visibleRuns, visibleRuns + 100);
+    $("cron-runs").append(
+      ...batch.map((run) => {
+        const view = presentCronRun(
+          run.iso,
+          plan.displayZone,
+          plan.scheduleZone,
+        );
+        const li = document.createElement("li"),
+          time = document.createElement("time");
+        const date = element("span", view.date),
+          clock = element("span", view.clock + " "),
+          offset = element("span", view.offset);
+        date.className = "cron-run-date";
+        clock.className = "cron-run-clock";
+        offset.className = "cron-run-offset";
+        clock.append(offset);
+        time.append(date, document.createTextNode(" "), clock);
+        time.dateTime = run.iso;
+        li.append(time);
+        if (view.schedule) {
+          const comparison = element("span", view.schedule);
+          comparison.className = "cron-schedule-time";
+          comparison.setAttribute(
+            "aria-label",
+            `Schedule time: ${view.schedule}`,
+          );
+          li.append(comparison);
+        }
+        return li;
+      }),
+    );
+    visibleRuns += batch.length;
+    $("cron-more").hidden = visibleRuns >= plan.runs.length;
+    $("cron-visible-count").hidden = plan.runs.length <= 100;
+    $("cron-visible-count").textContent =
+      `Showing ${visibleRuns.toLocaleString("en-US")} of ${plan.runs.length.toLocaleString("en-US")} runs. Copy and download include every run.`;
+  };
+  $("cron-more").addEventListener("click", () => {
+    const firstNewIndex = visibleRuns;
+    appendRuns();
+    const firstNewRun = $("cron-runs").children[firstNewIndex];
+    if (firstNewRun) {
+      firstNewRun.tabIndex = -1;
+      firstNewRun.focus({ preventScroll: true });
+      firstNewRun.scrollIntoView({ block: "start", behavior: "instant" });
     }
   });
   $("copy").addEventListener("click", async () => {

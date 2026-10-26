@@ -3,7 +3,8 @@
   font-size: 1.1rem;
   letter-spacing: 0.025em;
 }
-.cron-workspace input {
+.cron-workspace input,
+.cron-workspace select {
   width: 100%;
   min-width: 0;
 }

@@ -141,13 +141,13 @@ export const guides = {
       "Interested in application-owned operations and bounded agent choices?",
   },
   "cron-explainer": {
-    title: "Cron expression explainer — next five run times",
+    title: "Cron expression explainer — run times & week previews",
     description:
-      "Explain five-field cron expressions and preview the next five runs across timezones, with dates and UTC offsets. Private browser-local calculation; no AI.",
+      "Explain five-field cron expressions and preview the next five runs or a selected week across timezones, with dates and UTC offsets. Private browser-local calculation; no AI.",
     steps: [
       "Paste a five-field cron expression or load the weekday example.",
       "Choose the timezone used by your scheduler and the timezone where you want to see its runs.",
-      "Read the explanation and next five run times, then copy or download the preview. Nothing is scheduled.",
+      "Read the explanation and run times, or choose a week to inspect clock changes. Copy or download the preview; nothing is scheduled.",
     ],
     example:
       "0 9 * * MON-FRI means weekdays at 09:00 in the schedule timezone. Display those same instants in another timezone to see the difference.",
