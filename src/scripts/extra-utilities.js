@@ -1436,7 +1436,7 @@ if (root) {
         };
         let generation = 0;
         let themeWork = Promise.resolve();
-        diagramThemeObserver = new MutationObserver(() => {
+        const updateDiagramTheme = () => {
           const theme = currentTheme();
           const requested = ++generation;
           if (theme === activeTheme) return;
@@ -1470,11 +1470,14 @@ if (root) {
                   false,
                 );
             });
-        });
+        };
+        diagramThemeObserver = new MutationObserver(updateDiagramTheme);
         diagramThemeObserver.observe(document.documentElement, {
           attributes: true,
           attributeFilter: ["data-theme"],
         });
+        // A change during the first awaited render predates this observer.
+        updateDiagramTheme();
         const issues = graphRoleIssues(graph);
         if (issues.length) {
           const warning = document.createElement("p");
