@@ -42,6 +42,7 @@ test("family overview, assets and creator remain discoverable", async ({
   const cards = await page.locator("#tools article").allTextContents();
   expect(cards).toHaveLength(9);
   for (const description of [
+    "Paste a table screenshot, review editable cells",
     "Group repeated CSV rows into nested JSON",
     "Clean up supported date text",
     "Compare availability across cities",
@@ -53,7 +54,7 @@ test("family overview, assets and creator remain discoverable", async ({
   ])
     expect(cards.some((card) => card.includes(description))).toBe(true);
   expect(cards.filter((card) => card.includes("In your browser"))).toHaveLength(
-    5,
+    6,
   );
   expect(cards.filter((card) => card.includes("Uses AI"))).toHaveLength(3);
 });
