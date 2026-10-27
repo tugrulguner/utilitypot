@@ -4,6 +4,8 @@
 
 ### Added
 
+- Screenshot-to-spreadsheet: paste or upload one clear table image, recognize text in a cancellable local worker, review editable cells against source positions, and copy or download CSV/XLSX. Recognition assets are self-hosted, English printed-table limits are explicit, low-confidence values remain reviewable, and XLSX preserves text values and identifiers. No image upload or server inference.
+
 - Selected-week cron previews: inspect seven calendar days in the schedule timezone, including daylight-saving transitions. Show every occurrence with dates/UTC offsets, explicit empty weeks and complete copy/download exports; dense weeks display in batches.
 
 - Browser-local cron explainer with separate schedule/display timezones, plain-language five-field interpretation, the next five runs with UTC offsets, and copy/text download. Explicit DST-preview policy; no AI or job installation.

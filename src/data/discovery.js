@@ -48,6 +48,21 @@ export const projects = {
   },
 };
 export const guides = {
+  "screenshot-to-spreadsheet": {
+    title: "Screenshot to spreadsheet — image tables to Excel and CSV",
+    description:
+      "Paste a clear table screenshot, recognize text locally, review editable cells and copy to Excel or Google Sheets. Download CSV or text-preserving XLSX without uploading your image.",
+    steps: [
+      "Paste or choose one clear PNG, JPEG or WebP table image, up to 10 MB and eight million pixels.",
+      "Extract the table, review every value and edit incorrect cells. Select a cell to inspect its position in the source image.",
+      "Copy to your spreadsheet or download CSV/XLSX. XLSX stores values as text; CSV and clipboard formula protection is enabled by default.",
+    ],
+    example:
+      "A screenshot containing SKU 000123 can become an editable cell and text-valued XLSX. Review OCR carefully: recognition may misread characters, miss cells or infer the wrong structure.",
+    related: ["csv-to-nested-json", "fix-excel-dates", "json-to-csv"],
+    project: "refpot",
+    reason: "Exploring Python storage after preparing spreadsheet records?",
+  },
   "csv-to-nested-json": {
     title: "CSV to nested JSON converter — group rows locally",
     description:

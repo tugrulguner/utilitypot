@@ -21,7 +21,7 @@ test("family overview, assets and creator remain discoverable", async ({
   await expect(page.locator(".creator-credit")).toBeVisible();
   await expect(page.locator(".product-hero img")).toHaveAttribute(
     "src",
-    "/utilitypot-lockup-v2.png?v=inventory-artwork-1",
+    "/utilitypot-lockup-v2.png?v=inventory-artwork-2",
   );
   await expect(page.locator("link[rel=icon]")).toHaveAttribute(
     "href",
@@ -29,18 +29,18 @@ test("family overview, assets and creator remain discoverable", async ({
   );
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
-    "https://utilitypot.modepot.io/utilitypot-social-v2.png?v=inventory-artwork-1",
+    "https://utilitypot.modepot.io/utilitypot-social-v2.png?v=inventory-artwork-2",
   );
-  await expect(page.locator("#tools article")).toHaveCount(8);
+  await expect(page.locator("#tools article")).toHaveCount(9);
   await expect(page.locator(".product-hero img")).toHaveAttribute(
     "alt",
     /Focused browser tools for data, text, diagrams and planning/,
   );
   await expect(page.locator(".product-hero")).toContainText(
-    "Five tools work entirely in your browser; three use bounded AI only after you ask.",
+    "Six tools work entirely in your browser; three use bounded AI only after you ask.",
   );
   const cards = await page.locator("#tools article").allTextContents();
-  expect(cards).toHaveLength(8);
+  expect(cards).toHaveLength(9);
   for (const description of [
     "Group repeated CSV rows into nested JSON",
     "Clean up supported date text",

@@ -1,0 +1,114 @@
+---
+import ToolFeedback from "./ToolFeedback.astro";
+import FamilyDiscovery from "./FamilyDiscovery.astro";
+import "../styles/screenshot-workspace.css";
+---
+
+<section
+  id="screenshot-app"
+  class="utility-app screenshot-workspace ph-no-capture ph-no-autocapture"
+  data-utility="screenshot"
+  data-processing="local"
+>
+  <form class="panel" id="screenshot-form">
+    <h2>Turn a screenshot into a table</h2>
+    <label for="screenshot-file">Choose or paste a table image</label>
+    <input
+      id="screenshot-file"
+      type="file"
+      accept="image/png,image/jpeg,image/webp"
+      aria-describedby="screenshot-help"
+    />
+    <p id="screenshot-help" class="notice">
+      PNG, JPEG or WebP · up to 10 MB and 8 million pixels. You can also paste
+      or drop an image here.
+    </p>
+    <div class="actions">
+      <button id="screenshot-run" class="primary" type="submit" disabled>
+        Extract table
+      </button>
+      <button id="screenshot-cancel" type="button" disabled>
+        Cancel
+      </button>
+      <button id="screenshot-clear" type="button">
+        Clear
+      </button>
+    </div>
+    <p class="notice">
+      Your image stays in this browser. Recognition files download from this
+      site on first use. English printed tables work best; merged cells,
+      handwriting and rotated images need extra review.
+    </p>
+  </form>
+  <section id="screenshot-source-panel" class="panel" hidden>
+    <h2>Source image</h2>
+    <figure class="screenshot-source">
+      <img id="screenshot-preview" alt="Source table screenshot" />
+      <svg id="screenshot-overlay" aria-hidden="true"></svg>
+    </figure>
+  </section>
+  <div>
+    <p
+      id="screenshot-status"
+      class="utility-status"
+      role="status"
+      aria-live="polite"
+    >
+      Choose or paste a screenshot to begin.
+    </p>
+    <ToolFeedback
+      tool="screenshot"
+      context="error"
+      id="screenshot-error-feedback"
+    />
+  </div>
+  <section id="screenshot-results" class="panel" tabindex="-1" hidden>
+    <header>
+      <h2>Review every value</h2>
+      <p id="screenshot-summary"></p>
+    </header>
+    <div class="screenshot-actions actions">
+      <button id="screenshot-copy" disabled>
+        Copy to spreadsheet
+      </button>
+      <button id="screenshot-csv" disabled>
+        Download CSV
+      </button>
+      <button id="screenshot-xlsx" disabled>
+        Download XLSX
+      </button>
+      <ToolFeedback tool="screenshot" context="result" />
+    </div>
+    <details class="screenshot-export-settings">
+      <summary>Spreadsheet safety &amp; formats</summary>
+      <label>
+        <input id="screenshot-protect" type="checkbox" checked /> Protect
+        spreadsheet formulas in CSV and copied text
+      </label>
+      <p>
+        Protection prefixes potentially executable values with an apostrophe.
+        Turn it off only for trusted data. XLSX always stores exact text,
+        including leading zeros, rather than formulas or inferred numbers.
+      </p>
+    </details>
+    <p id="screenshot-cell-label" class="notice">
+      Select a cell to inspect its source. Scroll the table sideways for more
+      columns; edit incorrect text before exporting.
+    </p>
+    <canvas
+      id="screenshot-cell-crop"
+      hidden
+      role="img"
+      aria-label="Enlarged original image for the selected cell"
+    ></canvas>
+    <div id="screenshot-table" class="screenshot-table"></div>
+    <p id="screenshot-warnings" class="notice"></p>
+  </section>
+  <FamilyDiscovery surface="result" />
+</section>
+<noscript>
+  <p class="notice error">Enable JavaScript to recognize a table locally.</p>
+</noscript>
+<script>
+  import "../scripts/screenshot.js";
+</script>

@@ -49,7 +49,10 @@ for (const [slug, guide] of Object.entries(guides)) {
     attr(doc, "data-utility")[0] || attr(doc, "data-extra-utility")[0];
   const elements = all(doc, (e) => !!e.name);
   const copy =
-    attr(operating, "id", "copy")[0] || attr(operating, "id", "extra-copy")[0];
+    attr(operating, "id", "copy")[0] ||
+    attr(operating, "id", "extra-copy")[0] ||
+    attr(operating, "id", "screenshot-copy")[0];
+  assert.ok(copy, `${slug}: result copy action`);
   assert.ok(elements.indexOf(result) > elements.indexOf(copy));
   const [showcase] = attr(doc, "data-project-showcase");
   assert.ok(elements.indexOf(showcase) > elements.indexOf(result));
@@ -76,6 +79,6 @@ for (const [slug, guide] of Object.entries(guides)) {
 const home = await readFile("dist/index.html", "utf8");
 assert.ok(
   home.includes("creator-credit") &&
-    home.includes("/utilitypot-lockup-v2.png?v=inventory-artwork-1"),
+    home.includes("/utilitypot-lockup-v2.png?v=inventory-artwork-2"),
 );
 console.log("PASS homepage art and creator credit retained");

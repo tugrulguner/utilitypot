@@ -76,7 +76,7 @@ test("all registered tools have related links and sitemap entries", async ({
 });
 
 for (const mode of ["light", "dark", "auto"])
-  test(`all 16 related-tool links meet WCAG contrast in ${mode} mode`, async ({
+  test(`all registered related-tool links meet WCAG contrast in ${mode} mode`, async ({
     page,
   }) => {
     test.setTimeout(120_000);
@@ -94,7 +94,7 @@ for (const mode of ["light", "dark", "auto"])
         await page.goto(`/tools/${slug}/`);
         await page.evaluate(() => document.fonts.ready);
         const links = page.locator("[data-related-tools] a");
-        await expect(links).toHaveCount(2);
+        await expect(links).toHaveCount(guides[slug].related.length);
         count += await links.count();
         for (const link of await links.all())
           expect(
@@ -102,7 +102,9 @@ for (const mode of ["light", "dark", "auto"])
             `${slug} ${mode} ${width}px`,
           ).toBeGreaterThanOrEqual(4.5);
       }
-      expect(count).toBe(16);
+      expect(count).toBe(
+        slugs.reduce((sum, slug) => sum + guides[slug].related.length, 0),
+      );
     }
   });
 
