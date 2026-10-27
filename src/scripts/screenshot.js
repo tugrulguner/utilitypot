@@ -268,11 +268,17 @@ if (root) {
     try {
       await navigator.clipboard.writeText(tableTSV(table.rows, options()));
       status("Table copied. Paste it into your spreadsheet.");
-    } catch {
+    } catch (error) {
       status(
-        "Could not copy the table. Use Download XLSX or CSV instead.",
+        error instanceof Error && error.message.startsWith("Clipboard cells")
+          ? error.message
+          : "Could not copy the table. Use Download XLSX or CSV instead.",
         true,
       );
+      $("#screenshot-status").parentElement.scrollIntoView({
+        block: "center",
+        behavior: "instant",
+      });
     }
   });
   function download(data, name, type) {

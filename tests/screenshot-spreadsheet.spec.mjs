@@ -80,6 +80,23 @@ test("real local OCR supports editable cells, source selection and exact spreads
   expect(
     await page.evaluate(() => navigator.clipboard.readText()),
   ).not.toContain("'=1+1");
+  await page
+    .getByRole("textbox", { name: "Row 2, column 1", exact: true })
+    .fill("a\tb");
+  await page.locator("#screenshot-copy").click();
+  await expect(page.locator("#screenshot-status")).toContainText(
+    "Download XLSX",
+  );
+  await expect(page.locator("#screenshot-status")).toBeInViewport();
+  expect(
+    await page.evaluate(() => navigator.clipboard.readText()),
+  ).not.toContain("a\tb");
+  const fallback = page.waitForEvent("download");
+  await page.locator("#screenshot-xlsx").click();
+  const fallbackZip = unzipSync(
+    new Uint8Array(await readFile(await (await fallback).path())),
+  );
+  expect(strFromU8(fallbackZip["xl/worksheets/sheet1.xml"])).toContain("a\tb");
   await page.locator("#screenshot-clear").click();
   await expect(page.locator("#screenshot-results")).toBeHidden();
   await expect(page.locator("#screenshot-xlsx")).toBeDisabled();

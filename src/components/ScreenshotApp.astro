@@ -37,7 +37,9 @@ import "../styles/screenshot-workspace.css";
     <p class="notice">
       Your image stays in this browser. Recognition files download from this
       site on first use. English printed tables work best; merged cells,
-      handwriting and rotated images need extra review.
+      handwriting and rotated images need extra review. Wrapped text can become
+      separate rows; check alignment and finish row cleanup in your spreadsheet
+      if needed.
     </p>
   </form>
   <section id="screenshot-source-panel" class="panel" hidden>
@@ -88,7 +90,9 @@ import "../styles/screenshot-workspace.css";
       <p>
         Protection prefixes potentially executable values with an apostrophe.
         Turn it off only for trusted data. XLSX always stores exact text,
-        including leading zeros, rather than formulas or inferred numbers.
+        including leading zeros, rather than formulas or inferred numbers. Cells
+        containing tabs or line breaks cannot be copied; download XLSX to
+        preserve them.
       </p>
     </details>
     <p id="screenshot-cell-label" class="notice">
@@ -101,8 +105,8 @@ import "../styles/screenshot-workspace.css";
       role="img"
       aria-label="Enlarged original image for the selected cell"
     ></canvas>
-    <div id="screenshot-table" class="screenshot-table"></div>
     <p id="screenshot-warnings" class="notice"></p>
+    <div id="screenshot-table" class="screenshot-table"></div>
   </section>
   <FamilyDiscovery surface="result" />
 </section>

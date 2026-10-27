@@ -56,7 +56,7 @@ test("exports text safely and protects formulas by default", () => {
     ["001", " =1+1", "a,b", "x\ny"],
     ["中文", "-4", "@cmd", ""],
   ];
-  assert.match(tableTSV(rows), /^001\t' =1\+1\t"a,b"\t"x\ny"/);
+  assert.equal(tableTSV([["001", " =1+1", "a,b"]]), "001\t' =1+1\ta,b");
   assert.match(tableCSV(rows), /"001","' =1\+1","a,b","x\ny"/);
   assert.equal(tableCSV([[" =1+1"]], { protectFormulas: false }), '" =1+1"');
 });

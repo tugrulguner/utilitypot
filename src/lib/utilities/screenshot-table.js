@@ -41,12 +41,14 @@ function validRows(rows) {
 function safe(c, protect) {
   return protect && /^[\s]*[=+\-@\t\r]/.test(c) ? `'${c}` : c;
 }
-function quote(c) {
-  return /[\t\r\n,"]/.test(c) ? `"${c.replaceAll('"', '""')}"` : c;
-}
 export function tableTSV(rows, { protectFormulas = true } = {}) {
-  return validRows(rows)
-    .map((r) => r.map((c) => quote(safe(c, protectFormulas))).join("\t"))
+  const checked = validRows(rows);
+  if (checked.some((row) => row.some((cell) => /[\t\r\n]/.test(cell))))
+    throw new Error(
+      "Clipboard cells contain tabs or line breaks. Download XLSX to preserve them.",
+    );
+  return checked
+    .map((row) => row.map((cell) => safe(cell, protectFormulas)).join("\t"))
     .join("\r\n");
 }
 export function tableCSV(rows, { protectFormulas = true } = {}) {
@@ -67,7 +69,8 @@ const xml = (s) =>
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
-    .replaceAll("'", "&apos;");
+    .replaceAll("'", "&apos;")
+    .replaceAll("\r", "&#13;");
 function col(n) {
   let s = "";
   for (n++; n; n = Math.floor((n - 1) / 26))
@@ -205,6 +208,11 @@ export function reconstructTable(words, { width, height } = {}) {
     confidences,
     warnings: [
       "Table structure is inferred from text positions. Review row and column alignment; merged cells are not reconstructed.",
+      ...(rows.some((row) => row.filter(Boolean).length === 1)
+        ? [
+            "Sparse or wrapped rows were kept separate. Check row alignment; the exported sheet may need row cleanup.",
+          ]
+        : []),
     ],
   };
 }
