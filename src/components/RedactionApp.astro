@@ -76,7 +76,9 @@ import "../styles/redaction-workspace.css";
         <button id="redaction-download" type="button" disabled>
           Download redacted PNG
         </button>
-        <ToolFeedback tool="redaction" context="result" />
+        <span id="redaction-feedback-result" hidden>
+          <ToolFeedback tool="redaction" context="result" />
+        </span>
         <ToolFeedback
           tool="redaction"
           context="error"

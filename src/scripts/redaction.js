@@ -62,6 +62,7 @@ function redraw() {
     }),
   );
   download.disabled = !(bitmap && regions.length);
+  $("#redaction-feedback-result").hidden = download.disabled;
   if (family) family.hidden = !(bitmap && regions.length);
 }
 function changed() {
@@ -89,6 +90,7 @@ function clearImage() {
   canvas.height = 1;
   fileInput.value = "";
   download.disabled = true;
+  $("#redaction-feedback-result").hidden = true;
   family.hidden = true;
   regionList.replaceChildren();
   clearError();
@@ -100,6 +102,7 @@ async function loadFile(file) {
   regions = [];
   undoStack = [];
   download.disabled = true;
+  $("#redaction-feedback-result").hidden = true;
   family.hidden = true;
   redraw();
   clearError();
