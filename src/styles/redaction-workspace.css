@@ -1,0 +1,103 @@
+.redaction-workspace {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.redaction-workspace * {
+  box-sizing: border-box;
+}
+.redaction-workspace header h2 {
+  margin: 0.2rem 0;
+}
+.redaction-grid {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.8fr) minmax(0, 1.5fr);
+  gap: 1rem;
+  align-items: start;
+}
+.redaction-controls,
+.redaction-preview {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--border, #d5d9df);
+  border-radius: 14px;
+  background: var(--surface, #fff);
+}
+.redaction-controls label {
+  display: block;
+  margin: 0.65rem 0 0.25rem;
+}
+.redaction-controls input[type="file"] {
+  max-width: 100%;
+}
+.drop-target {
+  margin: 0.75rem 0;
+  padding: 1.2rem;
+  border: 2px dashed var(--border, #9aa3ad);
+  border-radius: 10px;
+  text-align: center;
+}
+.drop-target:focus,
+.drop-target.dragging {
+  outline: 2px solid var(--accent, #3468c0);
+}
+.numeric-region {
+  display: grid;
+  grid-template-columns: auto minmax(45px, 1fr) auto minmax(45px, 1fr);
+  gap: 0.4rem;
+  align-items: center;
+}
+.numeric-region input {
+  width: 100%;
+  min-width: 0;
+}
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.8rem;
+}
+.canvas-scroll {
+  max-width: 100%;
+  overflow: auto;
+  touch-action: none;
+}
+#redaction-canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  touch-action: none;
+  cursor: crosshair;
+}
+#redaction-regions {
+  padding-left: 1.4rem;
+}
+#redaction-regions li {
+  margin: 0.3rem 0;
+}
+.redaction-workspace [hidden] {
+  display: none !important;
+}
+.redaction-workspace .family-discovery {
+  margin-top: 1rem;
+}
+@media (max-width: 700px) {
+  .redaction-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .redaction-controls,
+  .redaction-preview {
+    padding: 0.75rem;
+  }
+}
+@media (max-width: 360px) {
+  .numeric-region {
+    grid-template-columns: auto minmax(35px, 1fr) auto minmax(35px, 1fr);
+  }
+  .redaction-workspace button {
+    max-width: 100%;
+    white-space: normal;
+  }
+}

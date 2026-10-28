@@ -6,10 +6,10 @@ test("task directory tells visitors which tools are local or use AI", async () =
   const tools = JSON.parse(
     await readFile(new URL("../data/tools.json", import.meta.url), "utf8"),
   );
-  assert.equal(tools.length, 8);
+  assert.equal(tools.length, 10);
   assert.equal(
     tools.filter((tool) => tool.processing === "In your browser").length,
-    5,
+    7,
   );
   assert.equal(
     tools.find((tool) => tool.slug === "cron-explainer")?.processing,
@@ -29,7 +29,7 @@ test("task directory tells visitors which tools are local or use AI", async () =
   assert.match(home, /class="coordinate tool-processing">\{processing\}/);
   assert.match(home, /Add your input\. Preview the result\./);
   assert.match(home, /bounded\s+AI\s+only\s+after\s+you\s+ask/);
-  assert.match(home, /utilitypot-lockup-v2\.png\?v=inventory-artwork-1/);
+  assert.match(home, /utilitypot-lockup-v2\.png\?v=local-tools-10/);
   assert.match(home, /Created by/);
 });
 test("date limitations appear before the input rather than only inside hidden help", async () => {

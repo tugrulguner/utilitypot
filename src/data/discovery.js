@@ -48,6 +48,37 @@ export const projects = {
   },
 };
 export const guides = {
+  "redact-screenshot": {
+    title: "Redact a screenshot — permanent black-box image redaction",
+    description:
+      "Paste or upload an image, cover selected regions with solid black pixels and download a flattened PNG. Browser-local manual redaction; review the entire image before sharing.",
+    steps: [
+      "Choose or paste one PNG, JPEG or WebP image, up to 10 MB and eight million pixels.",
+      "Draw rectangles or enter pixel coordinates. Review every region; only selected areas are covered.",
+      "Download a newly encoded PNG with opaque black redactions baked into its pixels. Keep the original image private.",
+    ],
+    example:
+      "Cover a name or account number in a screenshot. Check the downloaded PNG, not only the preview: unselected sensitive information is still visible.",
+    related: ["compare-spreadsheets", "json-to-csv"],
+    project: "lifepot",
+    reason: "Explore another browser-based project from the workshop.",
+  },
+  "compare-spreadsheets": {
+    title: "Compare spreadsheets — CSV and XLSX row and cell differences",
+    description:
+      "Compare two CSV or XLSX tables by a chosen key. Review added, removed and changed rows and values, then download CSV or JSON. Files stay in your browser.",
+    steps: [
+      "Paste CSV or choose two CSV/XLSX files. Use the first row as headers and select a worksheet for each workbook.",
+      "Choose a shared key column with nonblank unique values. Compare exact stored values, not visual cell formatting.",
+      "Inspect added, removed and changed values. Download a formula-protected CSV report or literal JSON.",
+    ],
+    example:
+      "Match inventory by SKU: 000123 stays distinct from 123. A reordered row is not a change; an updated quantity is. Formulas are compared as text and are never calculated.",
+    related: ["csv-to-nested-json", "fix-excel-dates"],
+    project: "refpot",
+    reason:
+      "Exploring storage for structured records after comparing your tables?",
+  },
   "csv-to-nested-json": {
     title: "CSV to nested JSON converter — group rows locally",
     description:

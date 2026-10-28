@@ -1,12 +1,12 @@
 # UtilityPot
 
-<p align="center"><img src="utilitypot.png?v=inventory-artwork-1" alt="UtilityPot — Focused browser tools for data, text, diagrams and planning. Review AI-assisted results; no arbitrary generated code." width="600"></p>
+<p align="center"><img src="utilitypot.png?v=local-tools-10" alt="UtilityPot — Focused browser tools for data, text, diagrams and planning. Review AI-assisted results; no arbitrary generated code." width="600"></p>
 
 <p align="center">Part of <a href="https://modepot.io/">ModePot</a>. &nbsp; <a href="https://utilitypot.modepot.io/">Project website</a> &nbsp; <a href="https://tugrul.modepot.io/">Created by Tugrul Guner</a></p>
 
 <p align="center"><strong>Focused browser tools for data, text, diagrams and planning.</strong></p>
 
-<p align="center">Five tools work in your browser; three use bounded AI only after you ask. Review AI-assisted results; no arbitrary generated code.</p>
+<p align="center">Seven tools work in your browser; three use bounded AI only after you ask. Review AI-assisted results; no arbitrary generated code.</p>
 
 <p align="center"><a href="https://github.com/tugrulguner/utilitypot/actions/workflows/ci.yml"><img src="https://github.com/tugrulguner/utilitypot/actions/workflows/ci.yml/badge.svg" alt="CI"></a> <a href="https://discord.gg/u3AANZr6RG"><img src="https://img.shields.io/badge/Discord-ModePot-5865F2?logo=discord&logoColor=white" alt="ModePot Discord"></a> <a href="LICENSE"><img src="https://img.shields.io/github/license/tugrulguner/utilitypot" alt="MIT license"></a> <a href="https://github.com/tugrulguner/utilitypot"><img src="https://img.shields.io/github/stars/tugrulguner/utilitypot?style=flat" alt="GitHub stars"></a></p>
 
@@ -15,6 +15,9 @@
 **Live app:** https://utilitypot.modepot.io/ — free, no signup. CSV/JSON conversion, date cleanup, cron previews and meeting-time calculation stay in your browser. Entity extraction, flowchart interpretation and webpage evidence selection use bounded AI after disclosed consent. Each utility has one workflow, not an AI/manual mode chooser.
 
 ## Utilities
+
+- Redact a screenshot: paste/upload an image, select regions with a pointer or pixel coordinates, review and export a newly encoded PNG with opaque black pixels baked in. Only selected regions are covered; inspect the download before sharing.
+- Compare spreadsheets: compare CSV/XLSX tables by a unique key, inspect added/removed/changed values and export a CSV or literal JSON difference report. Stored values and formula text are compared, not cell formatting or calculated results. Files stay local.
 
 - CSV to nested JSON: paste/upload, choose a grouping column, preview parent records and child rows. Custom output shapes use explicit field mappings; strings and literal headers are preserved. No AI or input upload is used.
 - JSON to CSV: select a record array, flatten objects, explicitly omit/join/reject other arrays; escape spreadsheet formulas. Numeric values that would be rounded are refused; quote long identifiers and high-precision values to preserve them.
@@ -47,13 +50,13 @@ npm run build
 npx wrangler dev --local --ip 127.0.0.1 --port 4398 --inspector-port 9398
 ```
 
-For optional local inference, create a gitignored `.dev.vars` containing `TYPESAFE_API_KEY` through your own secure environment workflow. Do not put a key in browser variables, source, issues or chat. Never commit `.dev.vars` or print its values. Without a key, the three AI utilities explicitly fail closed while the five browser-local tools remain usable.
+For optional local inference, create a gitignored `.dev.vars` containing `TYPESAFE_API_KEY` through your own secure environment workflow. Do not put a key in browser variables, source, issues or chat. Never commit `.dev.vars` or print its values. Without a key, the three AI utilities explicitly fail closed while the seven browser-local tools remain usable.
 
 ## Verification
 
 The cron tool has deterministic scheduling regressions in `src/lib/utilities/cron.test.mjs` and real browser interaction/export checks in `tests/cron-explainer.spec.mjs` and `tests/cron-privacy.spec.mjs`. These run without AI or a server credential. They cover separate timezones, clock changes, leap-day schedules, invalid input, clipboard/download parity and zero API requests. Its preview follows the pinned cron-parser implementation, not a promise that every cron daemon handles DST identically.
 
-For the current five browser-local and three AI-assisted workflows, run `UX_ORIGIN=<approved hosted origin> UX_RESULTS_DIR=<dedicated evidence directory> node scripts/focused-workspace-product-qa.mjs`. The runner accepts production or an approved immutable Worker preview, makes real, potentially billable Jev calls at least 13.5 seconds apart, and checks zero-API local computation, source spans, investigation controls and actual downloads. It saves every case, response, failure and screenshot; it does not mock requests or retry inference. Temporary previews must be approved and restored separately.
+For the original five browser-local and three AI-assisted workflows, run `UX_ORIGIN=<approved hosted origin> UX_RESULTS_DIR=<dedicated evidence directory> node scripts/focused-workspace-product-qa.mjs`. The runner accepts production or an approved immutable Worker preview, makes real, potentially billable Jev calls at least 13.5 seconds apart, and checks zero-API local computation, source spans, investigation controls and actual downloads. It saves every case, response, failure and screenshot; it does not mock requests or retry inference. Temporary previews must be approved and restored separately.
 
 The [public-readiness report](docs/public-readiness.md), [generated ledger](docs/public-readiness-evidence.json), older 23-scenario `fresh-ux-product-qa.mjs` runner and [original live QA report](docs/live-product-qa.md) describe earlier workflows. They do not qualify this redesign or declare its deployment. Fixture-green CI is not live semantic qualification.
 

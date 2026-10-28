@@ -112,3 +112,89 @@ for (const [date, first, last] of [
     expect(text).toContain("exclusive");
     expect(api).toBe(0);
   });
+
+test("actual Worker and extracted artifact flatten selected screenshot pixels", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/*", (r) =>
+    ["127.0.0.1", "localhost"].includes(new URL(r.request().url()).hostname)
+      ? r.continue()
+      : r.abort(),
+  );
+  await page.goto("/tools/redact-screenshot/");
+  await page
+    .locator("#redaction-file")
+    .setInputFiles(
+      new URL("./fixtures/redaction-review-source.png", import.meta.url)
+        .pathname,
+    );
+  await expect(page.locator("#redaction-canvas")).toHaveJSProperty(
+    "width",
+    600,
+  );
+  for (const [id, n] of Object.entries({
+    x: 65,
+    y: 45,
+    width: 360 - 65,
+    height: 120 - 45,
+  }))
+    await page.locator("#redaction-" + id).fill(String(n));
+  await page.locator("#redaction-add").click();
+  const event = page.waitForEvent("download");
+  await page.locator("#redaction-download").click();
+  const d = await event;
+  expect(d.suggestedFilename()).toBe("redacted.png");
+  const { readFile } = await import("node:fs/promises");
+  const bytes = await readFile(await d.path());
+  expect(bytes.includes(Buffer.from("PRIVATE_ORIGINAL_SENTINEL"))).toBe(false);
+  const pixel = await page.evaluate(
+    async (array) => {
+      const image = await createImageBitmap(
+        new Blob([new Uint8Array(array)], { type: "image/png" }),
+      );
+      const c = document.createElement("canvas");
+      c.width = image.width;
+      c.height = image.height;
+      const x = c.getContext("2d");
+      x.drawImage(image, 0, 0);
+      return [...x.getImageData(100, 80, 1, 1).data];
+    },
+    [...bytes],
+  );
+  expect(pixel).toEqual([0, 0, 0, 255]);
+});
+
+test("actual Worker and extracted artifact compare selected XLSX sheets without numeric coercion", async ({
+  page,
+  context,
+}) => {
+  await context.route("**/*", (r) =>
+    ["127.0.0.1", "localhost"].includes(new URL(r.request().url()).hostname)
+      ? r.continue()
+      : r.abort(),
+  );
+  await page.goto("/tools/compare-spreadsheets/");
+  for (const name of ["before", "after"]) {
+    await page
+      .locator("#diff-" + name + "-file")
+      .setInputFiles(
+        new URL("./fixtures/compare-" + name + ".xlsx", import.meta.url)
+          .pathname,
+      );
+    await page
+      .locator("#diff-" + name + "-sheet")
+      .selectOption({ label: "Inventory" });
+  }
+  await page.locator("#diff-key").selectOption("SKU");
+  await page.locator("#diff-run").click();
+  await expect(page.locator("#diff-counts")).toContainText("1 changed");
+  const event = page.waitForEvent("download");
+  await page.locator("#diff-json").click();
+  const { readFile } = await import("node:fs/promises");
+  const data = JSON.parse(await readFile(await (await event).path(), "utf8"));
+  expect(data.rows.some((r) => r.key === "900719925474099312345")).toBe(true);
+  expect(data.rows.find((r) => r.key === "000123").before.Formula).toBe(
+    "=SUM(C2:C3)",
+  );
+});

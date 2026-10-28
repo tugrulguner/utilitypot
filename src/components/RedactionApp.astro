@@ -1,0 +1,92 @@
+---
+import FamilyDiscovery from "./FamilyDiscovery.astro";
+import ToolFeedback from "./ToolFeedback.astro";
+import "../styles/redaction-workspace.css";
+---
+
+<section
+  id="redaction-app"
+  data-utility="redaction"
+  data-processing="local"
+  class="redaction-workspace utility-app ph-no-capture ph-no-autocapture"
+>
+  <header>
+    <p class="workspace-kicker">IMAGE → REDACTED PNG</p>
+    <h2>Cover selected regions</h2>
+    <p>
+      Choose or paste an image, cover details with solid black rectangles,
+      review, then download a flattened PNG.
+    </p>
+  </header>
+  <div class="redaction-grid">
+    <section class="redaction-controls" aria-label="Screenshot controls">
+      <label for="redaction-file">
+        Choose image (PNG, JPEG or WebP; max 10 MB and 8 megapixels)
+      </label>
+      <input
+        id="redaction-file"
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+      />
+      <div class="drop-target" tabindex="0">
+        Drop or paste an image here
+      </div>
+      <p>
+        Only selected areas are covered. Review every redaction; this tool does
+        not automatically detect private information.
+      </p>
+      <div class="numeric-region">
+        <label for="redaction-x">X</label>
+        <input id="redaction-x" type="number" min="0" step="1" value="0" />
+        <label for="redaction-y">Y</label>
+        <input id="redaction-y" type="number" min="0" step="1" value="0" />
+        <label for="redaction-width">Width</label>
+        <input id="redaction-width" type="number" min="1" step="1" value="1" />
+        <label for="redaction-height">Height</label>
+        <input id="redaction-height" type="number" min="1" step="1" value="1" />
+      </div>
+      <div class="actions">
+        <button id="redaction-add" type="button">
+          Add rectangle
+        </button>
+        <button id="redaction-undo" type="button">
+          Undo
+        </button>
+        <button id="redaction-clear" type="button">
+          Clear regions
+        </button>
+        <button id="redaction-clear-image" type="button">
+          Clear image
+        </button>
+      </div>
+    </section>
+    <section class="redaction-preview" aria-label="Image review">
+      <div class="canvas-scroll">
+        <canvas
+          id="redaction-canvas"
+          aria-label="Image preview; draw opaque black redaction rectangles"
+        ></canvas>
+      </div>
+      <ol id="redaction-regions" aria-label="Redaction regions"></ol>
+      <p id="redaction-status" role="status" aria-live="polite">
+        Choose or paste an image to begin.
+      </p>
+      <p id="redaction-error" role="alert" tabindex="-1" hidden></p>
+      <div class="actions">
+        <button id="redaction-download" type="button" disabled>
+          Download redacted PNG
+        </button>
+        <ToolFeedback tool="redaction" context="result" />
+        <ToolFeedback
+          tool="redaction"
+          context="error"
+          id="redaction-feedback-error"
+        />
+      </div>
+    </section>
+  </div>
+  <FamilyDiscovery surface="result" />
+</section>
+<script>
+  import "../scripts/redaction.js";
+</script>

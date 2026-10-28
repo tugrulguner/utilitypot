@@ -1,0 +1,27 @@
+---
+import RedactionApp from "../../components/RedactionApp.astro";
+import { guides } from "../../data/discovery.js";
+import ToolDiscovery from "../../components/ToolDiscovery.astro";
+import UtilityLayout from "../../layouts/UtilityLayout.astro";
+---
+
+<UtilityLayout
+  title="Redact a screenshot"
+  description="Cover screenshot details with opaque black rectangles and download a flattened PNG."
+  seoDescription={guides["redact-screenshot"].description}
+  searchTitle={guides["redact-screenshot"].title}
+  slug="redact-screenshot"
+>
+  <RedactionApp />
+  <ToolDiscovery slug="redact-screenshot" />
+  <details class="prose tool-help">
+    <summary>How screenshot redaction works</summary>
+    <p>
+      Images are processed locally in this browser. Select each area you need
+      hidden and review the finished image. Only selected areas are covered;
+      there is no automatic privacy guarantee. The export flattens black
+      rectangles into image pixels and does not include editable layers or
+      source metadata.
+    </p>
+  </details>
+</UtilityLayout>
