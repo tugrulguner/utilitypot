@@ -49,30 +49,26 @@ export async function verifyXlsxFidelity(page) {
   ];
   await page.goto("/tools/compare-spreadsheets/");
   for (const c of cases) {
-    await page
-      .locator("#diff-before-file")
-      .setInputFiles({
-        name: "before.xlsx",
-        mimeType:
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        buffer: workbook(c.before),
-      });
-    await page
-      .locator("#diff-after-file")
-      .setInputFiles(
-        c.csv
-          ? {
-              name: "after.csv",
-              mimeType: "text/csv",
-              buffer: Buffer.from(c.csv),
-            }
-          : {
-              name: "after.xlsx",
-              mimeType:
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-              buffer: workbook(c.after, c.shared),
-            },
-      );
+    await page.locator("#diff-before-file").setInputFiles({
+      name: "before.xlsx",
+      mimeType:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      buffer: workbook(c.before),
+    });
+    await page.locator("#diff-after-file").setInputFiles(
+      c.csv
+        ? {
+            name: "after.csv",
+            mimeType: "text/csv",
+            buffer: Buffer.from(c.csv),
+          }
+        : {
+            name: "after.xlsx",
+            mimeType:
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            buffer: workbook(c.after, c.shared),
+          },
+    );
     await page
       .locator("#diff-before-sheet")
       .selectOption({ label: "Inventory" });
