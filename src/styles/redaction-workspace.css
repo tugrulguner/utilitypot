@@ -20,9 +20,9 @@
 .redaction-preview {
   min-width: 0;
   padding: 1rem;
-  border: 1px solid var(--border, #d5d9df);
+  border: 1px solid var(--line);
   border-radius: 14px;
-  background: var(--surface, #fff);
+  background: var(--night-soft);
 }
 .redaction-controls label {
   display: block;
@@ -34,13 +34,13 @@
 .drop-target {
   margin: 0.75rem 0;
   padding: 1.2rem;
-  border: 2px dashed var(--border, #9aa3ad);
+  border: 2px dashed var(--line);
   border-radius: 10px;
   text-align: center;
 }
 .drop-target:focus,
 .drop-target.dragging {
-  outline: 2px solid var(--accent, #3468c0);
+  outline: 2px solid var(--gold);
 }
 .numeric-region {
   display: grid;
@@ -52,7 +52,7 @@
   width: 100%;
   min-width: 0;
 }
-.actions {
+.redaction-workspace .actions {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;

@@ -51,6 +51,34 @@ test("an image selected before the controller loads is consumed at startup", asy
   }
 });
 
+test("redaction review text keeps readable contrast in Light and Dark", async ({
+  page,
+}) => {
+  await prepare(page);
+  for (const theme of ["light", "dark"]) {
+    await page.getByLabel("Color theme").selectOption(theme);
+    const ratio = await page.locator(".redaction-preview").evaluate((el) => {
+      const rgb = (s) =>
+        s
+          .match(/[\d.]+/g)
+          .slice(0, 3)
+          .map(Number);
+      const lum = (c) =>
+        rgb(c)
+          .map((x) => {
+            x /= 255;
+            return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+          })
+          .reduce((s, x, i) => s + x * [0.2126, 0.7152, 0.0722][i], 0);
+      const st = getComputedStyle(el),
+        a = lum(st.color),
+        b = lum(st.backgroundColor);
+      return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+    });
+    expect(ratio).toBeGreaterThanOrEqual(4.5);
+  }
+});
+
 test.beforeEach(async ({ context }) => {
   await context.route("**/*", (r) =>
     ["127.0.0.1", "localhost"].includes(new URL(r.request().url()).hostname)
