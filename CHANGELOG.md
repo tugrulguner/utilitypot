@@ -25,6 +25,8 @@
 
 ### Fixed
 
+- Preserve XLSX CDATA and SpreadsheetML escaped string values, decode literal escape sequences only once, and distinguish omitted cells from explicit blanks without inventing changes when later cells disappear.
+
 - Improve result presentation across the converters, date review, meeting finder, entity extraction and flowchart tools: reveal fully rendered previews, make export formats explicit, promote SVG/calendar downloads, preserve readable theme-aware diagram inspection (including theme changes during initial rendering), and clarify grouped/date/entity results on narrow screens. Computations, source spans and data exports remain unchanged.
 
 - Distinguish source-backed answers with a dedicated result panel, a restrained accented answer surface and immediately adjacent copy/download actions. Keep question/source context secondary, preserve action controls across edits and reveal the completed result only after loading content is removed. Source wording, citations, exports and inference are unchanged.

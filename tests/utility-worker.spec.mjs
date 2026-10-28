@@ -1,4 +1,8 @@
 import { test, expect } from "@playwright/test";
+import { verifyXlsxFidelity } from "./xlsx-fidelity.journey.mjs";
+test("actual Worker and extracted artifact preserve XLSX string and sparse-cell fidelity", async ({
+  page,
+}) => verifyXlsxFidelity(page));
 test("actual Worker serves local utilities and fails closed for AI without a key", async ({
   page,
   request,

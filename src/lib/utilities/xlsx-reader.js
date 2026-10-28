@@ -22,11 +22,29 @@ function text(node) {
   let s = "";
   const walk = (n) => {
     if (n.type === "text") s += n.data;
-    else if (n.type === "tag" && n.name !== "rPh" && n.name !== "phoneticPr")
+    else if (
+      (n.type === "tag" || n.type === "cdata") &&
+      n.name !== "rPh" &&
+      n.name !== "phoneticPr"
+    )
       for (const c of n.children || []) walk(c);
   };
   if (node) walk(node);
   return s;
+}
+function decodeString(value) {
+  // A single pass preserves escaped literal underscores (_x005F_x000D_).
+  return value.replace(/_x([0-9a-fA-F]{4})_/g, (_, hex) =>
+    String.fromCharCode(parseInt(hex, 16)),
+  );
+}
+function richString(node) {
+  const plain = children(node, "t");
+  const parts = plain.length
+    ? plain
+    : children(node, "r").flatMap((run) => children(run, "t"));
+  // Decode each logical text element before joining distinct rich-text runs.
+  return parts.map((part) => decodeString(text(part))).join("");
 }
 function xml(src) {
   if (/<!DOCTYPE|<!ENTITY/i.test(src)) fail("DOCTYPE/ENTITY forbidden");
@@ -69,7 +87,7 @@ function val(cell, shared) {
     return `=${text(f)}`;
   }
   const typ = cell.attribs.t;
-  if (typ === "inlineStr") return text(first(cell, "is"));
+  if (typ === "inlineStr") return richString(first(cell, "is"));
   const v = first(cell, "v");
   if (!v) return "";
   const raw = text(v);
@@ -79,6 +97,7 @@ function val(cell, shared) {
       fail("bad shared string index");
     return shared[i];
   }
+  if (typ === "str") return decodeString(raw);
   if (typ === "b") return raw;
   if (typ === "e") return raw;
   return raw;
@@ -174,15 +193,7 @@ export async function readXlsx(bytes) {
   if (!sheetNodes.length) fail("no worksheets");
   const shared = [];
   const ss = get("xl/sharedStrings.xml", false);
-  if (ss)
-    for (const si of children(xml(ss), "si"))
-      shared.push(
-        children(si, "t").length
-          ? children(si, "t").map(text).join("")
-          : children(si, "r")
-              .map((r) => text(first(r, "t")))
-              .join(""),
-      );
+  if (ss) for (const si of children(xml(ss), "si")) shared.push(richString(si));
   const sheets = [];
   let allocated = 0,
     textTotal = 0;
@@ -218,7 +229,7 @@ export async function readXlsx(bytes) {
         while (rows[maxRow].length <= ci) {
           allocated++;
           if (allocated > 200000) fail("cell limit");
-          rows[maxRow].push("");
+          rows[maxRow].push(null);
         }
         rows[maxRow][ci] = v;
       }

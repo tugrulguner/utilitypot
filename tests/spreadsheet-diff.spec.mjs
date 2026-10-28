@@ -1,4 +1,8 @@
 import { test, expect } from "@playwright/test";
+import { verifyXlsxFidelity } from "./xlsx-fidelity.journey.mjs";
+test("native XLSX fidelity preserves CDATA, missing cells and encoded text", async ({
+  page,
+}) => verifyXlsxFidelity(page));
 import { readFile } from "node:fs/promises";
 const fixture = (name) =>
   new URL("./fixtures/compare-" + name, import.meta.url).pathname;
