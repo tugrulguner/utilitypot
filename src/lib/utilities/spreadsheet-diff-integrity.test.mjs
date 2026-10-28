@@ -31,3 +31,15 @@ test("CSV formula protection includes leading whitespace and retains null presen
   const diff = compareTables(parseCsv("id,v\n1,"), parseCsv("id,w\n1,x"), "id");
   assert.ok(exportCsv(diff).includes("before_present"));
 });
+
+test("prototype-shaped column names remain ordinary own-property string keys", () => {
+  for (const key of ["__proto__", "constructor", "toString"]) {
+    const a = parseCsv(`id,${key}\n1,x`),
+      b = parseCsv(`id,${key}\n1,x`);
+    assert.equal(Object.hasOwn(a.rows[0], key), true);
+    assert.equal(a.rows[0][key], "x");
+    const out = compareTables(a, b, key);
+    assert.equal(out.rows[0].key, "x");
+    assert.equal(out.counts.unchanged, 1);
+  }
+});

@@ -90,3 +90,40 @@ test("native XLSX sheets preserve long numeric identifiers and formulas without 
     "=SUM(C2:C3)",
   );
 });
+
+test("source edits clear ready feedback immediately and parsing errors never stay busy", async ({
+  page,
+}) => {
+  await page.goto("/tools/compare-spreadsheets/");
+  await page.locator("#diff-example").click();
+  await page.locator("#diff-run").click();
+  await expect(page.locator("#diff-status")).toContainText("Comparison ready");
+  const immediate = await page.evaluate(() => {
+    const input = document.querySelector("#diff-before");
+    input.value = "SKU,SKU\n1,2";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    return document.querySelector("#diff-status").textContent;
+  });
+  expect(immediate).not.toContain("Comparison ready");
+  await expect(page.locator("#diff-error")).toBeVisible();
+  await expect(page.locator("#diff-status")).not.toContainText("Reading");
+  await expect(page.locator("#diff-run")).toBeDisabled();
+});
+
+test("native worker comparison preserves prototype-shaped key columns", async ({
+  page,
+}) => {
+  await page.goto("/tools/compare-spreadsheets/");
+  for (const key of ["__proto__", "constructor", "toString"]) {
+    await page.locator("#diff-before").fill(`id,${key}\n1,x`);
+    await page.locator("#diff-after").fill(`id,${key}\n1,x`);
+    await page.locator("#diff-key").selectOption(key);
+    await page.locator("#diff-run").click();
+    await expect(page.locator("#diff-counts")).toContainText("1 unchanged");
+    const event = page.waitForEvent("download");
+    await page.locator("#diff-json").click();
+    const out = JSON.parse(await readFile(await (await event).path(), "utf8"));
+    expect(out.rows[0].key).toBe("x");
+    expect(out.counts.unchanged).toBe(1);
+  }
+});

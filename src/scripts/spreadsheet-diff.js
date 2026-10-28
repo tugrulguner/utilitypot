@@ -36,6 +36,8 @@ if (root) {
     $("#diff-feedback-error").hidden = true;
   }
   function error(message, reveal = false) {
+    $("#diff-status").textContent =
+      "Input needs attention. No current comparison.";
     $("#diff-error").textContent = message;
     $("#diff-error").hidden = false;
     $("#diff-feedback-error").hidden = false;
@@ -48,6 +50,8 @@ if (root) {
     }
   }
   function invalidate() {
+    $("#diff-status").textContent =
+      "Inputs changed. Read both sources and compare again.";
     revision++;
     comparison?.abort();
     comparison = null;
@@ -120,8 +124,9 @@ if (root) {
       } else {
         $(`#diff-${name}-info`).textContent = "Choose a worksheet to compare.";
       }
-      $("#diff-status").textContent =
-        "Choose a shared unique key, then Compare.";
+      $("#diff-status").textContent = $("#diff-error").hidden
+        ? "Read both sources and choose a shared unique key, then Compare."
+        : "Input needs attention. No current comparison.";
     } catch (e) {
       if (token === s.version && e.name !== "AbortError")
         error(e.message, isWorkbook);
