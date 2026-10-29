@@ -1,0 +1,124 @@
+.screenshot-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  min-width: 0;
+}
+.screenshot-workspace form {
+  display: grid;
+  gap: 0.75rem;
+}
+.screenshot-workspace .panel {
+  min-width: 0;
+}
+.screenshot-workspace h2 {
+  margin-block: 0 0.6rem;
+}
+.screenshot-workspace .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.screenshot-workspace .notice {
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.screenshot-workspace .screenshot-source {
+  position: relative;
+  margin: 0;
+  max-width: 100%;
+}
+.screenshot-workspace .screenshot-source img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.screenshot-workspace .screenshot-source svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.screenshot-workspace .screenshot-source rect {
+  fill: rgba(242, 184, 75, 0.18);
+  stroke: var(--gold);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.screenshot-workspace .screenshot-table {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  margin-top: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.utility-app.screenshot-workspace .screenshot-table table {
+  width: 100%;
+  min-width: calc(var(--screenshot-columns) * 10rem);
+  table-layout: auto;
+  border-collapse: collapse;
+}
+.screenshot-workspace td {
+  padding: 0.35rem;
+  border: 1px solid var(--line);
+}
+.utility-app.screenshot-workspace td input {
+  width: 100%;
+  min-width: 9rem;
+  min-height: 44px;
+  padding: 0.45rem 0.55rem;
+  background: var(--night-soft);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font: inherit;
+}
+.screenshot-workspace input.needs-review {
+  border: 2px solid var(--gold);
+}
+.screenshot-workspace :focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+.screenshot-workspace .screenshot-export-settings {
+  font-size: 0.875rem;
+  margin-block: 0.75rem;
+}
+.screenshot-workspace .screenshot-export-settings label {
+  display: flex;
+  gap: 0.5rem;
+  align-items: start;
+  margin-block: 0.75rem;
+}
+.screenshot-workspace .screenshot-export-settings input {
+  width: 1.15rem;
+  min-width: 1.15rem;
+  height: 1.15rem;
+}
+.screenshot-workspace #screenshot-cell-crop {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  background: white;
+}
+.screenshot-workspace #screenshot-results {
+  scroll-margin-top: 1rem;
+}
+@media (max-width: 400px) {
+  .screenshot-workspace .screenshot-actions button {
+    font-size: 0.875rem;
+    padding: 0.6rem;
+  }
+  .utility-app.screenshot-workspace td input {
+    min-width: 7rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .screenshot-workspace * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}

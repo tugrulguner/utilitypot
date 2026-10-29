@@ -4,6 +4,8 @@
 
 ### Added
 
+- Screenshot-to-spreadsheet: paste or upload one clear table image, recognize text in a cancellable local worker, review editable cells against source positions, and copy or download CSV/XLSX. Recognition assets are self-hosted, English printed-table limits are explicit, low-confidence values remain reviewable, and XLSX preserves text values and identifiers. No image upload or server inference.
+
 - Browser-local screenshot redaction: paste/upload an image, cover selected regions with opaque rectangles using a pointer or pixel coordinates, and export a flattened PNG. Manual review remains required.
 - Browser-local CSV/XLSX comparison by a unique row key: inspect added, removed and changed values, then export a safe CSV or exact JSON report. Compare stored values/formula text without numeric coercion or formula execution.
 

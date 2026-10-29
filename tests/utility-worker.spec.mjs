@@ -202,3 +202,44 @@ test("actual Worker and extracted artifact compare selected XLSX sheets without 
     "=SUM(C2:C3)",
   );
 });
+
+test("actual Worker and extracted artifact recognize screenshots locally", async ({
+  page,
+  context,
+}) => {
+  test.setTimeout(60000);
+  const api = [];
+  await context.route("**/*", (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname.startsWith("/api/")) {
+      api.push(url.pathname);
+      return route.abort();
+    }
+    if (!["127.0.0.1", "localhost"].includes(url.hostname))
+      return route.abort();
+    return route.continue();
+  });
+  await page.goto("/tools/screenshot-to-spreadsheet/");
+  await page
+    .locator("#screenshot-file")
+    .setInputFiles(
+      new URL("./fixtures/screenshot-table.png", import.meta.url).pathname,
+    );
+  await page.locator("#screenshot-run").click();
+  await expect(page.locator("#screenshot-results")).toBeVisible({
+    timeout: 30000,
+  });
+  await expect(page.locator("#screenshot-table input")).toHaveCount(16);
+  await expect(
+    page.getByRole("textbox", { name: "Row 2, column 1", exact: true }),
+  ).toHaveValue("000123");
+  const event = page.waitForEvent("download");
+  await page.locator("#screenshot-xlsx").click();
+  const { readFile } = await import("node:fs/promises");
+  const { unzipSync, strFromU8 } = await import("fflate");
+  const zip = unzipSync(
+    new Uint8Array(await readFile(await (await event).path())),
+  );
+  expect(strFromU8(zip["xl/worksheets/sheet1.xml"])).toContain("000123");
+  expect(api).toEqual([]);
+});

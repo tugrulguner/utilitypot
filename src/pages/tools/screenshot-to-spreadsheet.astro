@@ -1,0 +1,27 @@
+---
+import ScreenshotApp from "../../components/ScreenshotApp.astro";
+import ToolDiscovery from "../../components/ToolDiscovery.astro";
+import UtilityLayout from "../../layouts/UtilityLayout.astro";
+import { guides } from "../../data/discovery.js";
+---
+
+<UtilityLayout
+  title="Screenshot to spreadsheet"
+  description="Extract a table from a screenshot into an editable spreadsheet."
+  seoDescription={guides["screenshot-to-spreadsheet"].description}
+  searchTitle={guides["screenshot-to-spreadsheet"].title}
+  slug="screenshot-to-spreadsheet"
+>
+  <ScreenshotApp />
+  <ToolDiscovery slug="screenshot-to-spreadsheet" />
+  <details class="prose tool-help">
+    <summary>What works and what to review</summary>
+    <p>
+      English printed tables in a single PNG, JPEG or WebP image. Handwriting,
+      merged cells, rotated tables and complex layouts may not extract
+      correctly. Carefully review every value. Recognition runs locally in your
+      browser; the image is not sent to a server. Model files are downloaded
+      from this site as needed.
+    </p>
+  </details>
+</UtilityLayout>

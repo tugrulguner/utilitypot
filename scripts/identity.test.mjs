@@ -14,21 +14,21 @@ test("UtilityPot wordmark keeps the prefix off-white and pot rose in every SVG",
   }
 });
 
-test("canonical artwork captions match the seven-local, three-AI inventory", async () => {
+test("canonical artwork captions match the eight-local, three-AI inventory", async () => {
   const lockup = await readFile("docs/assets/utilitypot-lockup-v2.svg", "utf8");
   const social = await readFile("public/utilitypot-social-v2.svg", "utf8");
-  assert.match(lockup, /7 browser-local tools · 3 disclosed AI tools/);
+  assert.match(lockup, /8 browser-local tools · 3 disclosed AI tools/);
   assert.match(
     social,
-    /Seven tools run in your browser; three use bounded AI when you ask/,
+    /Eight tools run in your browser; three use bounded AI when you ask/,
   );
-  assert.match(social, /7 browser-local tools · 3 disclosed AI tools/);
+  assert.match(social, /8 browser-local tools · 3 disclosed AI tools/);
 });
 
 test("UtilityPot identity uses canonical family geometry and a consistent README resource row", async () => {
   const readme = await readFile("README.md", "utf8");
   const firstImage = readme.match(/<img\b[^>]*>/)?.[0] ?? "";
-  assert.match(firstImage, /src="utilitypot\.png\?v=local-tools-10"/);
+  assert.match(firstImage, /src="utilitypot\.png\?v=local-tools-11"/);
   assert.match(firstImage, /width="600"/);
   const resources =
     readme.match(/<p align="center">Part of[\s\S]*?<\/p>/)?.[0] ?? "";

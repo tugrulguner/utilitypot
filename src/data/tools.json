@@ -1,5 +1,12 @@
 [
   {
+    "slug": "screenshot-to-spreadsheet",
+    "title": "Screenshot to spreadsheet",
+    "description": "Paste a table screenshot, review editable cells and copy or download a spreadsheet. Recognition stays in your browser.",
+    "tool": "screenshot",
+    "processing": "In your browser"
+  },
+  {
     "slug": "redact-screenshot",
     "title": "Redact a screenshot",
     "description": "Cover selected areas with solid black pixels, review the image and download a flattened PNG. Your image stays in your browser.",

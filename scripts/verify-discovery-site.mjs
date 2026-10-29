@@ -51,6 +51,7 @@ for (const [slug, guide] of Object.entries(guides)) {
   const copy =
     attr(operating, "id", "copy")[0] ||
     attr(operating, "id", "extra-copy")[0] ||
+    attr(operating, "id", "screenshot-copy")[0] ||
     attr(operating, "id", "redaction-download")[0] ||
     attr(operating, "id", "diff-json")[0];
   assert.ok(copy, `${slug}: output export action`);
@@ -80,6 +81,6 @@ for (const [slug, guide] of Object.entries(guides)) {
 const home = await readFile("dist/index.html", "utf8");
 assert.ok(
   home.includes("creator-credit") &&
-    home.includes("/utilitypot-lockup-v2.png?v=local-tools-10"),
+    home.includes("/utilitypot-lockup-v2.png?v=local-tools-11"),
 );
 console.log("PASS homepage art and creator credit retained");
