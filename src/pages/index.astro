@@ -69,7 +69,7 @@ import CreatorSocials from "../components/CreatorSocials.astro";
   </div>
   <section id="tools" class="tools-section">
     <p class="coordinate">CHOOSE A TASK</p>
-    <h2>Eight tools. No signup.</h2>
+    <h2>{tools.length} tools. No signup.</h2>
     <div class="tool-cards">
       {tools.map(({ slug, title, description, processing }) => (
         <article class="panel">
