@@ -4,6 +4,9 @@
 
 ### Added
 
+- Browser-local screenshot redaction: paste/upload an image, cover selected regions with opaque rectangles using a pointer or pixel coordinates, and export a flattened PNG. Manual review remains required.
+- Browser-local CSV/XLSX comparison by a unique row key: inspect added, removed and changed values, then export a safe CSV or exact JSON report. Compare stored values/formula text without numeric coercion or formula execution.
+
 - Selected-week cron previews: inspect seven calendar days in the schedule timezone, including daylight-saving transitions. Show every occurrence with dates/UTC offsets, explicit empty weeks and complete copy/download exports; dense weeks display in batches.
 
 - Browser-local cron explainer with separate schedule/display timezones, plain-language five-field interpretation, the next five runs with UTC offsets, and copy/text download. Explicit DST-preview policy; no AI or job installation.
@@ -21,6 +24,8 @@
 - Main-branch Cloudflare deployment and version/changelog-gated, checksummed website release artifacts.
 
 ### Fixed
+
+- Preserve XLSX CDATA and SpreadsheetML escaped string values, decode literal escape sequences only once, and distinguish omitted cells from explicit blanks without inventing changes when later cells disappear.
 
 - Improve result presentation across the converters, date review, meeting finder, entity extraction and flowchart tools: reveal fully rendered previews, make export formats explicit, promote SVG/calendar downloads, preserve readable theme-aware diagram inspection (including theme changes during initial rendering), and clarify grouped/date/entity results on narrow screens. Computations, source spans and data exports remain unchanged.
 
