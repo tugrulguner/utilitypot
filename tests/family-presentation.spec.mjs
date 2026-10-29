@@ -21,7 +21,7 @@ test("family overview, assets and creator remain discoverable", async ({
   await expect(page.locator(".creator-credit")).toBeVisible();
   await expect(page.locator(".product-hero img")).toHaveAttribute(
     "src",
-    "/utilitypot-lockup-v2.png?v=inventory-artwork-2",
+    "/utilitypot-lockup-v2.png?v=local-tools-11",
   );
   await expect(page.locator("link[rel=icon]")).toHaveAttribute(
     "href",
@@ -29,18 +29,18 @@ test("family overview, assets and creator remain discoverable", async ({
   );
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
-    "https://utilitypot.modepot.io/utilitypot-social-v2.png?v=inventory-artwork-2",
+    "https://utilitypot.modepot.io/utilitypot-social-v2.png?v=local-tools-11",
   );
-  await expect(page.locator("#tools article")).toHaveCount(9);
+  await expect(page.locator("#tools article")).toHaveCount(11);
   await expect(page.locator(".product-hero img")).toHaveAttribute(
     "alt",
     /Focused browser tools for data, text, diagrams and planning/,
   );
   await expect(page.locator(".product-hero")).toContainText(
-    "Six tools work entirely in your browser; three use bounded AI only after you ask.",
+    "Eight tools work entirely in your browser; three use bounded AI only after you ask.",
   );
   const cards = await page.locator("#tools article").allTextContents();
-  expect(cards).toHaveLength(9);
+  expect(cards).toHaveLength(11);
   for (const description of [
     "Paste a table screenshot, review editable cells",
     "Group repeated CSV rows into nested JSON",
@@ -54,7 +54,7 @@ test("family overview, assets and creator remain discoverable", async ({
   ])
     expect(cards.some((card) => card.includes(description))).toBe(true);
   expect(cards.filter((card) => card.includes("In your browser"))).toHaveLength(
-    6,
+    8,
   );
   expect(cards.filter((card) => card.includes("Uses AI"))).toHaveLength(3);
 });

@@ -1,0 +1,91 @@
+.utility-app.diff-app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  min-width: 0;
+}
+.diff-app .diff-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.diff-app .panel {
+  min-width: 0;
+}
+.diff-app label {
+  display: block;
+  margin-block: 0.6rem;
+}
+.diff-app .notice,
+.diff-app details {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.utility-app.diff-app textarea,
+.utility-app.diff-app select,
+.utility-app.diff-app input[type="file"] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  background: var(--night-soft);
+  color: var(--ink);
+}
+.diff-app .actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block: 0.75rem;
+}
+.diff-app #diff-table-wrap {
+  max-width: 100%;
+  overflow: auto;
+  margin-block: 1rem;
+}
+.utility-app.diff-app table {
+  width: 100%;
+  min-width: 38rem;
+  border-collapse: collapse;
+}
+.diff-app th,
+.diff-app td {
+  text-align: left;
+  vertical-align: top;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 0.6rem;
+  border: 1px solid var(--line);
+  max-width: 22rem;
+}
+.diff-app [data-status="added"] td:first-child {
+  border-left: 3px solid var(--gold);
+}
+.diff-app [data-status="removed"] td:first-child {
+  border-left: 3px solid var(--rose);
+}
+.diff-app #diff-error {
+  color: var(--ink);
+  border-left: 3px solid var(--rose);
+  padding: 0.5rem;
+}
+.diff-app :focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+.diff-app #diff-result {
+  scroll-margin-top: 1rem;
+}
+@media (max-width: 650px) {
+  .diff-app .diff-inputs {
+    grid-template-columns: 1fr;
+  }
+  .diff-app .actions button {
+    font-size: 0.875rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .diff-app * {
+    scroll-behavior: auto !important;
+  }
+}

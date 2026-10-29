@@ -7,6 +7,20 @@
     "processing": "In your browser"
   },
   {
+    "slug": "redact-screenshot",
+    "title": "Redact a screenshot",
+    "description": "Cover selected areas with solid black pixels, review the image and download a flattened PNG. Your image stays in your browser.",
+    "tool": "redaction",
+    "processing": "In your browser"
+  },
+  {
+    "slug": "compare-spreadsheets",
+    "title": "Compare spreadsheets",
+    "description": "Compare CSV or XLSX files by a matching key. Review added, removed and changed values, then download the difference report.",
+    "tool": "spreadsheetDiff",
+    "processing": "In your browser"
+  },
+  {
     "slug": "csv-to-nested-json",
     "title": "CSV to nested JSON",
     "description": "Group repeated CSV rows into nested JSON and choose which fields stay together.",

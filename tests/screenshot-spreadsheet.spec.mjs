@@ -68,6 +68,17 @@ test("real local OCR supports editable cells, source selection and exact spreads
   expect(xml).toContain("000009");
   expect(xml).not.toContain("000123");
   expect(xml).toContain('t="inlineStr"');
+  const literal = "_x005F_x000D_";
+  await page
+    .getByRole("textbox", { name: "Row 2, column 1", exact: true })
+    .fill(literal);
+  const literalDownload = page.waitForEvent("download");
+  await page.locator("#screenshot-xlsx").click();
+  const { readXlsx } = await import("../src/lib/utilities/xlsx-reader.js");
+  const decoded = await readXlsx(
+    new Uint8Array(await readFile(await (await literalDownload).path())),
+  );
+  expect(decoded.sheets[0].rows[1][0]).toBe(literal);
   await page
     .getByRole("textbox", { name: "Row 2, column 1", exact: true })
     .fill("=1+1");

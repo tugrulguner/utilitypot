@@ -1,0 +1,143 @@
+---
+import FamilyDiscovery from "./FamilyDiscovery.astro";
+import ToolFeedback from "./ToolFeedback.astro";
+import "../styles/spreadsheet-diff-workspace.css";
+---
+
+<section
+  id="spreadsheet-diff-app"
+  data-utility="spreadsheetDiff"
+  data-processing="local"
+  class="utility-app diff-app ph-no-capture ph-no-autocapture"
+>
+  <div class="diff-inputs">
+    <section class="panel">
+      <h2>Before</h2>
+      <label for="diff-before">Paste before CSV</label>
+      <textarea id="diff-before" rows="5" spellcheck="false"></textarea>
+      <label for="diff-before-file">Or choose a CSV/XLSX file</label>
+      <input id="diff-before-file" type="file" accept=".csv,.xlsx" />
+      <label id="diff-before-sheet-label" hidden>
+        Before worksheet<select id="diff-before-sheet"></select>
+      </label>
+      <p id="diff-before-info" class="notice"></p>
+    </section>
+    <section class="panel">
+      <h2>After</h2>
+      <label for="diff-after">Paste after CSV</label>
+      <textarea id="diff-after" rows="5" spellcheck="false"></textarea>
+      <label for="diff-after-file">Or choose a CSV/XLSX file</label>
+      <input id="diff-after-file" type="file" accept=".csv,.xlsx" />
+      <label id="diff-after-sheet-label" hidden>
+        After worksheet<select id="diff-after-sheet"></select>
+      </label>
+      <p id="diff-after-info" class="notice"></p>
+    </section>
+  </div>
+  <div class="panel">
+    <label for="diff-key">Matching key column</label>
+    <select id="diff-key" disabled>
+      <option value="">Choose a key column</option>
+    </select>
+    <p class="notice">
+      Keys must be nonblank and unique in each table. Text, whitespace and
+      leading zeros are compared exactly.
+    </p>
+    <div class="actions">
+      <button id="diff-run" class="primary" type="button" disabled>
+        Compare
+      </button>
+      <button id="diff-cancel" type="button" disabled>
+        Cancel
+      </button>
+      <button id="diff-clear" type="button">
+        Clear
+      </button>
+      <button id="diff-example" type="button">
+        Load example
+      </button>
+    </div>
+    <details>
+      <summary>Formats, comparison rules &amp; limits</summary>
+      <p>
+        First row is the header. CSV must be UTF-8 (up to 2 MiB); XLSX up to 5
+        MiB compressed/20 MiB expanded (8 MiB per ZIP entry). At most 10,000
+        rows, 500 columns, 200,000 cells and two million text characters per
+        table. Workbooks also have aggregate limits.
+      </p>
+      <p>
+        XLSX compares stored values and formula text, not number/date display
+        formatting, formatting-only changes or calculated results. Formulas are
+        never executed. Shared/array formulas and unsupported or encrypted
+        workbooks are rejected. Legacy XLS is not supported.
+      </p>
+    </details>
+  </div>
+  <div>
+    <p id="diff-status" role="status" aria-live="polite">
+      Choose two files or paste CSV to begin.
+    </p>
+    <p id="diff-error" role="alert" tabindex="-1" hidden></p>
+    <ToolFeedback
+      tool="spreadsheetDiff"
+      context="error"
+      id="diff-feedback-error"
+    />
+  </div>
+  <section id="diff-result" class="panel" tabindex="-1" hidden>
+    <h2>Spreadsheet differences</h2>
+    <p id="diff-counts"></p>
+    <div class="actions">
+      <button id="diff-csv" type="button" disabled>
+        Download CSV
+      </button>
+      <button id="diff-json" type="button" disabled>
+        Download JSON
+      </button>
+      <ToolFeedback tool="spreadsheetDiff" context="result" />
+    </div>
+    <p class="notice">
+      CSV prefixes potentially executable values with an apostrophe. JSON
+      preserves exact report values. Missing fields and empty text are distinct.
+    </p>
+    <p id="diff-columns" class="notice"></p>
+    <label for="diff-filter">Show rows</label>
+    <select id="diff-filter">
+      <option value="all">All rows</option>
+      <option value="added">Added</option>
+      <option value="removed">Removed</option>
+      <option value="changed">Changed</option>
+      <option value="unchanged">Unchanged</option>
+    </select>
+    <div id="diff-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Key</th>
+            <th>Column</th>
+            <th>Before</th>
+            <th>After</th>
+          </tr>
+        </thead>
+        <tbody id="diff-rows"></tbody>
+      </table>
+    </div>
+    <div class="actions">
+      <button id="diff-previous" type="button">
+        Previous
+      </button>
+      <span id="diff-page" role="status"></span>
+      <button id="diff-next" type="button">
+        Next
+      </button>
+    </div>
+  </section>
+  <FamilyDiscovery surface="result" />
+</section>
+<noscript>
+  <p class="notice error">Enable JavaScript to compare files locally.</p>
+</noscript>
+<script>
+  import "../scripts/spreadsheet-diff.js";
+</script>

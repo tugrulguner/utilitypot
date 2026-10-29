@@ -29,6 +29,24 @@ import UtilityLayout from "../layouts/UtilityLayout.astro";
       events measure user intent, not completed transfer. Hosting providers
       still process ordinary request metadata under their own policies.
     </p>
+    <h2>Image redaction and spreadsheet comparisons</h2>
+    <p>
+      Screenshot redaction and spreadsheet comparison run on your device,
+      without uploading images or spreadsheet contents. Redaction is manual:
+      only selected regions become opaque black pixels in a newly encoded PNG.
+      Review the whole downloaded image before sharing; unselected sensitive
+      content remains visible. The original image stays separate and must be
+      kept private.
+    </p>
+    <p>
+      Spreadsheet comparisons match exact values by a chosen unique key. XLSX
+      formulas are compared as text, never executed, and visual formatting is
+      not compared. CSV reports protect potentially executable spreadsheet
+      values by prefixing an apostrophe; JSON preserves literal report values.
+      Each tool displays its file and resource limits. Clearing or replacing
+      sources discards the active result; these tools do not save an input
+      history.
+    </p>
     <h2>Screenshot recognition</h2>
     <p>
       Screenshot-to-spreadsheet runs OCR and table reconstruction on your

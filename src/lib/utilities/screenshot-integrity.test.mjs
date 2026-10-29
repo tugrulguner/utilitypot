@@ -54,3 +54,11 @@ test("ambiguous wrapped versus sparse lines remain intact with an explicit row-c
   ]);
   assert.ok(got.warnings.some((w) => /wrapped.*separate|sparse.*row/i.test(w)));
 });
+
+test("XLSX text round-trip preserves literal SpreadsheetML escape-shaped identifiers", async () => {
+  const { readXlsx } = await import("./xlsx-reader.js");
+  const values = [
+    ["_x0041_", "_x005F_x000D_", "000123", "literal & <tag>", "a\rb"],
+  ];
+  assert.deepEqual((await readXlsx(tableXLSX(values))).sheets[0].rows, values);
+});

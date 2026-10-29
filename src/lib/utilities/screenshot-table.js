@@ -65,6 +65,7 @@ export function tableCSV(rows, { protectFormulas = true } = {}) {
 }
 const xml = (s) =>
   s
+    .replace(/_(?=x[0-9a-fA-F]{4}_)/g, "_x005F_")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")

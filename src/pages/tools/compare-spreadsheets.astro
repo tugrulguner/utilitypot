@@ -1,0 +1,28 @@
+---
+import ToolDiscovery from "../../components/ToolDiscovery.astro";
+import { guides } from "../../data/discovery.js";
+import UtilityLayout from "../../layouts/UtilityLayout.astro";
+import SpreadsheetDiffApp from "../../components/SpreadsheetDiffApp.astro";
+---
+
+<UtilityLayout
+  title="Compare spreadsheets"
+  description="Compare two CSV or Excel files locally by a matching key."
+  seoDescription={guides["compare-spreadsheets"].description}
+  searchTitle={guides["compare-spreadsheets"].title}
+  slug="compare-spreadsheets"
+>
+  <SpreadsheetDiffApp />
+  <ToolDiscovery slug="compare-spreadsheets" />
+  <details class="prose tool-help">
+    <summary>How this tool works &amp; limits</summary>
+    <p>
+      First row is the header. Keys and cell values are exact strings: no
+      trimming, case folding, number or date conversion. Workbook formulas are
+      compared as formulas; cached results and number/date display formatting
+      are not recalculated. Formula-like values receive apostrophe escaping in
+      CSV exports.
+    </p>
+    <p>Files remain in this browser and are not sent to a service.</p>
+  </details>
+</UtilityLayout>
