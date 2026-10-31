@@ -252,14 +252,19 @@ if (root) {
     for (const row of rows.slice(page * 100, page * 100 + 100)) {
       const tr = document.createElement("tr");
       tr.dataset.status = row[0];
-      for (const value of row.slice(0, 5)) {
+      for (const [column, value] of row.slice(0, 5).entries()) {
         const td = document.createElement("td");
-        td.textContent =
-          value === null
-            ? "∅ (missing)"
-            : value === ""
-              ? "(blank)"
-              : String(value);
+        if (row[0] === "unchanged" && column >= 2) {
+          td.textContent = "—";
+          td.title = "No changes in this row.";
+        } else {
+          td.textContent =
+            value === null
+              ? "∅ (missing)"
+              : value === ""
+                ? "(blank)"
+                : String(value);
+        }
         tr.append(td);
       }
       body.append(tr);
