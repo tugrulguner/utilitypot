@@ -27,6 +27,8 @@
 
 ### Fixed
 
+- Use singular wording for one OCR review flag and neutral placeholders for unchanged spreadsheet report entries, without changing comparison data or exports.
+
 - Derive the homepage tool count from the registry and include all eleven utilities with their processing boundaries in agent discovery.
 
 - Preserve XLSX CDATA and SpreadsheetML escaped string values, decode literal escape sequences only once, and distinguish omitted cells from explicit blanks without inventing changes when later cells disappear.
