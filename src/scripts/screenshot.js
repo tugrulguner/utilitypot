@@ -185,7 +185,7 @@ if (root) {
       0,
     );
     $("#screenshot-summary").textContent =
-      `${table.rows.length} rows · ${table.rows[0].length} columns · ${low} cells flagged for review. Check every value.`;
+      `${table.rows.length} rows · ${table.rows[0].length} columns · ${low} ${low === 1 ? "cell" : "cells"} flagged for review. Check every value.`;
   }
   function render() {
     const element = document.createElement("table");
