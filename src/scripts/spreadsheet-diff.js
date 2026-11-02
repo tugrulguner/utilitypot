@@ -258,7 +258,8 @@ if (root) {
           : row.status === filter),
     );
     // Budget report entries, not just keys. Keep a wide record together rather
-    // than splitting its field changes across pages (at most 499 non-key fields).
+    // than splitting its field changes across pages. A record is bounded by
+    // the union of both source tables' non-key fields.
     const pages = [];
     let batch = [],
       size = 0;
@@ -294,9 +295,12 @@ if (root) {
         tr.dataset.groupStart = String(index === 0);
         for (const [column, value] of row.entries()) {
           const td = document.createElement("td");
-          if (group.status === "unchanged" && column >= 2) {
+          if (!group.changes.length && column >= 2) {
             td.textContent = "—";
-            td.title = "No changes in this row.";
+            td.title =
+              group.status === "unchanged"
+                ? "No changes in this row."
+                : "This row has no non-key fields.";
           } else td.textContent = displayValue(value);
           tr.append(td);
         }
@@ -316,7 +320,12 @@ if (root) {
       card.append(heading);
       if (!group.changes.length) {
         const notice = document.createElement("p");
-        notice.textContent = "No changes in this row.";
+        notice.textContent =
+          group.status === "unchanged"
+            ? "No changes in this row."
+            : group.status === "added"
+              ? "Row added. No non-key fields."
+              : "Row removed. No non-key fields.";
         card.append(notice);
       }
       for (const change of group.changes) {
