@@ -132,6 +132,9 @@ async function loadFile(file) {
     canvas.width = bitmap.width;
     canvas.height = bitmap.height;
     changed();
+    const review = $("#redaction-preview");
+    review.focus({ preventScroll: true });
+    review.scrollIntoView({ block: "start", behavior: "instant" });
   } catch {
     if (token === revision)
       revealError(
@@ -249,6 +252,7 @@ document.addEventListener("keydown", (e) => {
     const input = $(
       `#redaction-${key === "w" ? "width" : key === "h" ? "height" : key}`,
     );
+    $("#redaction-coordinate-settings").open = true;
     input.focus();
     input.select();
   } else if (key === "delete" || key === "backspace") {
