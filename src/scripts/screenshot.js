@@ -26,7 +26,8 @@ if (root) {
     url = null,
     revision = 0,
     controller = null,
-    table = null;
+    table = null,
+    reviewAnchor = null;
   const edited = new Set();
   const actions = [
     $("#screenshot-copy"),
@@ -49,6 +50,9 @@ if (root) {
     controller = null;
     table = null;
     edited.clear();
+    reviewAnchor = null;
+    $("#screenshot-review-next").hidden = true;
+    $("#screenshot-review-next").disabled = true;
     results.hidden = true;
     $("#screenshot-table").replaceChildren();
     overlay.replaceChildren();
@@ -151,7 +155,7 @@ if (root) {
       });
       overlay.setAttribute("viewBox", `0 0 ${ocr.width} ${ocr.height}`);
       render();
-      status("Review every value before exporting.");
+      status("Table ready.");
       results.hidden = false;
       controls();
       discovery.complete("success", true);
@@ -186,7 +190,26 @@ if (root) {
     );
     $("#screenshot-summary").textContent =
       `${table.rows.length} rows · ${table.rows[0].length} columns · ${low} ${low === 1 ? "cell" : "cells"} flagged for review. Check every value.`;
+    const next = $("#screenshot-review-next");
+    next.hidden = low === 0;
+    next.disabled = low === 0;
+    next.textContent =
+      low === 1 ? "Review flagged cell" : "Review next flagged cell";
   }
+  $("#screenshot-review-next").addEventListener("click", () => {
+    const flags = [
+      ...root.querySelectorAll("#screenshot-table input.needs-review"),
+    ];
+    if (!table || !flags.length) return;
+    const next = flags[(flags.indexOf(reviewAnchor) + 1) % flags.length];
+    next.focus({ preventScroll: true });
+    // Keep nested table and document scrolling atomic for keyboard review.
+    next.scrollIntoView({
+      block: "center",
+      inline: "nearest",
+      behavior: "instant",
+    });
+  });
   function render() {
     const element = document.createElement("table");
     element.setAttribute("aria-label", "Editable extracted table");
@@ -208,6 +231,14 @@ if (root) {
             "Low OCR confidence: check this value against the image.";
         }
         td.append(input);
+        if (table.confidences[r][c] < 80) {
+          const cue = document.createElement("span");
+          cue.className = "screenshot-review-cue";
+          cue.id = `screenshot-review-${r}-${c}`;
+          cue.textContent = "Review";
+          input.setAttribute("aria-describedby", cue.id);
+          td.append(cue);
+        }
         tr.append(td);
       });
       body.append(tr);
@@ -229,11 +260,15 @@ if (root) {
     table.rows[r][c] = input.value;
     edited.add(`${r},${c}`);
     input.classList.remove("needs-review");
+    input.removeAttribute("aria-describedby");
+    input.removeAttribute("title");
+    input.parentElement.querySelector(".screenshot-review-cue")?.remove();
     summary();
   });
   $("#screenshot-table").addEventListener("focusin", (e) => {
     const input = e.target;
     if (!input.matches("input[data-row]") || !table) return;
+    reviewAnchor = input;
     const r = Number(input.dataset.row),
       c = Number(input.dataset.column),
       box = table.boxes[r][c];
