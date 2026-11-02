@@ -60,6 +60,8 @@ test("unchanged report entries use neutral placeholders without masking real mis
     .fill("SKU,Note\nsame,keep\nblank,new\nchanged,new\nadded,present");
   await page.locator("#diff-key").selectOption("SKU");
   await page.locator("#diff-run").click();
+  await expect(page.locator("#diff-result")).toBeVisible();
+  await page.locator("#diff-filter").selectOption("all");
   const unchanged = page.locator('#diff-rows tr[data-status="unchanged"]');
   await expect(unchanged).toHaveCount(1);
   for (const [width, theme] of [
@@ -81,11 +83,29 @@ test("unchanged report entries use neutral placeholders without masking real mis
     await expect(
       page.locator('#diff-rows tr[data-status="removed"] td').nth(4),
     ).toHaveText("∅ (missing)");
-    const blank = page
-      .locator('#diff-rows tr[data-status="changed"]')
-      .filter({ has: page.getByRole("cell", { name: "blank", exact: true }) });
-    await expect(blank.locator("td").nth(3)).toHaveText("(blank)");
-    await unchanged.scrollIntoViewIfNeeded();
+    if (width === 1280) {
+      const blank = page
+        .locator('#diff-rows tr[data-status="changed"]')
+        .filter({
+          has: page.getByRole("cell", { name: "blank", exact: true }),
+        });
+      await expect(blank.locator("td").nth(3)).toHaveText("(blank)");
+      await unchanged.scrollIntoViewIfNeeded();
+    } else {
+      const card = page.locator('.diff-record[data-status="unchanged"]');
+      await expect(card).toContainText("No changes in this row.");
+      await expect(card).not.toContainText("∅ (missing)");
+      await expect(
+        page.locator('.diff-record[data-status="added"] dd').first(),
+      ).toHaveText("∅ (missing)");
+      await expect(
+        page.locator('.diff-record[data-status="removed"] dd').nth(1),
+      ).toHaveText("∅ (missing)");
+      await expect(
+        page.locator('.diff-record[data-key="blank"] dd').first(),
+      ).toHaveText("(blank)");
+      await card.scrollIntoViewIfNeeded();
+    }
     await page.screenshot({
       path: info.outputPath(`unchanged-${width}-${theme}.png`),
     });

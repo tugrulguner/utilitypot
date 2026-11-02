@@ -76,12 +76,34 @@
   border-radius: 4px;
   font: inherit;
 }
-.screenshot-workspace input.needs-review {
-  border: 2px solid var(--gold);
+.utility-app.screenshot-workspace td input.needs-review {
+  border: 2px dashed var(--gold);
+}
+.screenshot-workspace .screenshot-review-cue {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink);
 }
 .screenshot-workspace :focus-visible {
   outline: 3px solid var(--gold);
   outline-offset: 2px;
+}
+.screenshot-workspace .screenshot-review-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+}
+.screenshot-workspace .screenshot-review-summary p {
+  margin: 0;
+  flex: 1 1 20rem;
+}
+.screenshot-workspace .screenshot-review-summary button {
+  min-height: 44px;
+  flex: 0 0 auto;
 }
 .screenshot-workspace .screenshot-export-settings {
   font-size: 0.875rem;

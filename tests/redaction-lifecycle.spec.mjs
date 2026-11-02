@@ -7,6 +7,7 @@ const source = new URL(
 async function prepare(page) {
   await page.goto("/tools/redact-screenshot/");
   await page.locator("#redaction-file").setInputFiles(source);
+  await page.getByText("Add an exact rectangle", { exact: true }).click();
   for (const [id, n] of Object.entries({
     x: 65,
     y: 45,

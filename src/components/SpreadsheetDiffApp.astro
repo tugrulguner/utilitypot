@@ -88,7 +88,7 @@ import "../styles/spreadsheet-diff-workspace.css";
     <h2>Spreadsheet differences</h2>
     <p id="diff-counts"></p>
     <div class="actions">
-      <button id="diff-csv" type="button" disabled>
+      <button id="diff-csv" class="primary" type="button" disabled>
         Download CSV
       </button>
       <button id="diff-json" type="button" disabled>
@@ -96,19 +96,19 @@ import "../styles/spreadsheet-diff-workspace.css";
       </button>
       <ToolFeedback tool="spreadsheetDiff" context="result" />
     </div>
-    <p class="notice">
-      CSV prefixes potentially executable values with an apostrophe. JSON
-      preserves exact report values. Missing fields and empty text are distinct.
-    </p>
+    <p class="notice">CSV is formula-protected.</p>
     <p id="diff-columns" class="notice"></p>
     <label for="diff-filter">Show rows</label>
     <select id="diff-filter">
+      <option value="changes">All changes</option>
       <option value="all">All rows</option>
       <option value="added">Added</option>
       <option value="removed">Removed</option>
       <option value="changed">Changed</option>
       <option value="unchanged">Unchanged</option>
     </select>
+    <p id="diff-empty" class="notice" role="status" hidden></p>
+    <div id="diff-records"></div>
     <div id="diff-table-wrap">
       <table>
         <thead>
@@ -132,6 +132,15 @@ import "../styles/spreadsheet-diff-workspace.css";
         Next
       </button>
     </div>
+    <details>
+      <summary>Export formats &amp; value labels</summary>
+      <p>
+        CSV prefixes potentially executable values with an apostrophe. JSON
+        preserves exact report values. Missing fields (∅) and empty text (blank)
+        are distinct. Downloads include the complete report, regardless of the
+        selected view or page.
+      </p>
+    </details>
   </section>
   <FamilyDiscovery surface="result" />
 </section>

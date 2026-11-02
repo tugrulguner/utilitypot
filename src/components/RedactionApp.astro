@@ -19,7 +19,10 @@ import "../styles/redaction-workspace.css";
     </p>
   </header>
   <div class="redaction-grid">
-    <section class="redaction-controls" aria-label="Screenshot controls">
+    <section
+      class="redaction-controls redaction-source"
+      aria-label="Screenshot controls"
+    >
       <label for="redaction-file">
         Choose image (PNG, JPEG or WebP; max 10 MB and 8 megapixels)
       </label>
@@ -31,23 +34,29 @@ import "../styles/redaction-workspace.css";
       <div class="drop-target" tabindex="0">
         Drop or paste an image here
       </div>
-      <p>
-        Only selected areas are covered. Review every redaction; this tool does
-        not automatically detect private information.
+      <button id="redaction-clear-image" type="button">
+        Clear image
+      </button>
+    </section>
+    <section
+      id="redaction-preview"
+      class="redaction-preview"
+      aria-label="Image review"
+      tabindex="-1"
+    >
+      <h2>Image preview</h2>
+      <p id="redaction-status" role="status" aria-live="polite">
+        Choose or paste an image to begin.
       </p>
-      <div class="numeric-region">
-        <label for="redaction-x">X</label>
-        <input id="redaction-x" type="number" min="0" step="1" value="0" />
-        <label for="redaction-y">Y</label>
-        <input id="redaction-y" type="number" min="0" step="1" value="0" />
-        <label for="redaction-width">Width</label>
-        <input id="redaction-width" type="number" min="1" step="1" value="1" />
-        <label for="redaction-height">Height</label>
-        <input id="redaction-height" type="number" min="1" step="1" value="1" />
-      </div>
-      <div class="actions">
-        <button id="redaction-add" type="button">
-          Add rectangle
+      <p id="redaction-error" role="alert" tabindex="-1" hidden></p>
+      <ToolFeedback
+        tool="redaction"
+        context="error"
+        id="redaction-feedback-error"
+      />
+      <div class="actions redaction-result-actions">
+        <button id="redaction-download" class="primary" type="button" disabled>
+          Download redacted PNG
         </button>
         <button id="redaction-undo" type="button">
           Undo
@@ -55,36 +64,60 @@ import "../styles/redaction-workspace.css";
         <button id="redaction-clear" type="button">
           Clear regions
         </button>
-        <button id="redaction-clear-image" type="button">
-          Clear image
-        </button>
+        <span id="redaction-feedback-result" hidden>
+          <ToolFeedback tool="redaction" context="result" />
+        </span>
       </div>
-    </section>
-    <section class="redaction-preview" aria-label="Image review">
       <div class="canvas-scroll">
         <canvas
           id="redaction-canvas"
           aria-label="Image preview; draw opaque black redaction rectangles"
         ></canvas>
       </div>
-      <ol id="redaction-regions" aria-label="Redaction regions"></ol>
-      <p id="redaction-status" role="status" aria-live="polite">
-        Choose or paste an image to begin.
+      <p class="redaction-safety">
+        Only selected areas are covered. Review every redaction; this tool does
+        not automatically detect private information.
       </p>
-      <p id="redaction-error" role="alert" tabindex="-1" hidden></p>
-      <div class="actions">
-        <button id="redaction-download" class="primary" type="button" disabled>
-          Download redacted PNG
-        </button>
-        <span id="redaction-feedback-result" hidden>
-          <ToolFeedback tool="redaction" context="result" />
-        </span>
-        <ToolFeedback
-          tool="redaction"
-          context="error"
-          id="redaction-feedback-error"
-        />
-      </div>
+      <ol id="redaction-regions" aria-label="Redaction regions"></ol>
+    </section>
+    <section
+      class="redaction-controls redaction-editing"
+      aria-label="Exact rectangle controls"
+    >
+      <details id="redaction-coordinate-settings">
+        <summary>Add an exact rectangle</summary>
+        <p>
+          Coordinates use the original image’s pixels. You can also press X, Y,
+          W or H to open and focus a field.
+        </p>
+        <div class="numeric-region">
+          <label for="redaction-x">X</label>
+          <input id="redaction-x" type="number" min="0" step="1" value="0" />
+          <label for="redaction-y">Y</label>
+          <input id="redaction-y" type="number" min="0" step="1" value="0" />
+          <label for="redaction-width">Width</label>
+          <input
+            id="redaction-width"
+            type="number"
+            min="1"
+            step="1"
+            value="1"
+          />
+          <label for="redaction-height">Height</label>
+          <input
+            id="redaction-height"
+            type="number"
+            min="1"
+            step="1"
+            value="1"
+          />
+        </div>
+        <div class="actions">
+          <button id="redaction-add" type="button">
+            Add rectangle
+          </button>
+        </div>
+      </details>
     </section>
   </div>
   <FamilyDiscovery surface="result" />
