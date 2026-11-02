@@ -5,6 +5,24 @@ import {
   compareTables,
   exportCsv,
 } from "../src/lib/utilities/spreadsheet-diff.js";
+// Synthetic UI qualification must not send documents or analytics off origin.
+const apiRequests = new WeakMap();
+test.beforeEach(async ({ page, context }) => {
+  const requests = [];
+  apiRequests.set(page, requests);
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname.startsWith("/api/"))
+      requests.push(request.url());
+  });
+  await context.route("**/*", (route) =>
+    ["127.0.0.1", "localhost"].includes(new URL(route.request().url()).hostname)
+      ? route.continue()
+      : route.abort(),
+  );
+});
+test.afterEach(async ({ page }) => {
+  expect(apiRequests.get(page)).toEqual([]);
+});
 const before =
   "id,name,quantity,note\n001,Old name,12,\n002,Same,3,ok\n003,Removed,4,\n__proto__,Prototype,1,old\n005,Sparse,8";
 const after =

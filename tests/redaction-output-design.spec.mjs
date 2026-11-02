@@ -1,6 +1,24 @@
 import { test, expect } from "@playwright/test";
 import sharp from "sharp";
 import { readFile } from "node:fs/promises";
+// Synthetic UI qualification must not send documents or analytics off origin.
+const apiRequests = new WeakMap();
+test.beforeEach(async ({ page, context }) => {
+  const requests = [];
+  apiRequests.set(page, requests);
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname.startsWith("/api/"))
+      requests.push(request.url());
+  });
+  await context.route("**/*", (route) =>
+    ["127.0.0.1", "localhost"].includes(new URL(route.request().url()).hostname)
+      ? route.continue()
+      : route.abort(),
+  );
+});
+test.afterEach(async ({ page }) => {
+  expect(apiRequests.get(page)).toEqual([]);
+});
 const source = () =>
   sharp({
     create: {
@@ -86,13 +104,11 @@ test("closed exact coordinates open through keyboard shortcuts and retain add, c
 }) => {
   await page.setViewportSize({ width: 390, height: 900 });
   await page.goto("/tools/redact-screenshot/");
-  await page
-    .locator("#redaction-file")
-    .setInputFiles({
-      name: "private.png",
-      mimeType: "image/png",
-      buffer: await source(),
-    });
+  await page.locator("#redaction-file").setInputFiles({
+    name: "private.png",
+    mimeType: "image/png",
+    buffer: await source(),
+  });
   await expect(page.locator("#redaction-canvas")).toHaveJSProperty(
     "width",
     760,
