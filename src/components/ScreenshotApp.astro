@@ -66,11 +66,22 @@ import "../styles/screenshot-workspace.css";
   </div>
   <section id="screenshot-results" class="panel" tabindex="-1" hidden>
     <header>
-      <h2>Review every value</h2>
-      <p id="screenshot-summary"></p>
+      <h2>Extracted table</h2>
+      <div class="screenshot-review-summary">
+        <p id="screenshot-summary"></p>
+        <button
+          id="screenshot-review-next"
+          type="button"
+          aria-controls="screenshot-table"
+          disabled
+          hidden
+        >
+          Review flagged cell
+        </button>
+      </div>
     </header>
     <div class="screenshot-actions actions">
-      <button id="screenshot-copy" disabled>
+      <button id="screenshot-copy" class="primary" type="button" disabled>
         Copy to spreadsheet
       </button>
       <button id="screenshot-csv" disabled>

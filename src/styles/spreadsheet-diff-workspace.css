@@ -89,3 +89,92 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Change the output view when its own available width is too narrow for
+   five comparison columns, including intermediate discovery-rail layouts. */
+.diff-app #diff-result {
+  container-type: inline-size;
+}
+.diff-app #diff-records {
+  display: none;
+}
+.diff-app tr[data-group-start="true"] td {
+  border-top-width: 2px;
+}
+.diff-app .diff-record {
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--night-soft);
+}
+.diff-app .diff-record header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.diff-app .diff-record h3 {
+  min-width: 0;
+  margin: 0;
+  font-size: 1rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.diff-app .diff-record-status {
+  flex-shrink: 0;
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+.diff-app .diff-field {
+  min-width: 0;
+  border-top: 1px solid var(--line);
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+}
+.diff-app .diff-field h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.875rem;
+  white-space: pre-wrap;
+}
+.diff-app .diff-field dl {
+  margin: 0;
+}
+.diff-app .diff-field dl > div {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  gap: 0.5rem;
+  margin-block: 0.4rem;
+}
+.diff-app .diff-field dt {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.diff-app .diff-field dd {
+  min-width: 0;
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+@container (max-width: 38rem) {
+  .diff-app #diff-table-wrap {
+    display: none;
+  }
+  .diff-app #diff-records {
+    display: grid;
+    gap: 1rem;
+    margin-block: 1rem;
+  }
+}
+@media (max-width: 650px) {
+  .diff-app #diff-table-wrap {
+    display: none;
+  }
+  .diff-app #diff-records {
+    display: grid;
+    gap: 1rem;
+    margin-block: 1rem;
+  }
+}

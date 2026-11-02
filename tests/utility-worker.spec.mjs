@@ -137,6 +137,7 @@ test("actual Worker and extracted artifact flatten selected screenshot pixels", 
     "width",
     600,
   );
+  await page.getByText("Add an exact rectangle", { exact: true }).click();
   for (const [id, n] of Object.entries({
     x: 65,
     y: 45,

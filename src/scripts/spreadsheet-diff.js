@@ -1,5 +1,5 @@
 import { runDiffTask } from "../lib/utilities/spreadsheet-diff-client.js";
-import { exportCsv, reportRows } from "../lib/utilities/spreadsheet-diff.js";
+import { exportCsv } from "../lib/utilities/spreadsheet-diff.js";
 import { resultDiscovery } from "../lib/discovery.js";
 const root = document.querySelector("#spreadsheet-diff-app");
 if (root) {
@@ -19,7 +19,6 @@ if (root) {
   let revision = 0,
     comparison = null,
     result = null,
-    flat = [],
     page = 0,
     keyPreference = "";
   const model = (name) => sources[name].selected?.table;
@@ -56,7 +55,6 @@ if (root) {
     comparison?.abort();
     comparison = null;
     result = null;
-    flat = [];
     resultPanel.hidden = true;
     discovery.reset();
     clearError();
@@ -209,9 +207,8 @@ if (root) {
       );
       if (token !== revision) return;
       result = value;
-      flat = reportRows(result);
       page = 0;
-      $("#diff-filter").value = "all";
+      $("#diff-filter").value = "changes";
       render();
       resultPanel.hidden = false;
       discovery.complete("success", true);
@@ -239,40 +236,126 @@ if (root) {
       `${c.added} added · ${c.removed} removed · ${c.changed} changed · ${c.unchanged} unchanged rows`;
     $("#diff-columns").textContent =
       `Added columns: ${result.columns.added.join(", ") || "none"} · Removed columns: ${result.columns.removed.join(", ") || "none"}`;
+    $("#diff-columns").hidden =
+      !result.columns.added.length && !result.columns.removed.length;
     renderPage();
     controls();
   }
+  function displayValue(value) {
+    return value === null
+      ? "∅ (missing)"
+      : value === ""
+        ? "(blank)"
+        : String(value);
+  }
   function renderPage() {
-    const filter = $("#diff-filter").value,
-      rows = filter === "all" ? flat : flat.filter((r) => r[0] === filter),
-      pages = Math.max(1, Math.ceil(rows.length / 100));
-    page = Math.min(page, pages - 1);
-    const body = $("#diff-rows");
-    body.replaceChildren();
-    for (const row of rows.slice(page * 100, page * 100 + 100)) {
-      const tr = document.createElement("tr");
-      tr.dataset.status = row[0];
-      for (const [column, value] of row.slice(0, 5).entries()) {
-        const td = document.createElement("td");
-        if (row[0] === "unchanged" && column >= 2) {
-          td.textContent = "—";
-          td.title = "No changes in this row.";
-        } else {
-          td.textContent =
-            value === null
-              ? "∅ (missing)"
-              : value === ""
-                ? "(blank)"
-                : String(value);
-        }
-        tr.append(td);
+    const filter = $("#diff-filter").value;
+    const groups = result.rows.filter(
+      (row) =>
+        filter === "all" ||
+        (filter === "changes"
+          ? row.status !== "unchanged"
+          : row.status === filter),
+    );
+    // Budget report entries, not just keys. Keep a wide record together rather
+    // than splitting its field changes across pages (at most 499 non-key fields).
+    const pages = [];
+    let batch = [],
+      size = 0;
+    for (const group of groups) {
+      const count = group.changes.length || 1;
+      if (batch.length && size + count > 100) {
+        pages.push(batch);
+        batch = [];
+        size = 0;
       }
-      body.append(tr);
+      batch.push(group);
+      size += count;
     }
+    pages.push(batch);
+    page = Math.min(page, pages.length - 1);
+    const body = $("#diff-rows"),
+      cards = $("#diff-records");
+    body.replaceChildren();
+    cards.replaceChildren();
+    for (const group of pages[page]) {
+      const entries = group.changes.length
+        ? group.changes.map((change) => [
+            group.status,
+            group.key,
+            change.column,
+            change.before,
+            change.after,
+          ])
+        : [[group.status, group.key, "", null, null]];
+      for (const [index, row] of entries.entries()) {
+        const tr = document.createElement("tr");
+        tr.dataset.status = group.status;
+        tr.dataset.groupStart = String(index === 0);
+        for (const [column, value] of row.entries()) {
+          const td = document.createElement("td");
+          if (group.status === "unchanged" && column >= 2) {
+            td.textContent = "—";
+            td.title = "No changes in this row.";
+          } else td.textContent = displayValue(value);
+          tr.append(td);
+        }
+        body.append(tr);
+      }
+      const card = document.createElement("article"),
+        heading = document.createElement("header"),
+        title = document.createElement("h3"),
+        badge = document.createElement("span");
+      card.className = "diff-record";
+      card.dataset.key = group.key;
+      card.dataset.status = group.status;
+      title.textContent = `${result.keyColumn}: ${group.key}`;
+      badge.className = "diff-record-status";
+      badge.textContent = group.status[0].toUpperCase() + group.status.slice(1);
+      heading.append(title, badge);
+      card.append(heading);
+      if (!group.changes.length) {
+        const notice = document.createElement("p");
+        notice.textContent = "No changes in this row.";
+        card.append(notice);
+      }
+      for (const change of group.changes) {
+        const field = document.createElement("section"),
+          name = document.createElement("h4"),
+          values = document.createElement("dl");
+        field.className = "diff-field";
+        name.textContent = change.column;
+        for (const [label, value] of [
+          ["Before", change.before],
+          ["After", change.after],
+        ]) {
+          const pair = document.createElement("div"),
+            term = document.createElement("dt"),
+            detail = document.createElement("dd");
+          term.textContent = label;
+          detail.textContent = displayValue(value);
+          pair.append(term, detail);
+          values.append(pair);
+        }
+        field.append(name, values);
+        card.append(field);
+      }
+      cards.append(card);
+    }
+    const empty = $("#diff-empty");
+    empty.hidden = groups.length > 0;
+    empty.textContent =
+      filter === "changes"
+        ? "No changed rows. Choose All rows to inspect unchanged records."
+        : "No rows in this view.";
+    const entries = groups.reduce(
+      (sum, group) => sum + (group.changes.length || 1),
+      0,
+    );
     $("#diff-page").textContent =
-      `Page ${page + 1} of ${pages} · ${rows.length} report entries`;
+      `Page ${page + 1} of ${pages.length} · ${groups.length} ${groups.length === 1 ? "row" : "rows"} · ${entries} report ${entries === 1 ? "entry" : "entries"}`;
     $("#diff-previous").disabled = page === 0;
-    $("#diff-next").disabled = page >= pages - 1;
+    $("#diff-next").disabled = page >= pages.length - 1;
   }
   $("#diff-filter").addEventListener("change", () => {
     if (result) {
