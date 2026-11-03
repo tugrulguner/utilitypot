@@ -72,3 +72,16 @@ for (const file of [
         `${file} embeds affected ${name}@${version}`,
       );
   });
+
+test("locked Astro supports the project's advertised minimum Node version", async () => {
+  const { createRequire } = await import("node:module");
+  const require = createRequire(
+    new URL("../node_modules/astro/package.json", import.meta.url),
+  );
+  const { minVersion, satisfies } = require("semver");
+  const floor = minVersion(lock.packages[""].engines.node);
+  assert(
+    satisfies(floor, lock.packages["node_modules/astro"].engines.node),
+    "Dependency update must preserve the documented Node minimum",
+  );
+});
