@@ -8,7 +8,10 @@ for (const zone of zones) {
   alias.set(key, found);
 }
 // Reviewed local aliases; no geocoding or inference of arbitrary places.
-const curatedCities = [{ value: "Boston", zone: "America/New_York" }];
+const curatedCities = [
+  { value: "Boston", zone: "America/New_York" },
+  { value: "Kolkata", zone: "Asia/Kolkata" },
+];
 export const meetingCities = [
   ...curatedCities,
   ...zones.map((zone) => ({
@@ -96,4 +99,48 @@ export function presentMeetingSlot(slot, locale, { hourCycle } = {}) {
       end: formatter(person.end),
     };
   });
+}
+
+// Display only: scheduling instants and complete calendar/text exports stay intact.
+export function conciseMeetingSlot(slot, locale) {
+  const full = presentMeetingSlot(slot, locale, { hourCycle: "h23" });
+  const days = slot.local.flatMap((person) => [
+    person.start.slice(0, 10),
+    person.end.slice(0, 10),
+  ]);
+  const shared = days.every((day) => day === days[0]);
+  const instant = (value) => new Date(value.split("[")[0]);
+  const date = shared
+    ? new Intl.DateTimeFormat(locale, {
+        dateStyle: "medium",
+        timeZone: full[0].zone,
+      }).format(instant(slot.local[0].start))
+    : null;
+  const people = full.map((person, i) => {
+    const source = slot.local[i];
+    const time = (value) =>
+      new Intl.DateTimeFormat(locale, {
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+        timeZone: person.zone,
+      }).format(instant(value));
+    const offset = (value) =>
+      new Intl.DateTimeFormat("en-US", {
+        timeZone: person.zone,
+        timeZoneName: "shortOffset",
+      })
+        .formatToParts(instant(value))
+        .find((part) => part.type === "timeZoneName")
+        .value.replace("GMT", "UTC")
+        .replace(/^UTC[+-]0$/, "UTC");
+    const a = offset(source.start),
+      b = offset(source.end);
+    const start = shared ? time(source.start) : person.start;
+    const end = shared ? time(source.end) : person.end;
+    const range =
+      a === b ? `${start} – ${end} ${a}` : `${start} ${a} – ${end} ${b}`;
+    return { ...person, range };
+  });
+  return { date, people };
 }

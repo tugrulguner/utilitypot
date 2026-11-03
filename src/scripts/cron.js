@@ -144,7 +144,10 @@ if (root) {
       $("results-title").textContent = range
         ? "Selected week"
         : "Next five runs";
-      $("cron-range").textContent = rangeText;
+      $("cron-range").textContent = rangeText.replace(
+        ` · ${plan.scheduleZone} · `,
+        " · ",
+      );
       $("cron-range").hidden = !range;
       const reference = range
         ? `Range: ${range.startIso} inclusive to ${range.endIso} exclusive. Seven calendar days in ${plan.scheduleZone}.`

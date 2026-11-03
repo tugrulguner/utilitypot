@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test("mobile meeting options show both city times without clipping the text", async ({
+test("mobile meeting picker stays compact while comparison preserves both city times", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -41,7 +41,16 @@ test("mobile meeting options show both city times without clipping the text", as
     };
   });
   expect(geometry.text).toContain("London");
-  expect(geometry.text).toContain("New York");
+  const cities = page.locator(".meeting-comparison li");
+  await expect(cities).toHaveCount(2);
+  await expect(cities.nth(0)).toContainText("London");
+  await expect(cities.nth(0)).toContainText("15:00");
+  await expect(cities.nth(1)).toContainText("New York");
+  await expect(cities.nth(1)).toContainText("10:00");
+  for (const city of await cities.all())
+    expect(await city.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(
+      true,
+    );
   expect(geometry.textWidth).toBeLessThanOrEqual(geometry.available);
 });
 
