@@ -31,6 +31,8 @@
 - Group spreadsheet differences by row identity on narrow result panels, keep labelled Before/After values together, and default to changes while retaining all-row views and complete unchanged exports. Keep each row’s field changes together across bounded pages.
 - Prioritize the redaction preview and PNG download before advanced coordinate controls on mobile, and open exact-coordinate settings before keyboard focus. Raster export, metadata stripping and stale-download guards remain unchanged.
 
+- Compact selected meeting ranges with a shared date and explicit UTC offsets, retain rollover/DST disambiguation and shorten the option picker. Recognize Kolkata as a reviewed timezone alias. Add overflow-aware grouped-CSV scroll guidance and explicit cron export labels without changing calendar/report exports.
+
 - Use singular wording for one OCR review flag and neutral placeholders for unchanged spreadsheet report entries, without changing comparison data or exports.
 
 - Derive the homepage tool count from the registry and include all eleven utilities with their processing boundaries in agent discovery.

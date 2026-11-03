@@ -66,3 +66,9 @@
 .utility-app[data-utility="meeting"] .meeting-secondary-actions {
   margin-block: 0.5rem;
 }
+
+.utility-app[data-utility="meeting"] .meeting-shared-date {
+  margin: 0.25rem 0 0.65rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+}

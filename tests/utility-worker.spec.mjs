@@ -65,9 +65,7 @@ test("actual Worker and extracted artifact execute cron locally and export its f
     );
   await expect(page.locator(".skip-link")).not.toBeInViewport();
   const event = page.waitForEvent("download");
-  await page
-    .getByRole("button", { name: "Download run times", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Download TXT", exact: true }).click();
   const download = await event;
   const { readFile } = await import("node:fs/promises");
   const text = await readFile(await download.path(), "utf8");
@@ -105,7 +103,7 @@ for (const [date, first, last] of [
     await expect(page.locator("#cron-runs")).toContainText("UTC-04:00");
     const event = page.waitForEvent("download");
     await page
-      .getByRole("button", { name: "Download run times", exact: true })
+      .getByRole("button", { name: "Download TXT", exact: true })
       .click();
     const { readFile } = await import("node:fs/promises");
     const text = await readFile(await (await event).path(), "utf8");

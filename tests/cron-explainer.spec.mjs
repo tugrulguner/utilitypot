@@ -56,7 +56,7 @@ for (const width of [1280, 390, 320])
         page.getByRole("button", { name: "Copy run times", exact: true }),
       ).toBeInViewport();
       await expect(
-        page.getByRole("button", { name: "Download run times", exact: true }),
+        page.getByRole("button", { name: "Download TXT", exact: true }),
       ).toBeInViewport();
       await expect(runs.first().locator(".cron-schedule-time")).toHaveText(
         "09:00 UTC-05:00",
@@ -71,7 +71,7 @@ for (const width of [1280, 390, 320])
       const copied = await page.evaluate(() => navigator.clipboard.readText());
       const ev = page.waitForEvent("download");
       await page
-        .getByRole("button", { name: "Download run times", exact: true })
+        .getByRole("button", { name: "Download TXT", exact: true })
         .click();
       const download = await ev;
       const { readFile } = await import("node:fs/promises");

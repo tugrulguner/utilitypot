@@ -9,7 +9,7 @@ import { normalizeDates } from "../lib/utilities/dates.js";
 import { findSlots, calendarEvent } from "../lib/utilities/meeting.js";
 import {
   resolveMeetingZone,
-  presentMeetingSlot,
+  conciseMeetingSlot,
   compactMeetingSlot,
 } from "../lib/utilities/meeting-presentation.js";
 const root = document.querySelector("[data-utility]");
@@ -76,7 +76,22 @@ if (root) {
         report.scrollIntoView({ block: "center", behavior: "instant" });
     }
   };
+  const csvResize =
+    tool === "csv"
+      ? new ResizeObserver((entries) => {
+          for (const { target } of entries) {
+            const wrap =
+              target.tagName === "TABLE" ? target.parentElement : target;
+            const hint = wrap?.previousElementSibling;
+            if (hint?.classList.contains("csv-scroll-hint"))
+              hint.hidden = !(
+                wrap.clientWidth > 0 && wrap.scrollWidth > wrap.clientWidth + 1
+              );
+          }
+        })
+      : null;
   const invalidate = () => {
+    csvResize?.disconnect();
     discovery.reset();
     revision++;
     output = "";
@@ -151,6 +166,7 @@ if (root) {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   function show(text, name, type = "text/plain") {
+    csvResize?.disconnect();
     $("results").querySelector("[data-calendar-action]")?.remove();
     output = text;
     filename = name;
@@ -495,7 +511,13 @@ if (root) {
                 "Child records — scroll horizontally for every column",
               );
               wrap.append(table);
-              item.append(wrap);
+              const hint = document.createElement("p");
+              hint.className = "notice csv-scroll-hint";
+              hint.textContent = "Scroll sideways to see every column.";
+              hint.hidden = true;
+              item.append(hint, wrap);
+              csvResize.observe(wrap);
+              csvResize.observe(table);
             }
           }
           tree.append(item);
@@ -658,11 +680,14 @@ if (root) {
           technical.append(summary, ...$("result-view").childNodes);
           const label = document.createElement("label");
           label.htmlFor = "slot-choice";
-          label.textContent = `Choose a meeting time · ${$("meeting-date").value} · local times (24-hour)`;
+          label.textContent = "Choose a meeting time · local times (24-hour)";
           const select = document.createElement("select");
           select.id = "slot-choice";
           const choices = slots.map((s) =>
-            compactMeetingSlot(s, $("meeting-date").value),
+            compactMeetingSlot(
+              { ...s, local: s.local.slice(0, 1) },
+              $("meeting-date").value,
+            ),
           );
           slots.forEach((s, i) => {
             // Repeated DST wall times must remain distinguishable choices.
@@ -687,12 +712,12 @@ if (root) {
           const renderChoice = () => {
             const title = document.createElement("h3");
             title.textContent = `Selected meeting time · ${duration} minutes`;
+            const view = conciseMeetingSlot(slots[Number(select.value)]);
+            const date = document.createElement("p");
+            date.className = "meeting-shared-date";
+            date.textContent = view.date || "";
             const list = document.createElement("ul");
-            for (const person of presentMeetingSlot(
-              slots[Number(select.value)],
-              undefined,
-              { hourCycle: "h23" },
-            )) {
+            for (const person of view.people) {
               const row = document.createElement("li"),
                 who = document.createElement("strong"),
                 time = document.createElement("span");
@@ -700,11 +725,15 @@ if (root) {
                 person.label === person.city
                   ? person.city
                   : `${person.label} · ${person.city}`;
-              time.textContent = `${person.start} – ${person.end}`;
+              time.textContent = person.range;
               row.append(who, time);
               list.append(row);
             }
-            comparison.replaceChildren(title, list);
+            comparison.replaceChildren(
+              title,
+              ...(view.date ? [date] : []),
+              list,
+            );
           };
           select.addEventListener("change", renderChoice);
           renderChoice();
